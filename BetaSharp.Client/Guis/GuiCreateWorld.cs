@@ -193,7 +193,7 @@ public class GuiCreateWorld : GuiScreen
 
     protected override void KeyTyped(char eventChar, Keys eventKey)
     {
-        if (eventKey == Keyboard.KEY_ESCAPE)
+        if (eventKey == Keys.Escape)
         {
             if (_moreOptions)
             {

@@ -48,12 +48,17 @@ public class GuiScreen : Gui
 
     protected virtual void KeyTyped(char eventChar, Keys eventKey)
     {
+        // Compatibility path for screens that still override the old int keycode signature.
+        KeyTyped(eventChar, (int)eventKey);
+
         if (eventKey == Keys.Escape)
         {
             Game.displayGuiScreen(null);
             Game.setIngameFocus();
         }
     }
+
+    protected virtual void KeyTyped(char eventChar, int eventKey) { }
 
     protected virtual void CharTyped(char eventChar) { }
 
