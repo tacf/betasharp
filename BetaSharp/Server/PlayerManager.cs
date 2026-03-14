@@ -290,7 +290,7 @@ public class PlayerManager
         }
     }
 
-    public void flushPendingChunkUpdates()
+    public void FlushPendingChunkUpdates()
     {
         for (int i = 0; i < players.Count; i++)
         {

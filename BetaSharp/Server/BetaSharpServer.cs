@@ -434,7 +434,7 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
 
         connections?.Tick();
         playerManager.updateAllChunks();
-        playerManager.flushPendingChunkUpdates();
+        playerManager.FlushPendingChunkUpdates();
 
         foreach (EntityTracker t in entityTrackers)
         {
