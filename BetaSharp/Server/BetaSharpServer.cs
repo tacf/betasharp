@@ -17,7 +17,7 @@ using Thread = System.Threading.Thread;
 
 namespace BetaSharp.Server;
 
-public abstract class BetaSharpServer : Runnable, CommandOutput
+public abstract class BetaSharpServer : CommandOutput
 {
     public Dictionary<string, int> GIVE_COMMANDS_COOLDOWNS = [];
     public ConnectionListener connections;
@@ -120,7 +120,7 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
     private void loadWorld(string worldDir, WorldSettings settings)
     {
         worlds = new ServerWorld[2];
-        RegionWorldStorage worldStorage = new(getFile(".").getAbsolutePath(), worldDir, true);
+        RegionWorldStorage worldStorage = new(GetFile(".").FullName, worldDir, true);
 
         for (int i = 0; i < worlds.Length; i++)
         {
@@ -255,12 +255,21 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
         }
     }
 
-    public void stop()
+    public void Stop()
     {
         running = false;
     }
 
-    public void run()
+    public void RunThreaded(string threadName)
+    {
+        Thread thread = new (run)
+        {
+            Name = threadName
+        };
+        thread.Start();
+    }
+
+    private void run()
     {
         try
         {
@@ -300,6 +309,7 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
                             _currentTps = 0.0f;
                         }
                         Thread.Sleep(50);
+                        Thread.Sleep(50);
                         continue;
                     }
 
@@ -333,6 +343,7 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
                     }
 
                     Thread.Sleep(1);
+                    Thread.Sleep(1);
                 }
             }
             else
@@ -343,6 +354,7 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
 
                     try
                     {
+                        Thread.Sleep(10);
                         Thread.Sleep(10);
                     }
                     catch (InterruptedException ex)
@@ -362,6 +374,7 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
 
                 try
                 {
+                    Thread.Sleep(10);
                     Thread.Sleep(10);
                 }
                 catch (InterruptedException interruptedEx)
@@ -474,7 +487,7 @@ public abstract class BetaSharpServer : Runnable, CommandOutput
         }
     }
 
-    public abstract java.io.File getFile(string path);
+    public abstract FileInfo GetFile(string path);
 
     public void SendMessage(string message)
     {
