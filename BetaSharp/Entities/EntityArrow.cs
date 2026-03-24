@@ -25,7 +25,6 @@ public class EntityArrow : Entity
     public EntityArrow(IWorldContext world) : base(world)
     {
         setBoundingBoxSpacing(0.5F, 0.5F);
-        noClip = true;
     }
 
     public EntityArrow(IWorldContext world, double x, double y, double z) : base(world)
@@ -33,7 +32,6 @@ public class EntityArrow : Entity
         setBoundingBoxSpacing(0.5F, 0.5F);
         setPosition(x, y, z);
         standingEyeHeight = 0.0F;
-        noClip = true;
     }
 
     public EntityArrow(IWorldContext world, EntityLiving owner) : base(world)
@@ -41,7 +39,6 @@ public class EntityArrow : Entity
         this.owner = owner;
         doesArrowBelongToPlayer = owner is EntityPlayer;
         setBoundingBoxSpacing(0.5F, 0.5F);
-        noClip = true;
         setPositionAndAnglesKeepPrevAngles(owner.x, owner.y + (double)owner.getEyeHeight(), owner.z, owner.yaw, owner.pitch);
         x -= (double)(MathHelper.Cos(yaw / 180.0F * (float)System.Math.PI) * 0.16F);
         y -= (double)0.1F;
