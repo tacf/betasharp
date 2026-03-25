@@ -11,19 +11,7 @@ internal readonly struct ChunkPriority(int ring, double directionPenalty, long s
 
     public int CompareTo(ChunkPriority other)
     {
-        int ringComparison = Ring.CompareTo(other.Ring);
-        if (ringComparison != 0)
-        {
-            return ringComparison;
-        }
-
-        int directionComparison = DirectionPenalty.CompareTo(other.DirectionPenalty);
-        if (directionComparison != 0)
-        {
-            return directionComparison;
-        }
-
-        return Sequence.CompareTo(other.Sequence);
+        return (Ring, DirectionPenalty, Sequence).CompareTo((other.Ring, other.DirectionPenalty, other.Sequence));
     }
 }
 
