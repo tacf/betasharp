@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using BetaSharp.Client.Rendering;
 using Silk.NET.GLFW;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -32,6 +33,7 @@ public static unsafe class Display
     private static GlfwCallbacks.FramebufferSizeCallback? _framebufferSizeCallback;
     public static int MSAA_Samples = 0;
     public static bool DebugMode = false;
+    public static RendererBackendKind ActiveRendererBackend { get; private set; } = RendererBackendKind.OpenGL;
 
     // Window position
     private static int _x = -1;
@@ -470,6 +472,14 @@ public static unsafe class Display
     /// </summary>
     public static void create()
     {
+        create(RendererBackendKind.OpenGL);
+    }
+
+    /// <summary>
+    /// Create the graphics context for the selected renderer backend.
+    /// </summary>
+    public static void create(RendererBackendKind rendererBackend)
+    {
         lock (_lock)
         {
             if (isCreated())
@@ -482,7 +492,21 @@ public static unsafe class Display
             options.VSync = _swapInterval > 0;
             options.IsVisible = true;
             options.Samples = MSAA_Samples;
-            options.API = new GraphicsAPI(ContextAPI.OpenGL, ContextProfile.Core, DebugMode ? ContextFlags.Debug : ContextFlags.Default, new APIVersion(4, 1));
+
+            options.API = rendererBackend switch
+            {
+                RendererBackendKind.OpenGL => new GraphicsAPI(
+                    ContextAPI.OpenGL,
+                    ContextProfile.Core,
+                    DebugMode ? ContextFlags.Debug : ContextFlags.Default,
+                    new APIVersion(4, 1)),
+                RendererBackendKind.Vulkan => throw new NotSupportedException(
+                    "Vulkan window surface initialization is not implemented yet."),
+                _ => throw new NotSupportedException(
+                    $"Unsupported renderer backend: {rendererBackend}")
+            };
+
+            ActiveRendererBackend = rendererBackend;
 
             if (_x >= 0 && _y >= 0)
                 options.Position = new Vector2D<int>(_x, _y);

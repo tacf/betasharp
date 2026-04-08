@@ -103,6 +103,8 @@ public partial class BetaSharp :
 
     public int DisplayWidth { get; private set; }
     public int DisplayHeight { get; private set; }
+    public RendererBackendKind RequestedRendererBackend { get; }
+    public RendererBackendKind ActiveRendererBackend { get; private set; } = RendererBackendKind.OpenGL;
 
     /// <summary>
     /// When the debug viewport is active, the top-left pixel offset of the game viewport
@@ -193,13 +195,14 @@ public partial class BetaSharp :
 
     #region Initialization & Lifecycle
 
-    public BetaSharp(int width, int height, bool isFullscreen)
+    public BetaSharp(int width, int height, bool isFullscreen, RendererBackendKind rendererBackend = RendererBackendKind.OpenGL)
     {
         _loadingScreen = new LoadingScreenRenderer(this);
         _tempDisplayHeight = height;
         _fullscreen = isFullscreen;
         DisplayWidth = width;
         DisplayHeight = height;
+        RequestedRendererBackend = rendererBackend;
     }
 
     public void StartGame()
@@ -268,7 +271,20 @@ public partial class BetaSharp :
             int[] msaaValues = [0, 2, 4, 8];
             Display.MSAA_Samples = msaaValues[Options.MSAALevel];
 
-            Display.create();
+            RendererBackendSelection backendSelection = RendererBackendFactory.Resolve(RequestedRendererBackend);
+            ActiveRendererBackend = backendSelection.Effective;
+
+            _logger.LogInformation(
+                "Renderer backend requested: {RequestedBackend}; active: {ActiveBackend}",
+                backendSelection.Requested,
+                backendSelection.Effective);
+
+            if (!string.IsNullOrWhiteSpace(backendSelection.FallbackReason))
+            {
+                _logger.LogWarning("{FallbackReason}", backendSelection.FallbackReason);
+            }
+
+            Display.create(ActiveRendererBackend);
             Display.getGlfw().SetWindowSizeLimits(Display.GetWindowHandle(), 850, 480, maximumWidth, maximumHeight);
 
             GLManager.Init(Display.getGL()!);
@@ -1848,23 +1864,18 @@ public partial class BetaSharp :
 
     public static void Startup(string[] args)
     {
-        (string Name, string Session) result = args.Length switch
-        {
-            0 => ($"Player{Random.Shared.Next()}", "-"),
-            1 => (args[0], "-"),
-            _ => (args[0], args[1]),
-        };
+        ClientStartupOptions options = ClientStartupArgumentParser.Parse(args);
 
-        PlayerNameValidator.Validate(result.Name);
+        PlayerNameValidator.Validate(options.PlayerName);
 
-        StartMainThread(result.Name, result.Session);
+        StartMainThread(options.PlayerName, options.SessionToken, options.RendererBackend);
     }
 
-    private static void StartMainThread(string? playerName, string? sessionToken)
+    private static void StartMainThread(string? playerName, string? sessionToken, RendererBackendKind rendererBackend)
     {
         Thread.CurrentThread.Name = "BetaSharp Main Thread";
 
-        BetaSharp game = new(850, 480, false);
+        BetaSharp game = new(850, 480, false, rendererBackend);
 
         if (playerName != null && sessionToken != null)
         {
