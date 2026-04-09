@@ -14,6 +14,14 @@ internal sealed class SystemWindow(DebugWindowContext ctx) : DebugWindow
         ImGui.Text("Build: " + BetaSharp.Version);
         ImGui.Text($"OS:     {s.OsDescription}");
         ImGui.Text($"Runtime:{s.DotNetRuntime}");
+        ImGui.Text($"Renderer (Requested): {ctx.RequestedRendererBackend}");
+        ImGui.Text($"Renderer (Active):    {ctx.ActiveRendererBackend}");
+        ImGui.Text($"Display Backend:      {ctx.DisplayRendererBackend}");
+
+        if (ctx.RequestedRendererBackend != ctx.ActiveRendererBackend)
+        {
+            ImGui.TextColored(new System.Numerics.Vector4(1f, 0.8f, 0.35f, 1f), "Renderer fallback active");
+        }
 
         if (ImGui.CollapsingHeader("GPU", ImGuiTreeNodeFlags.DefaultOpen))
         {

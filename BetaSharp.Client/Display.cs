@@ -500,8 +500,11 @@ public static unsafe class Display
                     ContextProfile.Core,
                     DebugMode ? ContextFlags.Debug : ContextFlags.Default,
                     new APIVersion(4, 1)),
-                RendererBackendKind.Vulkan => throw new NotSupportedException(
-                    "Vulkan window surface initialization is not implemented yet."),
+                RendererBackendKind.Vulkan => new GraphicsAPI(
+                    ContextAPI.Vulkan,
+                    ContextProfile.Core,
+                    ContextFlags.Default,
+                    new APIVersion(1, 0)),
                 _ => throw new NotSupportedException(
                     $"Unsupported renderer backend: {rendererBackend}")
             };
@@ -528,9 +531,16 @@ public static unsafe class Display
 
     private static void onLoad()
     {
-        _gl = GL.GetApi(_window);
-        _gl.ClearColor(_r, _g, _b, 1.0f);
-        _gl.Enable(EnableCap.Multisample);
+        if (ActiveRendererBackend == RendererBackendKind.OpenGL)
+        {
+            _gl = GL.GetApi(_window);
+            _gl.ClearColor(_r, _g, _b, 1.0f);
+            _gl.Enable(EnableCap.Multisample);
+        }
+        else
+        {
+            _gl = null;
+        }
 
         refreshFramebufferSize();
         if (_window != null && _glfw != null)

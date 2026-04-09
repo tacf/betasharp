@@ -20,6 +20,11 @@ internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
         throw new NotSupportedException("Vulkan default render-state initialization is not implemented yet.");
     }
 
+    public void ConfigurePresentationMode(GameOptions options)
+    {
+        // Vulkan presentation mode (FIFO/MAILBOX/IMMEDIATE) will be configured during swapchain creation.
+    }
+
     public void SetMainViewport(int width, int height)
     {
         throw new NotSupportedException("Vulkan viewport binding is not implemented yet.");

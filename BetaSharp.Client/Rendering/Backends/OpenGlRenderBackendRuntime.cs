@@ -54,6 +54,11 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
         GLManager.GL.MatrixMode(GLEnum.Modelview);
     }
 
+    public void ConfigurePresentationMode(GameOptions options)
+    {
+        Display.getGlfw().SwapInterval(options.VSync ? 1 : 0);
+    }
+
     public void SetMainViewport(int width, int height)
     {
         GLManager.GL.Viewport(0, 0, (uint)width, (uint)height);

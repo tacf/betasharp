@@ -37,6 +37,10 @@ namespace BetaSharp.Client.Diagnostics;
 /// </remarks>
 internal sealed class DebugWindowContext(BetaSharp game)
 {
+    public RendererBackendKind RequestedRendererBackend => game.RequestedRendererBackend;
+    public RendererBackendKind ActiveRendererBackend => game.ActiveRendererBackend;
+    public RendererBackendKind DisplayRendererBackend => Display.ActiveRendererBackend;
+
     public World? World => game.World;
     public ClientPlayerEntity? Player => game.Player;
     public HitResult ObjectMouseOver => game.ObjectMouseOver;
