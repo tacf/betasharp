@@ -135,7 +135,9 @@ public partial class BetaSharp :
 
     public GameRenderer GameRenderer { get; private set; }
     public WorldRenderer WorldRenderer { get; private set; }
-    public IRenderPresentation FramebufferManager { get; private set; }
+    public IRenderPresentation RenderPresentation { get; private set; }
+    [Obsolete("Use RenderPresentation instead.")]
+    public IRenderPresentation FramebufferManager => RenderPresentation;
     public TextureManager TextureManager { get; private set; }
     public SkinManager SkinManager { get; private set; }
     public TextRenderer TextRenderer { get; private set; }
@@ -448,11 +450,11 @@ public partial class BetaSharp :
             () => _isMainMenuOpen
         ));
 
-        FramebufferManager = _renderBackendRuntime.CreatePresentation(
+        RenderPresentation = _renderBackendRuntime.CreatePresentation(
             Display.getFramebufferWidth(),
             Display.getFramebufferHeight(),
             Options);
-        PresentationRendererBackend = FramebufferManager.BackendKind;
+        PresentationRendererBackend = RenderPresentation.BackendKind;
     }
 
     private void LoadVersion()
@@ -651,7 +653,7 @@ public partial class BetaSharp :
                             int vpW = (int)vpSize.X, vpH = (int)vpSize.Y;
                             if (_lastViewportSize != vpSize)
                             {
-                                FramebufferManager.Resize(vpW, vpH);
+                                RenderPresentation.Resize(vpW, vpH);
                                 _lastViewportSize = vpSize;
                             }
                             DisplayWidth = vpW;
@@ -660,21 +662,21 @@ public partial class BetaSharp :
                             DebugViewportOffset = new Vector2(
                                 _debugWindowManager.ViewportPos.X,
                                 Display.getHeight() - vpH - _debugWindowManager.ViewportPos.Y);
-                            FramebufferManager.SkipBlit = true;
+                            RenderPresentation.SkipBlit = true;
                         }
                         else
                         {
                             DebugViewportOffset = Vector2.Zero;
-                            FramebufferManager.SkipBlit = false;
+                            RenderPresentation.SkipBlit = false;
                         }
                     }
                     else
                     {
                         DebugViewportOffset = Vector2.Zero;
-                        FramebufferManager.SkipBlit = false;
+                        RenderPresentation.SkipBlit = false;
                         if (_lastViewportSize != Vector2.Zero)
                         {
-                            FramebufferManager.Resize(Display.getFramebufferWidth(), Display.getFramebufferHeight());
+                            RenderPresentation.Resize(Display.getFramebufferWidth(), Display.getFramebufferHeight());
                             _lastViewportSize = Vector2.Zero;
                             _debugWindowManager.ViewportImage = PresentationViewportImage.Empty;
                         }
@@ -700,9 +702,9 @@ public partial class BetaSharp :
 
                     if (imguiThisFrame)
                     {
-                        if (FramebufferManager.SkipBlit)
+                        if (RenderPresentation.SkipBlit)
                         {
-                            _debugWindowManager.ViewportImage = FramebufferManager.ViewportImage;
+                            _debugWindowManager.ViewportImage = RenderPresentation.ViewportImage;
                         }
 
                         using (Profiler.Begin("ImguiBuild"))
@@ -1668,7 +1670,7 @@ public partial class BetaSharp :
         DisplayHeight = newHeight;
         Mouse.setDisplayDimensions(DisplayWidth, DisplayHeight);
 
-        FramebufferManager.Resize(Display.getFramebufferWidth(), Display.getFramebufferHeight());
+        RenderPresentation.Resize(Display.getFramebufferWidth(), Display.getFramebufferHeight());
     }
 
     private void ScreenshotListener()
