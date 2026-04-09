@@ -1,4 +1,3 @@
-BetaSharp.Client: /home/runner/work/Hexa.NET.ImGui/Hexa.NET.ImGui/src/imgui/imgui.cpp:20236: void ImGui::DockBuilderSetNodeSize(ImGuiID, ImVec2): Assertion `size.x > 0.0f && size.y > 0.0f' failed.
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime;
@@ -1756,6 +1755,12 @@ public partial class BetaSharp :
 
     private void LoadScreen()
     {
+        if (ActiveRendererBackend != RendererBackendKind.OpenGL)
+        {
+            _renderBackendRuntime.UpdateWindow(true);
+            return;
+        }
+
         ScaledResolution scaledResolution = new(Options, DisplayWidth, DisplayHeight);
         GLManager.GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
         GLManager.GL.MatrixMode(GLEnum.Projection);
@@ -1807,11 +1812,23 @@ public partial class BetaSharp :
 
     public void UpdateWindow(bool processMessages = true)
     {
+        if (_renderBackendRuntime == null)
+        {
+            Display.update(processMessages);
+            return;
+        }
+
         _renderBackendRuntime.UpdateWindow(processMessages);
     }
 
     public void SetVSyncEnabled(bool enabled)
     {
+        if (_renderBackendRuntime == null)
+        {
+            Display.setVSyncEnabled(enabled);
+            return;
+        }
+
         _renderBackendRuntime.SetVSyncEnabled(enabled);
     }
 
