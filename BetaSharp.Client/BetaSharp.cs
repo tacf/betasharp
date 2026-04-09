@@ -293,8 +293,7 @@ public partial class BetaSharp :
             Display.getGlfw().SetWindowSizeLimits(Display.GetWindowHandle(), 850, 480, maximumWidth, maximumHeight);
 
             _renderBackendRuntime.InitializeGraphicsContext(_debugTelemetry);
-
-            Display.getGlfw().SwapInterval(Options.VSync ? 1 : 0);
+            _renderBackendRuntime.ConfigurePresentationMode(Options);
 
 #if DEBUG
             _glErrorHandler = new();
