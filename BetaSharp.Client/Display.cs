@@ -41,6 +41,8 @@ public static unsafe class Display
 
     // Background color
     private static float _r, _g, _b;
+    private static bool UsesOpenGlContext => ActiveRendererBackend == RendererBackendKind.OpenGL;
+    private static bool UsesDisplaySwapBuffers => UsesOpenGlContext;
 
     static Display()
     {
@@ -531,7 +533,7 @@ public static unsafe class Display
 
     private static void onLoad()
     {
-        if (ActiveRendererBackend == RendererBackendKind.OpenGL)
+        if (UsesOpenGlContext)
         {
             _gl = GL.GetApi(_window);
         }
@@ -604,7 +606,7 @@ public static unsafe class Display
             if (!isCreated())
                 throw new InvalidOperationException("Display not created");
 
-            if (ActiveRendererBackend != RendererBackendKind.OpenGL)
+            if (!UsesDisplaySwapBuffers)
             {
                 return;
             }
@@ -633,7 +635,7 @@ public static unsafe class Display
 
             _wasResized = false;
 
-            if (_window!.IsVisible && ActiveRendererBackend == RendererBackendKind.OpenGL)
+            if (_window!.IsVisible && UsesDisplaySwapBuffers)
             {
                 swapBuffers();
             }

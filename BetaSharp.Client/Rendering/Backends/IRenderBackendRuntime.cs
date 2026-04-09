@@ -9,6 +9,8 @@ namespace BetaSharp.Client.Rendering.Backends;
 internal interface IRenderBackendRuntime
 {
     RendererBackendKind Kind { get; }
+    bool SupportsLegacyOpenGlRenderPath { get; }
+    bool SupportsScreenshotCapture { get; }
 
     void InitializeGraphicsContext(DebugTelemetry telemetry);
     void ConfigureDefaultRenderState(GameOptions options, ILogger logger);

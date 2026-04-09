@@ -36,7 +36,7 @@ public class LoadingScreenRenderer(BetaSharp game) : LoadingDisplay
         {
             _titleText = message;
 
-            if (game.ActiveRendererBackend != RendererBackendKind.OpenGL)
+            if (!game.SupportsLegacyOpenGlRenderPath)
             {
                 return;
             }
@@ -83,7 +83,7 @@ public class LoadingScreenRenderer(BetaSharp game) : LoadingDisplay
 
         _lastUpdateMs = currentTimeMs;
 
-        if (game.ActiveRendererBackend != RendererBackendKind.OpenGL)
+        if (!game.SupportsLegacyOpenGlRenderPath)
         {
             game.UpdateWindow(true);
             Thread.Yield();

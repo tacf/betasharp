@@ -110,6 +110,11 @@ public partial class BetaSharp :
     public string? RendererFallbackReason { get; private set; }
     public RendererBackendKind ImGuiRendererBackend { get; private set; } = RendererBackendKind.OpenGL;
     public RendererBackendKind PresentationRendererBackend { get; private set; } = RendererBackendKind.OpenGL;
+    public bool IsRendererRuntimeInitialized => _isRenderBackendInitialized;
+    public bool SupportsLegacyOpenGlRenderPath =>
+        _isRenderBackendInitialized && _renderBackendRuntime.SupportsLegacyOpenGlRenderPath;
+    public bool SupportsScreenshotCapture =>
+        _isRenderBackendInitialized && _renderBackendRuntime.SupportsScreenshotCapture;
 
     /// <summary>
     /// When the debug viewport is active, the top-left pixel offset of the game viewport
@@ -176,6 +181,7 @@ public partial class BetaSharp :
     private DebugWindowManager _debugWindowManager;
     private IImGuiRendererBackend _imguiRendererBackend = null!;
     private IRenderBackendRuntime _renderBackendRuntime = null!;
+    private bool _isRenderBackendInitialized;
     private GLErrorHandler _glErrorHandler;
     private string _gameDataDir;
 
@@ -282,6 +288,7 @@ public partial class BetaSharp :
             ActiveRendererBackend = backendSelection.Effective;
             RendererFallbackReason = backendSelection.FallbackReason;
             _renderBackendRuntime = RenderBackendRuntimeFactory.Create(ActiveRendererBackend);
+            _isRenderBackendInitialized = false;
 
             _logger.LogInformation(
                 "Renderer backend requested: {RequestedBackend}; active: {ActiveBackend}",
@@ -298,6 +305,7 @@ public partial class BetaSharp :
 
             _renderBackendRuntime.InitializeGraphicsContext(_debugTelemetry);
             _renderBackendRuntime.ConfigurePresentationMode(Options);
+            _isRenderBackendInitialized = true;
 
 #if DEBUG
             _glErrorHandler = new();
@@ -306,6 +314,8 @@ public partial class BetaSharp :
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception initializing display");
+            _isRenderBackendInitialized = false;
+            throw new InvalidOperationException($"Failed to initialize renderer backend '{ActiveRendererBackend}'.", ex);
         }
     }
 
@@ -415,7 +425,7 @@ public partial class BetaSharp :
         TextureManager.AddDynamicTexture(new FireSprite(1));
 
         WorldRenderer = new WorldRenderer(this, TextureManager);
-        _renderBackendRuntime.SetMainViewport(Display.getFramebufferWidth(), Display.getFramebufferHeight());
+        SetMainViewport(Display.getFramebufferWidth(), Display.getFramebufferHeight());
         ParticleManager = new ParticleManager(World, TextureManager);
 
         _ = new ResourceManager()
@@ -609,7 +619,7 @@ public partial class BetaSharp :
                     CheckGLError("Pre render");
 
                     SoundManager.UpdateListener(Player, Timer.renderPartialTicks);
-                    _renderBackendRuntime.PrepareFrameRenderState();
+                    PrepareFrameRenderState();
 
                     if (World != null)
                     {
@@ -623,7 +633,7 @@ public partial class BetaSharp :
                     {
                         using (Profiler.Begin("DisplayPresent"))
                         {
-                            _renderBackendRuntime.UpdateWindow(true);
+                            UpdateWindow(true);
                         }
                     }
 
@@ -717,7 +727,7 @@ public partial class BetaSharp :
 
                     if (Keyboard.isKeyDown(Keyboard.KEY_F7))
                     {
-                        _renderBackendRuntime.UpdateWindow(true);
+                        UpdateWindow(true);
                     }
 
                     ScreenshotListener();
@@ -1641,7 +1651,7 @@ public partial class BetaSharp :
             }
 
             Resize(DisplayWidth, DisplayHeight);
-            _renderBackendRuntime.UpdateWindow(true);
+            UpdateWindow(true);
         }
         catch (Exception displayException)
         {
@@ -1671,7 +1681,7 @@ public partial class BetaSharp :
                 int framebufferWidth = Display.getFramebufferWidth();
                 int framebufferHeight = Display.getFramebufferHeight();
 
-                if (_renderBackendRuntime.TryCaptureScreenshot(framebufferWidth, framebufferHeight, out byte[] pixels))
+                if (TryCaptureScreenshot(framebufferWidth, framebufferHeight, out byte[] pixels))
                 {
                     string result = ScreenShotHelper.saveScreenshot(_gameDataDir, DisplayWidth, DisplayHeight, pixels);
                     HUD.AddChatMessage(result);
@@ -1686,6 +1696,18 @@ public partial class BetaSharp :
         {
             _isTakingScreenshot = false;
         }
+    }
+
+    private bool TryCaptureScreenshot(int framebufferWidth, int framebufferHeight, out byte[] pixels)
+    {
+        pixels = [];
+
+        if (!SupportsScreenshotCapture)
+        {
+            return false;
+        }
+
+        return _renderBackendRuntime.TryCaptureScreenshot(framebufferWidth, framebufferHeight, out pixels);
     }
 
     private void ForceReload()
@@ -1746,14 +1768,19 @@ public partial class BetaSharp :
     [Conditional("DEBUG")]
     private void CheckGLError(string location)
     {
+        if (!_isRenderBackendInitialized)
+        {
+            return;
+        }
+
         _renderBackendRuntime.CheckBackendErrors(location, _logger);
     }
 
     private void LoadScreen()
     {
-        if (ActiveRendererBackend != RendererBackendKind.OpenGL)
+        if (!SupportsLegacyOpenGlRenderPath)
         {
-            _renderBackendRuntime.UpdateWindow(true);
+            UpdateWindow(true);
             return;
         }
 
@@ -1789,7 +1816,7 @@ public partial class BetaSharp :
         GLManager.GL.Disable(GLEnum.Fog);
         GLManager.GL.Enable(GLEnum.AlphaTest);
         GLManager.GL.AlphaFunc(GLEnum.Greater, 0.1F);
-        _renderBackendRuntime.UpdateWindow(true);
+        UpdateWindow(true);
     }
 
     private static void DrawTextureRegion(int x, int y, int texX, int texY, int width, int height)
@@ -1806,9 +1833,29 @@ public partial class BetaSharp :
         tess.draw();
     }
 
+    private void SetMainViewport(int width, int height)
+    {
+        if (!_isRenderBackendInitialized)
+        {
+            return;
+        }
+
+        _renderBackendRuntime.SetMainViewport(width, height);
+    }
+
+    private void PrepareFrameRenderState()
+    {
+        if (!_isRenderBackendInitialized)
+        {
+            return;
+        }
+
+        _renderBackendRuntime.PrepareFrameRenderState();
+    }
+
     public void UpdateWindow(bool processMessages = true)
     {
-        if (_renderBackendRuntime == null)
+        if (!_isRenderBackendInitialized)
         {
             Display.update(processMessages);
             return;
@@ -1819,7 +1866,7 @@ public partial class BetaSharp :
 
     public void SetVSyncEnabled(bool enabled)
     {
-        if (_renderBackendRuntime == null)
+        if (!_isRenderBackendInitialized)
         {
             Display.setVSyncEnabled(enabled);
             return;
