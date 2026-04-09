@@ -42,6 +42,9 @@ internal sealed class DebugWindowContext(BetaSharp game)
     public RendererBackendKind DisplayRendererBackend => Display.ActiveRendererBackend;
     public RendererBackendKind ImGuiRendererBackend => game.ImGuiRendererBackend;
     public RendererBackendKind PresentationRendererBackend => game.PresentationRendererBackend;
+    public bool IsRendererRuntimeInitialized => game.IsRendererRuntimeInitialized;
+    public bool SupportsLegacyOpenGlRenderPath => game.SupportsLegacyOpenGlRenderPath;
+    public bool SupportsScreenshotCapture => game.SupportsScreenshotCapture;
     public string? RendererFallbackReason => game.RendererFallbackReason;
 
     public World? World => game.World;
