@@ -610,7 +610,7 @@ public partial class BetaSharp :
                     CheckGLError("Pre render");
 
                     SoundManager.UpdateListener(Player, Timer.renderPartialTicks);
-                    GLManager.GL.Enable(GLEnum.Texture2D);
+                    _renderBackendRuntime.PrepareFrameRenderState();
 
                     if (World != null)
                     {
@@ -1751,6 +1751,11 @@ public partial class BetaSharp :
     [Conditional("DEBUG")]
     private void CheckGLError(string location)
     {
+        if (ActiveRendererBackend != RendererBackendKind.OpenGL)
+        {
+            return;
+        }
+
         GLEnum glError = GLManager.GL.GetError();
         if (glError != 0)
         {
