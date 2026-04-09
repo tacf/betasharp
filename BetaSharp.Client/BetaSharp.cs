@@ -115,6 +115,20 @@ public partial class BetaSharp :
         _isRenderBackendInitialized
             ? _renderBackendRuntime.Capabilities
             : RendererBackendCapabilities.For(ActiveRendererBackend);
+    public RendererBackendStateSnapshot RendererBackendState => new(
+        RequestedBackend: RequestedRendererBackend,
+        ActiveBackend: ActiveRendererBackend,
+        DisplayBackend: Display.ActiveRendererBackend,
+        ImGuiBackend: ImGuiRendererBackend,
+        PresentationBackend: PresentationRendererBackend,
+        RuntimeCapabilities: ActiveRendererCapabilities,
+        IsRuntimeInitialized: IsRendererRuntimeInitialized,
+        DisplaySupportsWindowBufferSwap: Display.SupportsWindowBufferSwap,
+        DisplayHasOpenGlContext: Display.HasOpenGlContext,
+        PresentationTargetWidth: PresentationTargetWidth,
+        PresentationTargetHeight: PresentationTargetHeight,
+        IsPresentationBlitSkipped: IsPresentationBlitSkipped,
+        FallbackReason: RendererFallbackReason);
     public bool SupportsLegacyOpenGlRenderPath => ActiveRendererCapabilities.SupportsLegacyOpenGlRenderPath;
     public bool SupportsScreenshotCapture => ActiveRendererCapabilities.SupportsScreenshotCapture;
 

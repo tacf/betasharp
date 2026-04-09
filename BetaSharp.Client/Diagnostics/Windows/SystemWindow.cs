@@ -1,3 +1,4 @@
+using BetaSharp.Client.Rendering;
 using Hexa.NET.ImGui;
 
 namespace BetaSharp.Client.Diagnostics.Windows;
@@ -10,33 +11,34 @@ internal sealed class SystemWindow(DebugWindowContext ctx) : DebugWindow
     protected override void OnDraw()
     {
         DebugSystemSnapshot s = ctx.DebugSystemSnapshot;
+        RendererBackendStateSnapshot rendererState = ctx.RendererBackendState;
 
         ImGui.Text("Build: " + BetaSharp.Version);
         ImGui.Text($"OS:     {s.OsDescription}");
         ImGui.Text($"Runtime:{s.DotNetRuntime}");
-        ImGui.Text($"Renderer (Requested): {ctx.RequestedRendererBackend}");
-        ImGui.Text($"Renderer (Active):    {ctx.ActiveRendererBackend}");
-        ImGui.Text($"Display Backend:      {ctx.DisplayRendererBackend}");
-        ImGui.Text($"Display SwapBuffers:  {(ctx.DisplaySupportsWindowBufferSwap ? "Yes" : "No")}");
-        ImGui.Text($"Display GL Context:   {(ctx.DisplayHasOpenGlContext ? "Yes" : "No")}");
-        ImGui.Text($"ImGui Backend:        {ctx.ImGuiRendererBackend}");
-        ImGui.Text($"Presentation Backend: {ctx.PresentationRendererBackend}");
-        ImGui.Text($"Presentation Target:  {ctx.PresentationTargetWidth}x{ctx.PresentationTargetHeight}");
-        ImGui.Text($"Presentation SkipBlit:{(ctx.IsPresentationBlitSkipped ? " Yes" : " No")}");
-        ImGui.Text($"Runtime Uses Swap:    {(ctx.ActiveRendererCapabilities.UsesDisplaySwapBuffers ? "Yes" : "No")}");
-        ImGui.Text($"Runtime Uses GL Ctx:  {(ctx.ActiveRendererCapabilities.UsesOpenGlContext ? "Yes" : "No")}");
-        ImGui.Text($"Renderer Runtime Init:{(ctx.IsRendererRuntimeInitialized ? " Yes" : " No")}");
-        ImGui.Text($"Legacy GL Render Path:{(ctx.SupportsLegacyOpenGlRenderPath ? " Yes" : " No")}");
-        ImGui.Text($"Screenshot Capture:   {(ctx.SupportsScreenshotCapture ? "Yes" : "No")}");
+        ImGui.Text($"Renderer (Requested): {rendererState.RequestedBackend}");
+        ImGui.Text($"Renderer (Active):    {rendererState.ActiveBackend}");
+        ImGui.Text($"Display Backend:      {rendererState.DisplayBackend}");
+        ImGui.Text($"Display SwapBuffers:  {(rendererState.DisplaySupportsWindowBufferSwap ? "Yes" : "No")}");
+        ImGui.Text($"Display GL Context:   {(rendererState.DisplayHasOpenGlContext ? "Yes" : "No")}");
+        ImGui.Text($"ImGui Backend:        {rendererState.ImGuiBackend}");
+        ImGui.Text($"Presentation Backend: {rendererState.PresentationBackend}");
+        ImGui.Text($"Presentation Target:  {rendererState.PresentationTargetWidth}x{rendererState.PresentationTargetHeight}");
+        ImGui.Text($"Presentation SkipBlit:{(rendererState.IsPresentationBlitSkipped ? " Yes" : " No")}");
+        ImGui.Text($"Runtime Uses Swap:    {(rendererState.RuntimeCapabilities.UsesDisplaySwapBuffers ? "Yes" : "No")}");
+        ImGui.Text($"Runtime Uses GL Ctx:  {(rendererState.RuntimeCapabilities.UsesOpenGlContext ? "Yes" : "No")}");
+        ImGui.Text($"Renderer Runtime Init:{(rendererState.IsRuntimeInitialized ? " Yes" : " No")}");
+        ImGui.Text($"Legacy GL Render Path:{(rendererState.SupportsLegacyOpenGlRenderPath ? " Yes" : " No")}");
+        ImGui.Text($"Screenshot Capture:   {(rendererState.SupportsScreenshotCapture ? "Yes" : "No")}");
 
-        if (ctx.RequestedRendererBackend != ctx.ActiveRendererBackend)
+        if (rendererState.IsFallbackActive)
         {
             ImGui.TextColored(new System.Numerics.Vector4(1f, 0.8f, 0.35f, 1f), "Renderer fallback active");
         }
 
-        if (!string.IsNullOrWhiteSpace(ctx.RendererFallbackReason))
+        if (!string.IsNullOrWhiteSpace(rendererState.FallbackReason))
         {
-            ImGui.TextDisabled($"Fallback reason: {ctx.RendererFallbackReason}");
+            ImGui.TextDisabled($"Fallback reason: {rendererState.FallbackReason}");
         }
 
         if (ImGui.CollapsingHeader("GPU", ImGuiTreeNodeFlags.DefaultOpen))
