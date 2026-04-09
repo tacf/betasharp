@@ -1670,19 +1670,16 @@ public partial class BetaSharp :
                 _isTakingScreenshot = true;
                 int framebufferWidth = Display.getFramebufferWidth();
                 int framebufferHeight = Display.getFramebufferHeight();
-                int size = framebufferWidth * framebufferHeight * 3;
-                byte[] pixels = new byte[size];
-                GLManager.GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
-                unsafe
-                {
-                    fixed (byte* p = pixels)
-                    {
-                        GLManager.GL.ReadPixels(0, 0, (uint)framebufferWidth, (uint)framebufferHeight, PixelFormat.Rgb, PixelType.UnsignedByte, p);
-                    }
-                }
 
-                string result = ScreenShotHelper.saveScreenshot(_gameDataDir, DisplayWidth, DisplayHeight, pixels);
-                HUD.AddChatMessage(result);
+                if (_renderBackendRuntime.TryCaptureScreenshot(framebufferWidth, framebufferHeight, out byte[] pixels))
+                {
+                    string result = ScreenShotHelper.saveScreenshot(_gameDataDir, DisplayWidth, DisplayHeight, pixels);
+                    HUD.AddChatMessage(result);
+                }
+                else
+                {
+                    HUD.AddChatMessage($"Screenshots are not supported yet for renderer '{ActiveRendererBackend}'.");
+                }
             }
         }
         else

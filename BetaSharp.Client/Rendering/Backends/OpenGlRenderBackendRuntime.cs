@@ -81,6 +81,29 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
         Display.update(processMessages);
     }
 
+    public bool TryCaptureScreenshot(int framebufferWidth, int framebufferHeight, out byte[] rgbPixels)
+    {
+        rgbPixels = new byte[framebufferWidth * framebufferHeight * 3];
+        GLManager.GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+
+        unsafe
+        {
+            fixed (byte* pixels = rgbPixels)
+            {
+                GLManager.GL.ReadPixels(
+                    0,
+                    0,
+                    (uint)framebufferWidth,
+                    (uint)framebufferHeight,
+                    PixelFormat.Rgb,
+                    PixelType.UnsignedByte,
+                    pixels);
+            }
+        }
+
+        return true;
+    }
+
     public IRenderPresentation CreatePresentation(int width, int height, GameOptions options)
     {
         return RenderPresentationFactory.Create(Kind, width, height, options);

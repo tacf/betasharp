@@ -43,6 +43,12 @@ internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
         }
     }
 
+    public bool TryCaptureScreenshot(int framebufferWidth, int framebufferHeight, out byte[] rgbPixels)
+    {
+        rgbPixels = [];
+        return false;
+    }
+
     public IRenderPresentation CreatePresentation(int width, int height, GameOptions options)
     {
         return RenderPresentationFactory.Create(Kind, width, height, options);

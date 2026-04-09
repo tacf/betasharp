@@ -16,6 +16,7 @@ internal interface IRenderBackendRuntime
     void SetVSyncEnabled(bool enabled);
     void SetMainViewport(int width, int height);
     void UpdateWindow(bool processMessages);
+    bool TryCaptureScreenshot(int framebufferWidth, int framebufferHeight, out byte[] rgbPixels);
 
     IRenderPresentation CreatePresentation(int width, int height, GameOptions options);
     IImGuiRendererBackend CreateImGuiRendererBackend();
