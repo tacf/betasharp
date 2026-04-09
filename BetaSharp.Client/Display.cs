@@ -534,8 +534,6 @@ public static unsafe class Display
         if (ActiveRendererBackend == RendererBackendKind.OpenGL)
         {
             _gl = GL.GetApi(_window);
-            _gl.ClearColor(_r, _g, _b, 1.0f);
-            _gl.Enable(EnableCap.Multisample);
         }
         else
         {
@@ -606,6 +604,11 @@ public static unsafe class Display
             if (!isCreated())
                 throw new InvalidOperationException("Display not created");
 
+            if (ActiveRendererBackend != RendererBackendKind.OpenGL)
+            {
+                return;
+            }
+
             _window!.SwapBuffers();
         }
     }
@@ -630,7 +633,7 @@ public static unsafe class Display
 
             _wasResized = false;
 
-            if (_window!.IsVisible)
+            if (_window!.IsVisible && ActiveRendererBackend == RendererBackendKind.OpenGL)
             {
                 swapBuffers();
             }
@@ -674,6 +677,14 @@ public static unsafe class Display
     public static GL? getGL()
     {
         return _gl;
+    }
+
+    /// <summary>
+    /// Gets the configured initial background color.
+    /// </summary>
+    public static (float R, float G, float B) GetInitialBackgroundColor()
+    {
+        return (_r, _g, _b);
     }
 
     public static WindowHandle* GetWindowHandle()

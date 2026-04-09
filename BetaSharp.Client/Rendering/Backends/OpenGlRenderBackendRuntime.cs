@@ -5,6 +5,8 @@ using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.OpenGL;
 using BetaSharp.Client.Rendering.Presentation;
 using Microsoft.Extensions.Logging;
+using Silk.NET.OpenGL;
+using LegacyGLEnum = BetaSharp.Client.Rendering.Core.OpenGL.GLEnum;
 
 namespace BetaSharp.Client.Rendering.Backends;
 
@@ -14,7 +16,12 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
 
     public void InitializeGraphicsContext(DebugTelemetry telemetry)
     {
-        GLManager.Init(Display.getGL()!);
+        GL silkGl = Display.getGL()!;
+        (float r, float g, float b) = Display.GetInitialBackgroundColor();
+        silkGl.ClearColor(r, g, b, 1.0f);
+        silkGl.Enable(EnableCap.Multisample);
+
+        GLManager.Init(silkGl);
         if (GLManager.GL is LegacyGL legacyGl)
         {
             telemetry.CaptureSystemInfo(legacyGl);
@@ -32,7 +39,7 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
 
         if (anisotropicFiltering)
         {
-            GLManager.GL.GetFloat(GLEnum.MaxTextureMaxAnisotropy, out float maxAnisotropy);
+            GLManager.GL.GetFloat(LegacyGLEnum.MaxTextureMaxAnisotropy, out float maxAnisotropy);
             GameOptions.MaxAnisotropy = maxAnisotropy;
             logger.LogInformation("Max Anisotropy: {MaxAnisotropy}", maxAnisotropy);
         }
@@ -41,17 +48,17 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
             GameOptions.MaxAnisotropy = 1.0f;
         }
 
-        GLManager.GL.Enable(GLEnum.Texture2D);
-        GLManager.GL.ShadeModel(GLEnum.Smooth);
+        GLManager.GL.Enable(LegacyGLEnum.Texture2D);
+        GLManager.GL.ShadeModel(LegacyGLEnum.Smooth);
         GLManager.GL.ClearDepth(1.0D);
-        GLManager.GL.Enable(GLEnum.DepthTest);
-        GLManager.GL.DepthFunc(GLEnum.Lequal);
-        GLManager.GL.Enable(GLEnum.AlphaTest);
-        GLManager.GL.AlphaFunc(GLEnum.Greater, 0.1F);
-        GLManager.GL.CullFace(GLEnum.Back);
-        GLManager.GL.MatrixMode(GLEnum.Projection);
+        GLManager.GL.Enable(LegacyGLEnum.DepthTest);
+        GLManager.GL.DepthFunc(LegacyGLEnum.Lequal);
+        GLManager.GL.Enable(LegacyGLEnum.AlphaTest);
+        GLManager.GL.AlphaFunc(LegacyGLEnum.Greater, 0.1F);
+        GLManager.GL.CullFace(LegacyGLEnum.Back);
+        GLManager.GL.MatrixMode(LegacyGLEnum.Projection);
         GLManager.GL.LoadIdentity();
-        GLManager.GL.MatrixMode(GLEnum.Modelview);
+        GLManager.GL.MatrixMode(LegacyGLEnum.Modelview);
     }
 
     public void ConfigurePresentationMode(GameOptions options)
