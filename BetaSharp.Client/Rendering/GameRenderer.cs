@@ -56,19 +56,13 @@ public class GameRenderer : ISceneRenderer
     public void Tick(float partialTicks) => tick(partialTicks);
     public void OnFrameUpdate(float tickDelta) => onFrameUpdate(tickDelta);
     public void ResetEquippedItemProgress() => itemRenderer.ResetEquippedProgress();
-    public void MarkVisibleChunksDirty() => _client.WorldRenderer?.MarkAllVisibleChunksDirty();
-    public void UpdateClouds() => _client.WorldRenderer?.UpdateClouds();
-    public void ChangeWorld(World world) => _client.WorldRenderer?.ChangeWorld(world);
-    public void SetDamagePartialTime(float value)
-    {
-        if (_client.WorldRenderer != null)
-        {
-            _client.WorldRenderer.DamagePartialTime = value;
-        }
-    }
+    public void MarkVisibleChunksDirty() => _client.WorldRenderer.MarkAllVisibleChunksDirty();
+    public void UpdateClouds() => _client.WorldRenderer.UpdateClouds();
+    public void ChangeWorld(World world) => _client.WorldRenderer.ChangeWorld(world);
+    public void SetDamagePartialTime(float value) => _client.WorldRenderer.DamagePartialTime = value;
     public void PublishRenderMetrics()
     {
-        if (_client.WorldRenderer == null || !_client.WorldRenderer.TryGetChunkStats(out ChunkRendererStats chunkStats))
+        if (!_client.WorldRenderer.TryGetChunkStats(out ChunkRendererStats chunkStats))
         {
             return;
         }
@@ -99,10 +93,7 @@ public class GameRenderer : ISceneRenderer
 
     public void tick(float var1)
     {
-        if (_client.WorldRenderer != null)
-        {
-            _client.WorldRenderer.Tick(_client.Camera, var1);
-        }
+        _client.WorldRenderer.Tick(_client.Camera, var1);
     }
 
     public void UpdateTargetedEntity(float tickDelta)

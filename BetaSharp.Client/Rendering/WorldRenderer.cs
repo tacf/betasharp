@@ -668,7 +668,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         GLManager.GL.Enable(GLEnum.CullFace);
     }
 
-    public void DrawBlockBreaking(EntityPlayer entityPlayer, HitResult hit, ItemStack itemStack, float tickDelta)
+    public void DrawBlockBreaking(EntityPlayer entityPlayer, HitResult hit, ItemStack? itemStack, float tickDelta)
     {
         if (DamagePartialTime <= 0.0F) return;
 
@@ -710,7 +710,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         GLManager.GL.PopMatrix();
     }
 
-    public void DrawSelectionBox(EntityPlayer var1, HitResult var2, int var3, ItemStack var4, float var5)
+    public void DrawSelectionBox(EntityPlayer var1, HitResult var2, int var3, ItemStack? var4, float var5)
     {
         if (var3 == 0 && var2.Type == HitResultType.TILE)
         {
