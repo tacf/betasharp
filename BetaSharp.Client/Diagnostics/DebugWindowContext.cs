@@ -37,21 +37,7 @@ namespace BetaSharp.Client.Diagnostics;
 /// </remarks>
 internal sealed class DebugWindowContext(BetaSharp game)
 {
-    public RendererBackendKind RequestedRendererBackend => game.RequestedRendererBackend;
-    public RendererBackendKind ActiveRendererBackend => game.ActiveRendererBackend;
-    public RendererBackendKind DisplayRendererBackend => Display.ActiveRendererBackend;
-    public bool DisplaySupportsWindowBufferSwap => Display.SupportsWindowBufferSwap;
-    public bool DisplayHasOpenGlContext => Display.HasOpenGlContext;
-    public RendererBackendKind ImGuiRendererBackend => game.ImGuiRendererBackend;
-    public RendererBackendKind PresentationRendererBackend => game.PresentationRendererBackend;
-    public RendererBackendCapabilities ActiveRendererCapabilities => game.ActiveRendererCapabilities;
-    public int PresentationTargetWidth => game.PresentationTargetWidth;
-    public int PresentationTargetHeight => game.PresentationTargetHeight;
-    public bool IsPresentationBlitSkipped => game.IsPresentationBlitSkipped;
-    public bool IsRendererRuntimeInitialized => game.IsRendererRuntimeInitialized;
-    public bool SupportsLegacyOpenGlRenderPath => game.SupportsLegacyOpenGlRenderPath;
-    public bool SupportsScreenshotCapture => game.SupportsScreenshotCapture;
-    public string? RendererFallbackReason => game.RendererFallbackReason;
+    public RendererBackendStateSnapshot RendererBackendState => game.RendererBackendState;
 
     public World? World => game.World;
     public ClientPlayerEntity? Player => game.Player;
