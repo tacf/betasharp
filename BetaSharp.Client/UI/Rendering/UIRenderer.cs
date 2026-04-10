@@ -18,10 +18,18 @@ using GLEnum = BetaSharp.Client.Rendering.Core.OpenGL.GLEnum;
 
 namespace BetaSharp.Client.UI.Rendering;
 
-public class UIRenderer(ITextRenderer textRenderer, ITextureManager textureManager, GameOptions gameOptions, Func<Vector2D<int>> getDisplaySize)
+public class UIRenderer(
+    ITextRenderer textRenderer,
+    ITextureManager textureManager,
+    IEntityRenderDispatcher entityRenderDispatcher,
+    IBlockEntityRenderDispatcher blockEntityRenderDispatcher,
+    GameOptions gameOptions,
+    Func<Vector2D<int>> getDisplaySize)
 {
     public ITextureManager TextureManager { get; } = textureManager;
     public ITextRenderer TextRenderer { get; } = textRenderer;
+    private readonly IEntityRenderDispatcher _entityRenderDispatcher = entityRenderDispatcher;
+    private readonly IBlockEntityRenderDispatcher _blockEntityRenderDispatcher = blockEntityRenderDispatcher;
     private readonly ItemRenderer _itemRenderer = new();
     private readonly GameOptions _gameOptions = gameOptions;
 
@@ -357,8 +365,8 @@ public class UIRenderer(ITextRenderer textRenderer, ITextureManager textureManag
         entity.minBrightness = 1.0F;
 
         GLManager.GL.Translate(0.0F, entity.standingEyeHeight, 0.0F);
-        EntityRenderDispatcher.Instance.PlayerViewY = 180.0F;
-        EntityRenderDispatcher.Instance.RenderEntityWithPosYaw(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F);
+        _entityRenderDispatcher.PlayerViewY = 180.0F;
+        _entityRenderDispatcher.RenderEntityWithPosYaw(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F);
 
         entity.minBrightness = 0.0F;
         if (entity is EntityLiving el3)
@@ -455,7 +463,7 @@ public class UIRenderer(ITextRenderer textRenderer, ITextureManager textureManag
             GLManager.GL.Translate(0.0F, -1.0625F, 0.0F);
         }
 
-        BlockEntityRenderer.Instance.RenderTileEntityAt(sign, -0.5D, -0.75D, -0.5D, 0.0F);
+        _blockEntityRenderDispatcher.RenderTileEntityAt(sign, -0.5D, -0.75D, -0.5D, 0.0F);
         GLManager.GL.PopMatrix();
         GLManager.GL.Disable(GLEnum.DepthTest);
         GLManager.GL.Disable(GLEnum.RescaleNormal);

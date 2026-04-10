@@ -11,14 +11,14 @@ using BetaSharp.Worlds.Core;
 
 namespace BetaSharp.Client.Rendering.Entities;
 
-public class EntityRenderDispatcher
+public class EntityRenderDispatcher : IEntityRenderDispatcher
 {
     private readonly Dictionary<Type, EntityRenderer> _entityRenderMap = [];
     public static readonly EntityRenderDispatcher Instance = new();
     private ITextRenderer _fontRenderer;
-    public static double OffsetX { get; set; }
-    public static double OffsetY { get; set; }
-    public static double OffsetZ { get; set; }
+    public double OffsetX { get; set; }
+    public double OffsetY { get; set; }
+    public double OffsetZ { get; set; }
     public ITextureManager TextureManager { get; private set; }
     public ISkinManager SkinManager { get; set; }
     public HeldItemRenderer HeldItemRenderer { get; set; }
@@ -147,8 +147,10 @@ public class EntityRenderDispatcher
         return xDelta * xDelta + yDelta * yDelta + zDelta * zDelta;
     }
 
-    public ITextRenderer getTextRenderer()
+    public ITextRenderer GetTextRenderer()
     {
         return _fontRenderer;
     }
+
+    public ITextRenderer getTextRenderer() => GetTextRenderer();
 }

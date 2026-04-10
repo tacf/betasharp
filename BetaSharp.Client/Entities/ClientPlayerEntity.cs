@@ -224,7 +224,7 @@ public class ClientPlayerEntity : EntityPlayer
 
     public override void sendPickup(Entity entity, int count)
     {
-        Game.ParticleManager.AddSpecialParticle(new LegacyParticleAdapter(new EntityPickupFX(Game.World, entity, this, -0.5F)));
+        Game.ParticleManager.AddSpecialParticle(new LegacyParticleAdapter(new EntityPickupFX(Game.World, entity, this, -0.5F, Game.EntityRenderDispatcher)));
     }
 
     public int getPlayerArmorValue()

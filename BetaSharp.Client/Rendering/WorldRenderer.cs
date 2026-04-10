@@ -153,7 +153,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
     {
         _world?.EventListeners.Remove(this);
 
-        EntityRenderDispatcher.Instance.World = world;
+        _game.EntityRenderDispatcher.World = world;
         _world = world;
         if (world != null)
         {
@@ -247,18 +247,18 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         }
         else
         {
-            BlockEntityRenderer.Instance.CacheActiveRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, var3);
-            EntityRenderDispatcher.Instance.CacheRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, _game.Options, var3);
+            _game.BlockEntityRenderDispatcher.CacheActiveRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, var3);
+            _game.EntityRenderDispatcher.CacheRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, _game.Options, var3);
             CountEntitiesTotal = 0;
             CountEntitiesRendered = 0;
             CountEntitiesHidden = 0;
             EntityLiving var4 = _game.Camera;
-            EntityRenderDispatcher.OffsetX = var4.lastTickX + (var4.x - var4.lastTickX) * (double)var3;
-            EntityRenderDispatcher.OffsetY = var4.lastTickY + (var4.y - var4.lastTickY) * (double)var3;
-            EntityRenderDispatcher.OffsetZ = var4.lastTickZ + (var4.z - var4.lastTickZ) * (double)var3;
-            BlockEntityRenderer.StaticPlayerX = var4.lastTickX + (var4.x - var4.lastTickX) * (double)var3;
-            BlockEntityRenderer.StaticPlayerY = var4.lastTickY + (var4.y - var4.lastTickY) * (double)var3;
-            BlockEntityRenderer.StaticPlayerZ = var4.lastTickZ + (var4.z - var4.lastTickZ) * (double)var3;
+            _game.EntityRenderDispatcher.OffsetX = var4.lastTickX + (var4.x - var4.lastTickX) * (double)var3;
+            _game.EntityRenderDispatcher.OffsetY = var4.lastTickY + (var4.y - var4.lastTickY) * (double)var3;
+            _game.EntityRenderDispatcher.OffsetZ = var4.lastTickZ + (var4.z - var4.lastTickZ) * (double)var3;
+            _game.BlockEntityRenderDispatcher.StaticPlayerX = var4.lastTickX + (var4.x - var4.lastTickX) * (double)var3;
+            _game.BlockEntityRenderDispatcher.StaticPlayerY = var4.lastTickY + (var4.y - var4.lastTickY) * (double)var3;
+            _game.BlockEntityRenderDispatcher.StaticPlayerZ = var4.lastTickZ + (var4.z - var4.lastTickZ) * (double)var3;
             List<Entity> var5 = _world.Entities.Entities;
             CountEntitiesTotal = var5.Count;
 
@@ -270,7 +270,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                 ++CountEntitiesRendered;
                 if (var7.shouldRender(var1))
                 {
-                    EntityRenderDispatcher.Instance.RenderEntity(var7, var3);
+                    _game.EntityRenderDispatcher.RenderEntity(var7, var3);
                 }
             }
 
@@ -308,7 +308,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                     if (_world.Reader.IsPosLoaded(MathHelper.Floor(var7.x), yFloor, MathHelper.Floor(var7.z)))
                     {
                         ++CountEntitiesRendered;
-                        EntityRenderDispatcher.Instance.RenderEntity(var7, var3);
+                        _game.EntityRenderDispatcher.RenderEntity(var7, var3);
                     }
                 }
             }
@@ -318,7 +318,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                 BlockEntity entity = _world.Entities.BlockEntities[var6];
                 if (!entity.isRemoved() && culler.IsBoundingBoxInFrustum(new Box(entity.X, entity.Y, entity.Z, entity.X + 1, entity.Y + 1, entity.Z + 1)))
                 {
-                    BlockEntityRenderer.Instance.RenderTileEntity(entity, var3);
+                    _game.BlockEntityRenderDispatcher.RenderTileEntity(entity, var3);
                 }
             }
         }
@@ -880,7 +880,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
     public void NotifyEntityAdded(Entity var1)
     {
         var1.updateCloak();
-        EntityRenderDispatcher.Instance.SkinManager.RequestDownload((var1 as EntityPlayer)?.name);
+        _game.EntityRenderDispatcher.SkinManager.RequestDownload((var1 as EntityPlayer)?.name);
     }
 
     public void NotifyEntityRemoved(Entity var1)

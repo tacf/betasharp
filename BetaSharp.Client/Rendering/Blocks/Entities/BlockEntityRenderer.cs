@@ -1,20 +1,22 @@
 using BetaSharp.Blocks.Entities;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Entities;
 using BetaSharp.Worlds.Core;
 
 namespace BetaSharp.Client.Rendering.Blocks.Entities;
 
-public class BlockEntityRenderer
+public class BlockEntityRenderer : IBlockEntityRenderDispatcher
 {
     private readonly Dictionary<Type, BlockEntitySpecialRenderer?> _specialRendererMap = [];
     public static BlockEntityRenderer Instance { get; } = new();
     private ITextRenderer _fontRenderer;
-    public static double StaticPlayerX;
-    public static double StaticPlayerY;
-    public static double StaticPlayerZ;
+    public double StaticPlayerX { get; set; }
+    public double StaticPlayerY { get; set; }
+    public double StaticPlayerZ { get; set; }
     public ITextureManager TextureManager { get; set; }
+    public IEntityRenderDispatcher EntityDispatcher { get; set; } = EntityRenderDispatcher.Instance;
     public World World { get; set; }
     public EntityLiving PlayerEntity { get; set; }
     public float PlayerYaw { get; set; }
@@ -77,9 +79,9 @@ public class BlockEntityRenderer
             GLManager.GL.Color3(luminance, luminance, luminance);
             RenderTileEntityAt(
                 blockEntity,
-                blockEntity.X - StaticPlayerX,
-                blockEntity.Y - StaticPlayerY,
-                blockEntity.Z - StaticPlayerZ,
+                blockEntity.X - this.StaticPlayerX,
+                blockEntity.Y - this.StaticPlayerY,
+                blockEntity.Z - this.StaticPlayerZ,
                 tickDelta);
         }
 

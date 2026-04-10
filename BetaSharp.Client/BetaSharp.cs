@@ -16,6 +16,7 @@ using BetaSharp.Client.Rendering.Backends;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Presentation;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Blocks.Entities;
 using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Client.Rendering.Items;
 using BetaSharp.Client.Resource;
@@ -154,6 +155,8 @@ public partial class BetaSharp :
     public ITextureManager TextureManager { get; private set; }
     public ISkinManager SkinManager { get; private set; }
     public ITextRenderer TextRenderer { get; private set; }
+    public IEntityRenderDispatcher EntityRenderDispatcher { get; private set; } = new NoOpEntityRenderDispatcher();
+    public IBlockEntityRenderDispatcher BlockEntityRenderDispatcher { get; private set; } = new NoOpBlockEntityRenderDispatcher();
     public TexturePacks TexturePackList { get; private set; }
     public IParticleManager ParticleManager { get; private set; } = new NoOpParticleManager();
 
@@ -337,11 +340,16 @@ public partial class BetaSharp :
         _backendResourceServices = _renderBackendRuntime.CreateResourceServices(this, TexturePackList, Options);
         TextureManager = _backendResourceServices.TextureManager;
         TextRenderer = _backendResourceServices.TextRenderer;
+        SkinManager = _backendResourceServices.SkinManager;
+        EntityRenderDispatcher = _backendResourceServices.EntityRenderDispatcher;
+        BlockEntityRenderDispatcher = _backendResourceServices.BlockEntityRenderDispatcher;
 
         UIContext = new UIContext(
             Options,
             TextRenderer,
             TextureManager,
+            EntityRenderDispatcher,
+            BlockEntityRenderDispatcher,
             playClickSound: () => SoundManager.PlaySoundFX("random.click", 1.0f, 1.0f),
             displaySize: () => new Vector2D<int>(DisplayWidth, DisplayHeight),
             inputDisplaySize: () =>
@@ -362,7 +370,6 @@ public partial class BetaSharp :
             mouseOffset: () => new Vector2D<int>((int)DebugViewportOffset.X, (int)DebugViewportOffset.Y)
         );
 
-        SkinManager = _backendResourceServices.SkinManager;
         WaterColors.loadColors(TextureManager.GetColors("/misc/watercolor.png"));
         GrassColors.loadColors(TextureManager.GetColors("/misc/grasscolor.png"));
         FoliageColors.loadColors(TextureManager.GetColors("/misc/foliagecolor.png"));
@@ -1581,7 +1588,7 @@ public partial class BetaSharp :
     }
 
     private MainMenuScreen CreateMainMenuScreen() => new(UIContext, Session, _hideQuitButton, this, CreateNetworkContext(), TexturePackList, Shutdown);
-    private ClientNetworkContext CreateNetworkContext() => new(this, this, this, Session, StatFileWriter, ParticleManager, HUD.AddChatMessage, this);
+    private ClientNetworkContext CreateNetworkContext() => new(this, this, this, Session, StatFileWriter, ParticleManager, EntityRenderDispatcher, HUD.AddChatMessage, this);
 
     #endregion
 

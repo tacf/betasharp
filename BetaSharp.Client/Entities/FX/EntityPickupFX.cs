@@ -9,17 +9,24 @@ namespace BetaSharp.Client.Entities.FX;
 public class EntityPickupFX : EntityFX
 {
 
+    private readonly IEntityRenderDispatcher _entityRenderDispatcher;
     private readonly Entity target;
     private readonly Entity source;
     private int currentAge;
     private readonly int maxAge;
     private readonly float yOffset;
 
-    public EntityPickupFX(IWorldContext world, Entity target, Entity source, float yOffset) : base(world, target.x, target.y, target.z, target.velocityX, target.velocityY, target.velocityZ)
+    public EntityPickupFX(
+        IWorldContext world,
+        Entity target,
+        Entity source,
+        float yOffset,
+        IEntityRenderDispatcher entityRenderDispatcher) : base(world, target.x, target.y, target.z, target.velocityX, target.velocityY, target.velocityZ)
     {
         this.target = target;
         this.source = source;
         this.yOffset = yOffset;
+        _entityRenderDispatcher = entityRenderDispatcher;
         maxAge = 3;
     }
 
@@ -44,7 +51,7 @@ public class EntityPickupFX : EntityFX
         renderY -= interpPosY;
         renderZ -= interpPosZ;
         GLManager.GL.Color4(luminance, luminance, luminance, 1.0F);
-        EntityRenderDispatcher.Instance.RenderEntityWithPosYaw(target, (double)((float)renderX), (double)((float)renderY), (double)((float)renderZ), target.yaw, partialTick);
+        _entityRenderDispatcher.RenderEntityWithPosYaw(target, (double)((float)renderX), (double)((float)renderY), (double)((float)renderZ), target.yaw, partialTick);
     }
 
     public override void tick()

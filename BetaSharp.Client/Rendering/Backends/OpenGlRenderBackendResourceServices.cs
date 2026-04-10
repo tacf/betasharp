@@ -1,5 +1,6 @@
 using BetaSharp.Client.DynamicTexture;
 using BetaSharp.Client.Options;
+using BetaSharp.Client.Rendering.Blocks.Entities;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Client.Rendering.Items;
@@ -12,6 +13,8 @@ internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResour
     public ITextureManager TextureManager { get; }
     public ITextRenderer TextRenderer { get; }
     public ISkinManager SkinManager { get; }
+    public IEntityRenderDispatcher EntityRenderDispatcher { get; }
+    public IBlockEntityRenderDispatcher BlockEntityRenderDispatcher { get; }
 
     public OpenGlRenderBackendResourceServices(BetaSharp client, TexturePacks texturePacks, GameOptions options)
     {
@@ -23,12 +26,15 @@ internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResour
             new DirectTextureUploadService());
         TextRenderer = new TextRenderer(options, TextureManager);
         SkinManager = new SkinManager(TextureManager);
+        EntityRenderDispatcher = global::BetaSharp.Client.Rendering.Entities.EntityRenderDispatcher.Instance;
+        BlockEntityRenderDispatcher = BlockEntityRenderer.Instance;
     }
 
     public void ConfigureEntityRendering(BetaSharp client)
     {
-        EntityRenderDispatcher.Instance.SkinManager = SkinManager;
-        EntityRenderDispatcher.Instance.HeldItemRenderer = new HeldItemRenderer(client);
+        EntityRenderDispatcher.SkinManager = SkinManager;
+        EntityRenderDispatcher.HeldItemRenderer = new HeldItemRenderer(client);
+        BlockEntityRenderDispatcher.EntityDispatcher = EntityRenderDispatcher;
     }
 
     public void RegisterDynamicTextures(BetaSharp client)
