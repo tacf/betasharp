@@ -7,7 +7,6 @@ using BetaSharp.Blocks;
 using BetaSharp.Client.Achievements;
 using BetaSharp.Client.Diagnostics;
 using BetaSharp.Client.Diagnostics.GuiBackends;
-using BetaSharp.Client.DynamicTexture;
 using BetaSharp.Client.Entities;
 using BetaSharp.Client.Input;
 using BetaSharp.Client.Network;
@@ -185,8 +184,6 @@ public partial class BetaSharp :
 
     private readonly ILogger<BetaSharp> _logger = Log.Instance.For<BetaSharp>();
     private ILoadingScreenRenderer _loadingScreen;
-    private readonly WaterSprite _textureWaterFX = new();
-    private readonly LavaSprite _textureLavaFX = new();
     private readonly DebugTelemetry _debugTelemetry = new();
 
     private readonly string _serverName;
@@ -368,8 +365,7 @@ public partial class BetaSharp :
         GrassColors.loadColors(TextureManager.GetColors("/misc/grasscolor.png"));
         FoliageColors.loadColors(TextureManager.GetColors("/misc/foliagecolor.png"));
         SceneRenderer = _renderBackendRuntime.CreateSceneRenderer(this);
-        EntityRenderDispatcher.Instance.SkinManager = SkinManager;
-        EntityRenderDispatcher.Instance.HeldItemRenderer = new HeldItemRenderer(this);
+        _renderBackendRuntime.ConfigureEntityRenderDispatcher(this, SkinManager);
         StatFileWriter = new StatFileWriter(Session, _gameDataDir);
 
         StatStringFormatKeyInv format = new(this);
@@ -428,15 +424,7 @@ public partial class BetaSharp :
         SoundManager.LoadSoundSettings(Options);
         DefaultMusicCategories.Register(SoundManager);
 
-        TextureManager.AddDynamicTexture(_textureLavaFX);
-        TextureManager.AddDynamicTexture(_textureWaterFX);
-        TextureManager.AddDynamicTexture(new NetherPortalSprite());
-        TextureManager.AddDynamicTexture(new CompassSprite(this));
-        TextureManager.AddDynamicTexture(new ClockSprite(this));
-        TextureManager.AddDynamicTexture(new WaterSideSprite());
-        TextureManager.AddDynamicTexture(new LavaSideSprite());
-        TextureManager.AddDynamicTexture(new FireSprite(0));
-        TextureManager.AddDynamicTexture(new FireSprite(1));
+        _renderBackendRuntime.RegisterDefaultDynamicTextures(this, TextureManager);
 
         WorldRenderer = _renderBackendRuntime.CreateWorldRenderer(this, TextureManager);
         SetMainViewport(Display.getFramebufferWidth(), Display.getFramebufferHeight());

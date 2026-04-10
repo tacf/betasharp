@@ -1,9 +1,12 @@
 using BetaSharp.Client.Diagnostics.GuiBackends;
 using BetaSharp.Client.Diagnostics;
+using BetaSharp.Client.DynamicTexture;
 using BetaSharp.Client.Options;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.OpenGL;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Entities;
+using BetaSharp.Client.Rendering.Items;
 using BetaSharp.Client.Rendering.Presentation;
 using BetaSharp.Worlds.Core;
 using Microsoft.Extensions.Logging;
@@ -189,6 +192,25 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
     public void LogRenderResourceReport()
     {
         GLTexture.LogLeakReport();
+    }
+
+    public void ConfigureEntityRenderDispatcher(BetaSharp client, SkinManager skinManager)
+    {
+        EntityRenderDispatcher.Instance.SkinManager = skinManager;
+        EntityRenderDispatcher.Instance.HeldItemRenderer = new HeldItemRenderer(client);
+    }
+
+    public void RegisterDefaultDynamicTextures(BetaSharp client, TextureManager textureManager)
+    {
+        textureManager.AddDynamicTexture(new LavaSprite());
+        textureManager.AddDynamicTexture(new WaterSprite());
+        textureManager.AddDynamicTexture(new NetherPortalSprite());
+        textureManager.AddDynamicTexture(new CompassSprite(client));
+        textureManager.AddDynamicTexture(new ClockSprite(client));
+        textureManager.AddDynamicTexture(new WaterSideSprite());
+        textureManager.AddDynamicTexture(new LavaSideSprite());
+        textureManager.AddDynamicTexture(new FireSprite(0));
+        textureManager.AddDynamicTexture(new FireSprite(1));
     }
 
     public ILoadingScreenRenderer CreateLoadingScreenRenderer(BetaSharp client)

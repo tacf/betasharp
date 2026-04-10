@@ -35,6 +35,8 @@ internal interface IRenderBackendRuntime
         TextureHandle logoTexture);
     void CleanupRenderResources();
     void LogRenderResourceReport();
+    void ConfigureEntityRenderDispatcher(BetaSharp client, SkinManager skinManager);
+    void RegisterDefaultDynamicTextures(BetaSharp client, TextureManager textureManager);
     ILoadingScreenRenderer CreateLoadingScreenRenderer(BetaSharp client);
     ISceneRenderer CreateSceneRenderer(BetaSharp client);
     IWorldRenderer CreateWorldRenderer(BetaSharp client, TextureManager textureManager);
