@@ -205,7 +205,7 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
             new DirectTextureUploadService());
     }
 
-    public TextRenderer CreateLegacyTextRenderer(GameOptions options, TextureManager textureManager)
+    public ITextRenderer CreateTextRenderer(GameOptions options, TextureManager textureManager)
     {
         return new TextRenderer(options, textureManager);
     }

@@ -10,7 +10,7 @@ public class BlockEntityRenderer
 {
     private readonly Dictionary<Type, BlockEntitySpecialRenderer?> _specialRendererMap = [];
     public static BlockEntityRenderer Instance { get; } = new();
-    private TextRenderer _fontRenderer;
+    private ITextRenderer _fontRenderer;
     public static double StaticPlayerX;
     public static double StaticPlayerY;
     public static double StaticPlayerZ;
@@ -52,38 +52,43 @@ public class BlockEntityRenderer
         return be == null ? null : GetSpecialRendererForClass(be.GetType());
     }
 
-    public void CacheActiveRenderInfo(World var1, TextureManager var2, TextRenderer var3, EntityLiving var4, float var5)
+    public void CacheActiveRenderInfo(World world, TextureManager textureManager, ITextRenderer textRenderer, EntityLiving camera, float tickDelta)
     {
-        if (World != var1)
+        if (World != world)
         {
-            func_31072_a(var1);
+            func_31072_a(world);
         }
 
-        TextureManager = var2;
-        PlayerEntity = var4;
-        _fontRenderer = var3;
-        PlayerYaw = var4.prevYaw + (var4.yaw - var4.prevYaw) * var5;
-        PlayerPitch = var4.prevPitch + (var4.pitch - var4.prevPitch) * var5;
-        PlayerX = var4.lastTickX + (var4.x - var4.lastTickX) * (double)var5;
-        PlayerY = var4.lastTickY + (var4.y - var4.lastTickY) * (double)var5;
-        PlayerZ = var4.lastTickZ + (var4.z - var4.lastTickZ) * (double)var5;
+        TextureManager = textureManager;
+        PlayerEntity = camera;
+        _fontRenderer = textRenderer;
+        PlayerYaw = camera.prevYaw + (camera.yaw - camera.prevYaw) * tickDelta;
+        PlayerPitch = camera.prevPitch + (camera.pitch - camera.prevPitch) * tickDelta;
+        PlayerX = camera.lastTickX + (camera.x - camera.lastTickX) * (double)tickDelta;
+        PlayerY = camera.lastTickY + (camera.y - camera.lastTickY) * (double)tickDelta;
+        PlayerZ = camera.lastTickZ + (camera.z - camera.lastTickZ) * (double)tickDelta;
     }
 
-    public void RenderTileEntity(BlockEntity var1, float var2)
+    public void RenderTileEntity(BlockEntity blockEntity, float tickDelta)
     {
-        if (var1.distanceFrom(PlayerX, PlayerY, PlayerZ) < 4096.0D)
+        if (blockEntity.distanceFrom(PlayerX, PlayerY, PlayerZ) < 4096.0D)
         {
-            float var3 = World.GetLuminance(var1.X, var1.Y, var1.Z);
-            GLManager.GL.Color3(var3, var3, var3);
-            RenderTileEntityAt(var1, var1.X - StaticPlayerX, var1.Y - StaticPlayerY, var1.Z - StaticPlayerZ, var2);
+            float luminance = World.GetLuminance(blockEntity.X, blockEntity.Y, blockEntity.Z);
+            GLManager.GL.Color3(luminance, luminance, luminance);
+            RenderTileEntityAt(
+                blockEntity,
+                blockEntity.X - StaticPlayerX,
+                blockEntity.Y - StaticPlayerY,
+                blockEntity.Z - StaticPlayerZ,
+                tickDelta);
         }
 
     }
 
-    public void RenderTileEntityAt(BlockEntity var1, double var2, double var4, double var6, float var8)
+    public void RenderTileEntityAt(BlockEntity blockEntity, double x, double y, double z, float tickDelta)
     {
-        BlockEntitySpecialRenderer? var9 = GetSpecialRendererForEntity(var1);
-        var9?.renderTileEntityAt(var1, var2, var4, var6, var8);
+        BlockEntitySpecialRenderer? renderer = GetSpecialRendererForEntity(blockEntity);
+        renderer?.renderTileEntityAt(blockEntity, x, y, z, tickDelta);
 
     }
 
@@ -96,7 +101,7 @@ public class BlockEntityRenderer
         }
     }
 
-    public TextRenderer GetFontRenderer()
+    public ITextRenderer GetFontRenderer()
     {
         return _fontRenderer;
     }

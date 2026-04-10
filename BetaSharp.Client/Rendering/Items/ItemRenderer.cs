@@ -22,67 +22,71 @@ public class ItemRenderer : EntityRenderer
         ShadowStrength = 12.0F / 16.0F;
     }
 
-    public void doRenderItem(EntityItem var1, double var2, double var4, double var6, float var8, float var9)
+    public void doRenderItem(EntityItem itemEntity, double x, double y, double z, float yaw, float tickDelta)
     {
         random.SetSeed(187L);
-        ItemStack var10 = var1.stack;
+        ItemStack itemStack = itemEntity.stack;
         GLManager.GL.PushMatrix();
-        float var11 = MathHelper.Sin((var1.age + var9) / 10.0F + var1.bobPhase) * 0.1F + 0.1F;
-        float var12 = ((var1.age + var9) / 20.0F + var1.bobPhase) * (180.0F / (float)Math.PI);
-        byte var13 = 1;
-        if (var1.stack.Count > 1)
+        float bobOffset = MathHelper.Sin((itemEntity.age + tickDelta) / 10.0F + itemEntity.bobPhase) * 0.1F + 0.1F;
+        float spinDegrees = ((itemEntity.age + tickDelta) / 20.0F + itemEntity.bobPhase) * (180.0F / (float)Math.PI);
+        byte renderCopies = 1;
+        if (itemEntity.stack.Count > 1)
         {
-            var13 = 2;
+            renderCopies = 2;
         }
 
-        if (var1.stack.Count > 5)
+        if (itemEntity.stack.Count > 5)
         {
-            var13 = 3;
+            renderCopies = 3;
         }
 
-        if (var1.stack.Count > 20)
+        if (itemEntity.stack.Count > 20)
         {
-            var13 = 4;
+            renderCopies = 4;
         }
 
-        GLManager.GL.Translate((float)var2, (float)var4 + var11, (float)var6);
+        GLManager.GL.Translate((float)x, (float)y + bobOffset, (float)z);
         GLManager.GL.Enable(GLEnum.RescaleNormal);
-        float var16;
-        float var17;
-        float var18;
-        if (var10.ItemId < 256 && BlockRenderer.IsSideLit(Block.Blocks[var10.ItemId].getRenderType()))
+        float randomOffsetX;
+        float randomOffsetY;
+        float randomOffsetZ;
+        if (itemStack.ItemId < 256 && BlockRenderer.IsSideLit(Block.Blocks[itemStack.ItemId].getRenderType()))
         {
-            GLManager.GL.Rotate(var12, 0.0F, 1.0F, 0.0F);
+            GLManager.GL.Rotate(spinDegrees, 0.0F, 1.0F, 0.0F);
             loadTexture("/terrain.png");
-            float var28 = 0.25F;
-            if (!Block.Blocks[var10.ItemId].isFullCube() && var10.ItemId != Block.Slab.id
-                && Block.Blocks[var10.ItemId].getRenderType() != BlockRendererType.PistonBase)
+            float blockScale = 0.25F;
+            if (!Block.Blocks[itemStack.ItemId].isFullCube() && itemStack.ItemId != Block.Slab.id
+                && Block.Blocks[itemStack.ItemId].getRenderType() != BlockRendererType.PistonBase)
             {
-                var28 = 0.5F;
+                blockScale = 0.5F;
             }
 
-            GLManager.GL.Scale(var28, var28, var28);
+            GLManager.GL.Scale(blockScale, blockScale, blockScale);
 
-            for (int var29 = 0; var29 < var13; ++var29)
+            for (int copyIndex = 0; copyIndex < renderCopies; ++copyIndex)
             {
                 GLManager.GL.PushMatrix();
-                if (var29 > 0)
+                if (copyIndex > 0)
                 {
-                    var16 = (random.NextFloat() * 2.0F - 1.0F) * 0.2F / var28;
-                    var17 = (random.NextFloat() * 2.0F - 1.0F) * 0.2F / var28;
-                    var18 = (random.NextFloat() * 2.0F - 1.0F) * 0.2F / var28;
-                    GLManager.GL.Translate(var16, var17, var18);
+                    randomOffsetX = (random.NextFloat() * 2.0F - 1.0F) * 0.2F / blockScale;
+                    randomOffsetY = (random.NextFloat() * 2.0F - 1.0F) * 0.2F / blockScale;
+                    randomOffsetZ = (random.NextFloat() * 2.0F - 1.0F) * 0.2F / blockScale;
+                    GLManager.GL.Translate(randomOffsetX, randomOffsetY, randomOffsetZ);
                 }
 
-                BlockRenderer.RenderBlockOnInventory(Block.Blocks[var10.ItemId], var10.getDamage(), var1.getBrightnessAtEyes(var9), Tessellator.instance);
+                BlockRenderer.RenderBlockOnInventory(
+                    Block.Blocks[itemStack.ItemId],
+                    itemStack.getDamage(),
+                    itemEntity.getBrightnessAtEyes(tickDelta),
+                    Tessellator.instance);
                 GLManager.GL.PopMatrix();
             }
         }
         else
         {
             GLManager.GL.Scale(0.5F, 0.5F, 0.5F);
-            int var14 = var10.getTextureId();
-            if (var10.ItemId < 256)
+            int textureIndex = itemStack.getTextureId();
+            if (itemStack.ItemId < 256)
             {
                 loadTexture("/terrain.png");
             }
@@ -91,47 +95,47 @@ public class ItemRenderer : EntityRenderer
                 loadTexture("/gui/items.png");
             }
 
-            Tessellator var15 = Tessellator.instance;
-            var16 = (var14 % 16 * 16 + 0) / 256.0F;
-            var17 = (var14 % 16 * 16 + 16) / 256.0F;
-            var18 = (var14 / 16 * 16 + 0) / 256.0F;
-            float var19 = (var14 / 16 * 16 + 16) / 256.0F;
-            float var20 = 1.0F;
-            float var21 = 0.5F;
-            float var22 = 0.25F;
-            int var23;
-            float var24;
-            float var25;
-            float var26;
+            Tessellator tessellator = Tessellator.instance;
+            float minU = (textureIndex % 16 * 16 + 0) / 256.0F;
+            float maxU = (textureIndex % 16 * 16 + 16) / 256.0F;
+            float minV = (textureIndex / 16 * 16 + 0) / 256.0F;
+            float maxV = (textureIndex / 16 * 16 + 16) / 256.0F;
+            float quadWidth = 1.0F;
+            float quadHalfWidth = 0.5F;
+            float quadHalfHeight = 0.25F;
+            int colorMultiplier;
+            float colorRed;
+            float colorGreen;
+            float colorBlue;
             if (useCustomDisplayColor)
             {
-                var23 = Item.ITEMS[var10.ItemId].getColorMultiplier(var10.getDamage());
-                var24 = (var23 >> 16 & 255) / 255.0F;
-                var25 = (var23 >> 8 & 255) / 255.0F;
-                var26 = (var23 & 255) / 255.0F;
-                float var27 = var1.getBrightnessAtEyes(var9);
-                GLManager.GL.Color4(var24 * var27, var25 * var27, var26 * var27, 1.0F);
+                colorMultiplier = Item.ITEMS[itemStack.ItemId].getColorMultiplier(itemStack.getDamage());
+                colorRed = (colorMultiplier >> 16 & 255) / 255.0F;
+                colorGreen = (colorMultiplier >> 8 & 255) / 255.0F;
+                colorBlue = (colorMultiplier & 255) / 255.0F;
+                float brightness = itemEntity.getBrightnessAtEyes(tickDelta);
+                GLManager.GL.Color4(colorRed * brightness, colorGreen * brightness, colorBlue * brightness, 1.0F);
             }
 
-            for (var23 = 0; var23 < var13; ++var23)
+            for (int copyIndex = 0; copyIndex < renderCopies; ++copyIndex)
             {
                 GLManager.GL.PushMatrix();
-                if (var23 > 0)
+                if (copyIndex > 0)
                 {
-                    var24 = (random.NextFloat() * 2.0F - 1.0F) * 0.3F;
-                    var25 = (random.NextFloat() * 2.0F - 1.0F) * 0.3F;
-                    var26 = (random.NextFloat() * 2.0F - 1.0F) * 0.3F;
-                    GLManager.GL.Translate(var24, var25, var26);
+                    randomOffsetX = (random.NextFloat() * 2.0F - 1.0F) * 0.3F;
+                    randomOffsetY = (random.NextFloat() * 2.0F - 1.0F) * 0.3F;
+                    randomOffsetZ = (random.NextFloat() * 2.0F - 1.0F) * 0.3F;
+                    GLManager.GL.Translate(randomOffsetX, randomOffsetY, randomOffsetZ);
                 }
 
                 GLManager.GL.Rotate(180.0F - Dispatcher.PlayerViewY, 0.0F, 1.0F, 0.0F);
-                var15.startDrawingQuads();
-                var15.setNormal(0.0F, 1.0F, 0.0F);
-                var15.addVertexWithUV((double)(0.0F - var21), (double)(0.0F - var22), 0.0D, (double)var16, (double)var19);
-                var15.addVertexWithUV((double)(var20 - var21), (double)(0.0F - var22), 0.0D, (double)var17, (double)var19);
-                var15.addVertexWithUV((double)(var20 - var21), (double)(1.0F - var22), 0.0D, (double)var17, (double)var18);
-                var15.addVertexWithUV((double)(0.0F - var21), (double)(1.0F - var22), 0.0D, (double)var16, (double)var18);
-                var15.draw();
+                tessellator.startDrawingQuads();
+                tessellator.setNormal(0.0F, 1.0F, 0.0F);
+                tessellator.addVertexWithUV((double)(0.0F - quadHalfWidth), (double)(0.0F - quadHalfHeight), 0.0D, (double)minU, (double)maxV);
+                tessellator.addVertexWithUV((double)(quadWidth - quadHalfWidth), (double)(0.0F - quadHalfHeight), 0.0D, (double)maxU, (double)maxV);
+                tessellator.addVertexWithUV((double)(quadWidth - quadHalfWidth), (double)(1.0F - quadHalfHeight), 0.0D, (double)maxU, (double)minV);
+                tessellator.addVertexWithUV((double)(0.0F - quadHalfWidth), (double)(1.0F - quadHalfHeight), 0.0D, (double)minU, (double)minV);
+                tessellator.draw();
                 GLManager.GL.PopMatrix();
             }
         }
@@ -140,91 +144,102 @@ public class ItemRenderer : EntityRenderer
         GLManager.GL.PopMatrix();
     }
 
-    public void drawItemIntoGui(TextRenderer var1, TextureManager var2, int var3, int var4, int var5, int var6, int var7)
+    public void drawItemIntoGui(
+        ITextRenderer textRenderer,
+        TextureManager textureManager,
+        int itemId,
+        int itemDamage,
+        int textureIndex,
+        int x,
+        int y)
     {
-        float var11;
-        if (var3 < 256 && BlockRenderer.IsSideLit(Block.Blocks[var3].getRenderType()))
+        float colorBlue;
+        if (itemId < 256 && BlockRenderer.IsSideLit(Block.Blocks[itemId].getRenderType()))
         {
-            var2.BindTexture(var2.GetTextureId("/terrain.png"));
-            Block var14 = Block.Blocks[var3];
+            textureManager.BindTexture(textureManager.GetTextureId("/terrain.png"));
+            Block block = Block.Blocks[itemId];
             GLManager.GL.PushMatrix();
-            GLManager.GL.Translate(var6 - 2, var7 + 3, -3.0F);
+            GLManager.GL.Translate(x - 2, y + 3, -3.0F);
             GLManager.GL.Scale(10.0F, 10.0F, 10.0F);
             GLManager.GL.Translate(1.0F, 0.5F, 1.0F);
             GLManager.GL.Scale(1.0F, 1.0F, -1.0F);
             GLManager.GL.Rotate(210.0F, 1.0F, 0.0F, 0.0F);
             GLManager.GL.Rotate(45.0F, 0.0F, 1.0F, 0.0F);
-            int var15 = Item.ITEMS[var3].getColorMultiplier(var4);
-            var11 = (var15 >> 16 & 255) / 255.0F;
-            float var12 = (var15 >> 8 & 255) / 255.0F;
-            float var13 = (var15 & 255) / 255.0F;
+            int colorMultiplier = Item.ITEMS[itemId].getColorMultiplier(itemDamage);
+            float colorRed = (colorMultiplier >> 16 & 255) / 255.0F;
+            float colorGreen = (colorMultiplier >> 8 & 255) / 255.0F;
+            colorBlue = (colorMultiplier & 255) / 255.0F;
             if (useCustomDisplayColor)
             {
-                GLManager.GL.Color4(var11, var12, var13, 1.0F);
+                GLManager.GL.Color4(colorRed, colorGreen, colorBlue, 1.0F);
             }
 
             GLManager.GL.Rotate(-90.0F, 0.0F, 1.0F, 0.0F);
-            BlockRenderer.RenderBlockOnInventory(var14, var4, 1.0F, Tessellator.instance);
+            BlockRenderer.RenderBlockOnInventory(block, itemDamage, 1.0F, Tessellator.instance);
             GLManager.GL.PopMatrix();
         }
-        else if (var5 >= 0)
+        else if (textureIndex >= 0)
         {
             GLManager.GL.Disable(GLEnum.Lighting);
-            if (var3 < 256)
+            if (itemId < 256)
             {
-                var2.BindTexture(var2.GetTextureId("/terrain.png"));
+                textureManager.BindTexture(textureManager.GetTextureId("/terrain.png"));
             }
             else
             {
-                var2.BindTexture(var2.GetTextureId("/gui/items.png"));
+                textureManager.BindTexture(textureManager.GetTextureId("/gui/items.png"));
             }
 
-            int var8 = Item.ITEMS[var3].getColorMultiplier(var4);
-            float var9 = (var8 >> 16 & 255) / 255.0F;
-            float var10 = (var8 >> 8 & 255) / 255.0F;
-            var11 = (var8 & 255) / 255.0F;
+            int colorMultiplier = Item.ITEMS[itemId].getColorMultiplier(itemDamage);
+            float colorRed = (colorMultiplier >> 16 & 255) / 255.0F;
+            float colorGreen = (colorMultiplier >> 8 & 255) / 255.0F;
+            colorBlue = (colorMultiplier & 255) / 255.0F;
             if (useCustomDisplayColor)
             {
-                GLManager.GL.Color4(var9, var10, var11, 1.0F);
+                GLManager.GL.Color4(colorRed, colorGreen, colorBlue, 1.0F);
             }
 
-            renderTexturedQuad(var6, var7, var5 % 16 * 16, var5 / 16 * 16, 16, 16);
+            renderTexturedQuad(x, y, textureIndex % 16 * 16, textureIndex / 16 * 16, 16, 16);
         }
     }
 
-    public void renderItemIntoGUI(TextRenderer var1, TextureManager var2, ItemStack var3, int var4, int var5)
+    public void renderItemIntoGUI(ITextRenderer textRenderer, TextureManager textureManager, ItemStack itemStack, int x, int y)
     {
-        if (var3 != null)
+        if (itemStack != null)
         {
-            drawItemIntoGui(var1, var2, var3.ItemId, var3.getDamage(), var3.getTextureId(), var4, var5);
+            drawItemIntoGui(textRenderer, textureManager, itemStack.ItemId, itemStack.getDamage(), itemStack.getTextureId(), x, y);
         }
     }
 
-    public void renderItemOverlayIntoGUI(TextRenderer var1, TextureManager var2, ItemStack var3, int var4, int var5)
+    public void renderItemOverlayIntoGUI(ITextRenderer textRenderer, TextureManager textureManager, ItemStack itemStack, int x, int y)
     {
-        if (var3 != null)
+        if (itemStack != null)
         {
-            if (var3.Count > 1)
+            if (itemStack.Count > 1)
             {
-                string var6 = "" + var3.Count;
+                string stackCountText = itemStack.Count.ToString();
                 GLManager.GL.Disable(GLEnum.Lighting);
                 GLManager.GL.Disable(GLEnum.DepthTest);
-                var1.DrawStringWithShadow(var6, var4 + 19 - 2 - var1.GetStringWidth(var6), var5 + 6 + 3, Color.White);
+                textRenderer.DrawStringWithShadow(
+                    stackCountText,
+                    x + 19 - 2 - textRenderer.GetStringWidth(stackCountText),
+                    y + 6 + 3,
+                    Color.White);
             }
 
-            if (var3.isDamaged())
+            if (itemStack.isDamaged())
             {
-                int var11 = (int)MathHelper.Round(13.0D - var3.getDamage2() * 13.0D / var3.getMaxDamage());
-                int var7 = (int)MathHelper.Round(255.0D - var3.getDamage2() * 255.0D / var3.getMaxDamage());
+                int durabilityBarWidth = (int)MathHelper.Round(13.0D - itemStack.getDamage2() * 13.0D / itemStack.getMaxDamage());
+                int durabilityGreen = (int)MathHelper.Round(255.0D - itemStack.getDamage2() * 255.0D / itemStack.getMaxDamage());
                 GLManager.GL.Disable(GLEnum.Lighting);
                 GLManager.GL.Disable(GLEnum.DepthTest);
                 GLManager.GL.Disable(GLEnum.Texture2D);
-                Tessellator var8 = Tessellator.instance;
-                int var9 = 255 - var7 << 16 | var7 << 8;
-                int var10 = (255 - var7) / 4 << 16 | 16128;
-                renderQuad(var8, var4 + 2, var5 + 13, 13, 2, 0);
-                renderQuad(var8, var4 + 2, var5 + 13, 12, 1, var10);
-                renderQuad(var8, var4 + 2, var5 + 13, var11, 1, var9);
+                Tessellator tessellator = Tessellator.instance;
+                int durabilityBarColor = 255 - durabilityGreen << 16 | durabilityGreen << 8;
+                int durabilityBarBackgroundColor = (255 - durabilityGreen) / 4 << 16 | 16128;
+                renderQuad(tessellator, x + 2, y + 13, 13, 2, 0);
+                renderQuad(tessellator, x + 2, y + 13, 12, 1, durabilityBarBackgroundColor);
+                renderQuad(tessellator, x + 2, y + 13, durabilityBarWidth, 1, durabilityBarColor);
                 GLManager.GL.Enable(GLEnum.Texture2D);
                 GLManager.GL.Color4(1.0F, 1.0F, 1.0F, 1.0F);
             }
@@ -232,29 +247,29 @@ public class ItemRenderer : EntityRenderer
         }
     }
 
-    private void renderQuad(Tessellator var1, int var2, int var3, int var4, int var5, int var6)
+    private void renderQuad(Tessellator tessellator, int x, int y, int width, int height, int color)
     {
-        var1.startDrawingQuads();
-        var1.setColorOpaque_I(var6);
-        var1.addVertex(var2 + 0, var3 + 0, 0.0D);
-        var1.addVertex(var2 + 0, var3 + var5, 0.0D);
-        var1.addVertex(var2 + var4, var3 + var5, 0.0D);
-        var1.addVertex(var2 + var4, var3 + 0, 0.0D);
-        var1.draw();
+        tessellator.startDrawingQuads();
+        tessellator.setColorOpaque_I(color);
+        tessellator.addVertex(x + 0, y + 0, 0.0D);
+        tessellator.addVertex(x + 0, y + height, 0.0D);
+        tessellator.addVertex(x + width, y + height, 0.0D);
+        tessellator.addVertex(x + width, y + 0, 0.0D);
+        tessellator.draw();
     }
 
-    public void renderTexturedQuad(int var1, int var2, int var3, int var4, int var5, int var6)
+    public void renderTexturedQuad(int x, int y, int u, int v, int width, int height)
     {
-        float var7 = 0.0F;
-        float var8 = 1 / 256f;
-        float var9 = 1 / 256f;
-        Tessellator var10 = Tessellator.instance;
-        var10.startDrawingQuads();
-        var10.addVertexWithUV(var1 + 0, var2 + var6, (double)var7, (double)((var3 + 0) * var8), (double)((var4 + var6) * var9));
-        var10.addVertexWithUV(var1 + var5, var2 + var6, (double)var7, (double)((var3 + var5) * var8), (double)((var4 + var6) * var9));
-        var10.addVertexWithUV(var1 + var5, var2 + 0, (double)var7, (double)((var3 + var5) * var8), (double)((var4 + 0) * var9));
-        var10.addVertexWithUV(var1 + 0, var2 + 0, (double)var7, (double)((var3 + 0) * var8), (double)((var4 + 0) * var9));
-        var10.draw();
+        float depth = 0.0F;
+        float uScale = 1 / 256f;
+        float vScale = 1 / 256f;
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+        tessellator.addVertexWithUV(x + 0, y + height, (double)depth, (double)((u + 0) * uScale), (double)((v + height) * vScale));
+        tessellator.addVertexWithUV(x + width, y + height, (double)depth, (double)((u + width) * uScale), (double)((v + height) * vScale));
+        tessellator.addVertexWithUV(x + width, y + 0, (double)depth, (double)((u + width) * uScale), (double)((v + 0) * vScale));
+        tessellator.addVertexWithUV(x + 0, y + 0, (double)depth, (double)((u + 0) * uScale), (double)((v + 0) * vScale));
+        tessellator.draw();
     }
 
     public override void Render(Entity target, double x, double y, double z, float yaw, float tickDelta)

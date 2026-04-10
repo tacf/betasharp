@@ -36,10 +36,10 @@ internal interface IRenderBackendRuntime
     void LogRenderResourceReport();
     /// <summary>
     /// Temporary migration bridge for legacy GL-bound asset service creation.
-    /// Remove once texture/text/skin services are backend-neutral.
+    /// Remove once texture/skin services are fully backend-neutral.
     /// </summary>
     TextureManager CreateLegacyTextureManager(BetaSharp client, TexturePacks texturePacks, GameOptions options);
-    TextRenderer CreateLegacyTextRenderer(GameOptions options, TextureManager textureManager);
+    ITextRenderer CreateTextRenderer(GameOptions options, TextureManager textureManager);
     SkinManager CreateLegacySkinManager(TextureManager textureManager);
     /// <summary>
     /// Temporary migration bridge for legacy entity dispatcher wiring.
