@@ -15,7 +15,7 @@ public abstract class EntityRenderer
     protected float ShadowStrength = 1.0F;
 
     protected World World => Dispatcher.World;
-    public TextRenderer TextRenderer => Dispatcher.getTextRenderer();
+    public ITextRenderer TextRenderer => Dispatcher.getTextRenderer();
 
     public abstract void Render(Entity target, double x, double y, double z, float yaw, float tickDelta);
 

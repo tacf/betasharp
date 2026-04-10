@@ -11,7 +11,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace BetaSharp.Client.Rendering;
 
-public class TextRenderer
+public class TextRenderer : ITextRenderer
 {
     private readonly ILogger<TextRenderer> _logger = Log.Instance.For<TextRenderer>();
 

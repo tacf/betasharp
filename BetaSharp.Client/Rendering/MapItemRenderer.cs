@@ -15,9 +15,9 @@ public class MapItemRenderer
     private readonly int[] colors = new int[128 * 128];
     private readonly TextureHandle _textureId;
     private readonly GameOptions _options;
-    private readonly TextRenderer _textRenderer;
+    private readonly ITextRenderer _textRenderer;
 
-    public MapItemRenderer(TextRenderer textRenderer, GameOptions options, TextureManager textureManager)
+    public MapItemRenderer(ITextRenderer textRenderer, GameOptions options, TextureManager textureManager)
     {
         _options = options;
         _textRenderer = textRenderer;

@@ -22,9 +22,9 @@ public class LivingEntityRenderer : EntityRenderer
         ShadowRadius = shadowRadius;
     }
 
-    public void setRenderPassModel(ModelBase model)
+    public void setRenderPassModel(ModelBase renderPassModel)
     {
-        renderPassModel = model;
+        this.renderPassModel = renderPassModel;
     }
 
     public virtual void DoRenderLiving(EntityLiving entity, double x, double y, double z, float yaw, float tickDelta)
@@ -56,23 +56,23 @@ public class LivingEntityRenderer : EntityRenderer
             GLManager.GL.Scale(-1.0F, -1.0F, 1.0F);
             PreRenderCallback(entity, tickDelta);
             GLManager.GL.Translate(0.0F, -24.0F * modelScale - (1 / 128f), 0.0F);
-            float walkSpeed = entity.LastWalkAnimationSpeed + (entity.WalkAnimationSpeed - entity.LastWalkAnimationSpeed) * tickDelta;
-            float walkPhase = entity.AnimationPhase - entity.WalkAnimationSpeed * (1.0F - tickDelta);
-            if (walkSpeed > 1.0F)
+            float walkAnimationSpeed = entity.LastWalkAnimationSpeed + (entity.WalkAnimationSpeed - entity.LastWalkAnimationSpeed) * tickDelta;
+            float walkAnimationPhase = entity.AnimationPhase - entity.WalkAnimationSpeed * (1.0F - tickDelta);
+            if (walkAnimationSpeed > 1.0F)
             {
-                walkSpeed = 1.0F;
+                walkAnimationSpeed = 1.0F;
             }
 
             LoadDownloadableImageTexture((entity as EntityPlayer)?.Name, entity.GetTexture());
             GLManager.GL.Enable(GLEnum.AlphaTest);
-            mainModel.setLivingAnimations(entity, walkPhase, walkSpeed, tickDelta);
-            mainModel.render(walkPhase, walkSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+            mainModel.setLivingAnimations(entity, walkAnimationPhase, walkAnimationSpeed, tickDelta);
+            mainModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
 
             for (int renderPass = 0; renderPass < 4; ++renderPass)
             {
                 if (ShouldRenderPass(entity, renderPass, tickDelta))
                 {
-                    renderPassModel.render(walkPhase, walkSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    renderPassModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
                     GLManager.GL.Disable(GLEnum.Blend);
                     GLManager.GL.Enable(GLEnum.AlphaTest);
                 }
@@ -91,33 +91,33 @@ public class LivingEntityRenderer : EntityRenderer
                 if (entity.HurtTime > 0 || entity.DeathTime > 0)
                 {
                     GLManager.GL.Color4(brightness, 0.0F, 0.0F, 0.4F);
-                    mainModel.render(walkPhase, walkSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    mainModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
 
-                    for (int damagePass = 0; damagePass < 4; ++damagePass)
+                    for (int renderPass = 0; renderPass < 4; ++renderPass)
                     {
-                        if (func_27005_b(entity, damagePass, tickDelta))
+                        if (func_27005_b(entity, renderPass, tickDelta))
                         {
                             GLManager.GL.Color4(brightness, 0.0F, 0.0F, 0.4F);
-                            renderPassModel.render(walkPhase, walkSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                            renderPassModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
                         }
                     }
                 }
 
                 if ((colorMultiplier >> 24 & 255) > 0)
                 {
-                    float red = (colorMultiplier >> 16 & 255) / 255.0F;
-                    float green = (colorMultiplier >> 8 & 255) / 255.0F;
-                    float blue = (colorMultiplier & 255) / 255.0F;
-                    float alpha = (colorMultiplier >> 24 & 255) / 255.0F;
-                    GLManager.GL.Color4(red, green, blue, alpha);
-                    mainModel.render(walkPhase, walkSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    float colorRed = (colorMultiplier >> 16 & 255) / 255.0F;
+                    float colorGreen = (colorMultiplier >> 8 & 255) / 255.0F;
+                    float colorBlue = (colorMultiplier & 255) / 255.0F;
+                    float colorAlpha = (colorMultiplier >> 24 & 255) / 255.0F;
+                    GLManager.GL.Color4(colorRed, colorGreen, colorBlue, colorAlpha);
+                    mainModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
 
-                    for (int overlayPass = 0; overlayPass < 4; ++overlayPass)
+                    for (int renderPass = 0; renderPass < 4; ++renderPass)
                     {
-                        if (func_27005_b(entity, overlayPass, tickDelta))
+                        if (func_27005_b(entity, renderPass, tickDelta))
                         {
-                            GLManager.GL.Color4(red, green, blue, alpha);
-                            renderPassModel.render(walkPhase, walkSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                            GLManager.GL.Color4(colorRed, colorGreen, colorBlue, colorAlpha);
+                            renderPassModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
                         }
                     }
                 }
@@ -149,14 +149,14 @@ public class LivingEntityRenderer : EntityRenderer
         GLManager.GL.Rotate(180.0F - bodyYaw, 0.0F, 1.0F, 0.0F);
         if (entity.DeathTime > 0)
         {
-            float deathRotation = (entity.DeathTime + tickDelta - 1.0F) / 20.0F * 1.6F;
-            deathRotation = MathHelper.Sqrt(deathRotation);
-            if (deathRotation > 1.0F)
+            float deathAnimationProgress = (entity.DeathTime + tickDelta - 1.0F) / 20.0F * 1.6F;
+            deathAnimationProgress = MathHelper.Sqrt(deathAnimationProgress);
+            if (deathAnimationProgress > 1.0F)
             {
-                deathRotation = 1.0F;
+                deathAnimationProgress = 1.0F;
             }
 
-            GLManager.GL.Rotate(deathRotation * getDeathMaxRotation(entity), 0.0F, 0.0F, 1.0F);
+            GLManager.GL.Rotate(deathAnimationProgress * getDeathMaxRotation(entity), 0.0F, 0.0F, 1.0F);
         }
 
     }
@@ -208,46 +208,46 @@ public class LivingEntityRenderer : EntityRenderer
 
     }
 
-    protected void renderLivingLabel(EntityLiving entity, string label, double x, double y, double z, int maxDistance)
+    protected void renderLivingLabel(EntityLiving entity, string labelText, double x, double y, double z, int maxDistance)
     {
-        float distance = entity.GetDistance(Dispatcher.CameraEntity);
-        if (distance <= maxDistance)
+        float distanceToCamera = entity.GetDistance(Dispatcher.CameraEntity);
+        if (distanceToCamera <= maxDistance)
         {
-            TextRenderer fontRenderer = TextRenderer;
-            float labelScale = 1.6F;
-            float renderScale = (float)(1.0D / 60.0D) * labelScale;
+            ITextRenderer textRenderer = TextRenderer;
+            float labelBaseScale = 1.6F;
+            float labelScale = (float)(1.0D / 60.0D) * labelBaseScale;
             GLManager.GL.PushMatrix();
             GLManager.GL.Translate((float)x + 0.0F, (float)y + 2.3F, (float)z);
             GLManager.GL.Normal3(0.0F, 1.0F, 0.0F);
             GLManager.GL.Rotate(-Dispatcher.PlayerViewY, 0.0F, 1.0F, 0.0F);
             GLManager.GL.Rotate(Dispatcher.PlayerViewX, 1.0F, 0.0F, 0.0F);
-            GLManager.GL.Scale(-renderScale, -renderScale, renderScale);
+            GLManager.GL.Scale(-labelScale, -labelScale, labelScale);
             GLManager.GL.Disable(GLEnum.Lighting);
             GLManager.GL.DepthMask(false);
             GLManager.GL.Disable(GLEnum.DepthTest);
             GLManager.GL.Enable(GLEnum.Blend);
             GLManager.GL.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
             Tessellator tessellator = Tessellator.instance;
-            int yOffset = 0;
-            if (label.Equals("deadmau5"))
+            int verticalOffset = 0;
+            if (labelText.Equals("deadmau5"))
             {
-                yOffset = -10;
+                verticalOffset = -10;
             }
 
             GLManager.GL.Disable(GLEnum.Texture2D);
             tessellator.startDrawingQuads();
-            int labelHalfWidth = fontRenderer.GetStringWidth(label) / 2;
+            int halfLabelWidth = textRenderer.GetStringWidth(labelText) / 2;
             tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
-            tessellator.addVertex(-labelHalfWidth - 1, -1 + yOffset, 0.0D);
-            tessellator.addVertex(-labelHalfWidth - 1, 8 + yOffset, 0.0D);
-            tessellator.addVertex(labelHalfWidth + 1, 8 + yOffset, 0.0D);
-            tessellator.addVertex(labelHalfWidth + 1, -1 + yOffset, 0.0D);
+            tessellator.addVertex(-halfLabelWidth - 1, -1 + verticalOffset, 0.0D);
+            tessellator.addVertex(-halfLabelWidth - 1, 8 + verticalOffset, 0.0D);
+            tessellator.addVertex(halfLabelWidth + 1, 8 + verticalOffset, 0.0D);
+            tessellator.addVertex(halfLabelWidth + 1, -1 + verticalOffset, 0.0D);
             tessellator.draw();
             GLManager.GL.Enable(GLEnum.Texture2D);
-            fontRenderer.DrawString(label, -fontRenderer.GetStringWidth(label) / 2, yOffset, Color.WhiteAlpha20);
+            textRenderer.DrawString(labelText, -textRenderer.GetStringWidth(labelText) / 2, verticalOffset, Color.WhiteAlpha20);
             GLManager.GL.Enable(GLEnum.DepthTest);
             GLManager.GL.DepthMask(true);
-            fontRenderer.DrawString(label, -fontRenderer.GetStringWidth(label) / 2, yOffset, Color.WhiteAlpha20);
+            textRenderer.DrawString(labelText, -textRenderer.GetStringWidth(labelText) / 2, verticalOffset, Color.WhiteAlpha20);
             GLManager.GL.Enable(GLEnum.Lighting);
             GLManager.GL.Disable(GLEnum.Blend);
             GLManager.GL.Color4(1.0F, 1.0F, 1.0F, 1.0F);

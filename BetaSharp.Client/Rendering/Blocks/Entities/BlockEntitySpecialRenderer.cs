@@ -26,7 +26,7 @@ public abstract class BlockEntitySpecialRenderer
     {
     }
 
-    public TextRenderer getFontRenderer()
+    public ITextRenderer getFontRenderer()
     {
         return tileEntityRenderer.GetFontRenderer();
     }

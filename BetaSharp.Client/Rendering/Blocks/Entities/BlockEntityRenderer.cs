@@ -10,7 +10,7 @@ public class BlockEntityRenderer
 {
     private readonly Dictionary<Type, BlockEntitySpecialRenderer?> _specialRendererMap = [];
     public static BlockEntityRenderer Instance { get; } = new();
-    private TextRenderer _fontRenderer;
+    private ITextRenderer _fontRenderer;
     public static double StaticPlayerX;
     public static double StaticPlayerY;
     public static double StaticPlayerZ;
@@ -52,7 +52,7 @@ public class BlockEntityRenderer
         return be == null ? null : GetSpecialRendererForClass(be.GetType());
     }
 
-    public void CacheActiveRenderInfo(World world, TextureManager textureManager, TextRenderer fontRenderer, EntityLiving player, float tickDelta)
+    public void CacheActiveRenderInfo(World world, TextureManager textureManager, ITextRenderer textRenderer, EntityLiving camera, float tickDelta)
     {
         if (World != world)
         {
@@ -60,22 +60,27 @@ public class BlockEntityRenderer
         }
 
         TextureManager = textureManager;
-        PlayerEntity = player;
-        _fontRenderer = fontRenderer;
-        PlayerYaw = player.PrevYaw + (player.Yaw - player.PrevYaw) * tickDelta;
-        PlayerPitch = player.PrevPitch + (player.Pitch - player.PrevPitch) * tickDelta;
-        PlayerX = player.LastTickX + (player.X - player.LastTickX) * (double)tickDelta;
-        PlayerY = player.LastTickY + (player.Y - player.LastTickY) * (double)tickDelta;
-        PlayerZ = player.LastTickZ + (player.Z - player.LastTickZ) * (double)tickDelta;
+        PlayerEntity = camera;
+        _fontRenderer = textRenderer;
+        PlayerYaw = camera.PrevYaw + (camera.Yaw - camera.PrevYaw) * tickDelta;
+        PlayerPitch = camera.PrevPitch + (camera.Pitch - camera.PrevPitch) * tickDelta;
+        PlayerX = camera.LastTickX + (camera.X - camera.LastTickX) * (double)tickDelta;
+        PlayerY = camera.LastTickY + (camera.Y - camera.LastTickY) * (double)tickDelta;
+        PlayerZ = camera.LastTickZ + (camera.Z - camera.LastTickZ) * (double)tickDelta;
     }
 
     public void RenderTileEntity(BlockEntity blockEntity, float tickDelta)
     {
         if (blockEntity.distanceFrom(PlayerX, PlayerY, PlayerZ) < 4096.0D)
         {
-            float brightness = World.GetLuminance(blockEntity.X, blockEntity.Y, blockEntity.Z);
-            GLManager.GL.Color3(brightness, brightness, brightness);
-            RenderTileEntityAt(blockEntity, blockEntity.X - StaticPlayerX, blockEntity.Y - StaticPlayerY, blockEntity.Z - StaticPlayerZ, tickDelta);
+            float luminance = World.GetLuminance(blockEntity.X, blockEntity.Y, blockEntity.Z);
+            GLManager.GL.Color3(luminance, luminance, luminance);
+            RenderTileEntityAt(
+                blockEntity,
+                blockEntity.X - StaticPlayerX,
+                blockEntity.Y - StaticPlayerY,
+                blockEntity.Z - StaticPlayerZ,
+                tickDelta);
         }
 
     }
@@ -96,7 +101,7 @@ public class BlockEntityRenderer
         }
     }
 
-    public TextRenderer GetFontRenderer()
+    public ITextRenderer GetFontRenderer()
     {
         return _fontRenderer;
     }

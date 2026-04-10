@@ -153,7 +153,7 @@ public partial class BetaSharp :
     public PresentationViewportImage CurrentPresentationViewportImage => _renderPresentation.ViewportImage;
     public TextureManager TextureManager { get; private set; }
     public SkinManager SkinManager { get; private set; }
-    public TextRenderer TextRenderer { get; private set; }
+    public ITextRenderer TextRenderer { get; private set; }
     public TexturePacks TexturePackList { get; private set; }
     public IParticleManager ParticleManager { get; private set; } = new NoOpParticleManager();
 
@@ -334,7 +334,7 @@ public partial class BetaSharp :
     {
         TexturePackList = new TexturePacks(this, new DirectoryInfo(_gameDataDir));
         TextureManager = _renderBackendRuntime.CreateLegacyTextureManager(this, TexturePackList, Options);
-        TextRenderer = _renderBackendRuntime.CreateLegacyTextRenderer(Options, TextureManager);
+        TextRenderer = _renderBackendRuntime.CreateTextRenderer(Options, TextureManager);
 
         UIContext = new UIContext(
             Options,

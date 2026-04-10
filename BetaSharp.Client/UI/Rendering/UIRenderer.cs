@@ -2,6 +2,7 @@ using BetaSharp.Blocks;
 using BetaSharp.Blocks.Entities;
 using BetaSharp.Client.Guis;
 using BetaSharp.Client.Options;
+using BetaSharp.Client.Rendering;
 using BetaSharp.Client.Rendering.Blocks;
 using BetaSharp.Client.Rendering.Blocks.Entities;
 using BetaSharp.Client.Rendering.Core;
@@ -14,14 +15,13 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using SixLabors.Fonts;
 using GLEnum = BetaSharp.Client.Rendering.Core.OpenGL.GLEnum;
-using TextRenderer = BetaSharp.Client.Rendering.TextRenderer;
 
 namespace BetaSharp.Client.UI.Rendering;
 
-public class UIRenderer(TextRenderer textRenderer, TextureManager textureManager, GameOptions gameOptions, Func<Vector2D<int>> getDisplaySize)
+public class UIRenderer(ITextRenderer textRenderer, TextureManager textureManager, GameOptions gameOptions, Func<Vector2D<int>> getDisplaySize)
 {
     public TextureManager TextureManager { get; } = textureManager;
-    public TextRenderer TextRenderer { get; } = textRenderer;
+    public ITextRenderer TextRenderer { get; } = textRenderer;
     private readonly ItemRenderer _itemRenderer = new();
     private readonly GameOptions _gameOptions = gameOptions;
 

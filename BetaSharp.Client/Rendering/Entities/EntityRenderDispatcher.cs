@@ -15,7 +15,7 @@ public class EntityRenderDispatcher
 {
     private readonly Dictionary<Type, EntityRenderer> _entityRenderMap = [];
     public static readonly EntityRenderDispatcher Instance = new();
-    private TextRenderer _fontRenderer;
+    private ITextRenderer _fontRenderer;
     public static double OffsetX { get; set; }
     public static double OffsetY { get; set; }
     public static double OffsetZ { get; set; }
@@ -89,7 +89,7 @@ public class EntityRenderDispatcher
         return GetEntityClassRenderObject(entity.GetType());
     }
 
-    public void CacheRenderInfo(World world, TextureManager textureManager, TextRenderer textRenderer, EntityLiving camera, GameOptions options, float tickDelta)
+    public void CacheRenderInfo(World world, TextureManager textureManager, ITextRenderer textRenderer, EntityLiving camera, GameOptions options, float tickDelta)
     {
         World = world;
         TextureManager = textureManager;
@@ -101,8 +101,8 @@ public class EntityRenderDispatcher
             int blockId = world.Reader.GetBlockId(MathHelper.Floor(camera.X), MathHelper.Floor(camera.Y), MathHelper.Floor(camera.Z));
             if (blockId == Block.Bed.id)
             {
-                int bedMeta = world.Reader.GetBlockMeta(MathHelper.Floor(camera.X), MathHelper.Floor(camera.Y), MathHelper.Floor(camera.Z));
-                int bedFacing = bedMeta & 3;
+                int bedMetadata = world.Reader.GetBlockMeta(MathHelper.Floor(camera.X), MathHelper.Floor(camera.Y), MathHelper.Floor(camera.Z));
+                int bedFacing = bedMetadata & 3;
                 PlayerViewY = bedFacing * 90 + 180;
                 PlayerViewX = 0.0F;
             }
@@ -147,7 +147,7 @@ public class EntityRenderDispatcher
         return xDelta * xDelta + yDelta * yDelta + zDelta * zDelta;
     }
 
-    public TextRenderer getTextRenderer()
+    public ITextRenderer getTextRenderer()
     {
         return _fontRenderer;
     }
