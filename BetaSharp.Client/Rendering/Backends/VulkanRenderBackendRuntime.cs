@@ -86,6 +86,14 @@ internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
     {
     }
 
+    public void ConfigureEntityRenderDispatcher(BetaSharp client, SkinManager skinManager)
+    {
+    }
+
+    public void RegisterDefaultDynamicTextures(BetaSharp client, TextureManager textureManager)
+    {
+    }
+
     public ILoadingScreenRenderer CreateLoadingScreenRenderer(BetaSharp client)
     {
         return new NoOpLoadingScreenRenderer(client);
