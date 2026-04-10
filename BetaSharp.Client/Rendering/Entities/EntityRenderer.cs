@@ -10,12 +10,12 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public abstract class EntityRenderer
 {
-    public EntityRenderDispatcher Dispatcher { get; set; } = null!;
+    public IEntityRenderDispatcher Dispatcher { get; set; } = null!;
     protected float ShadowRadius = 0.0F;
     protected float ShadowStrength = 1.0F;
 
     protected World World => Dispatcher.World;
-    public ITextRenderer TextRenderer => Dispatcher.getTextRenderer();
+    public ITextRenderer TextRenderer => Dispatcher.GetTextRenderer();
 
     public abstract void Render(Entity target, double x, double y, double z, float yaw, float tickDelta);
 

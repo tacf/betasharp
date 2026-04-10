@@ -31,7 +31,7 @@ public class BlockEntityMobSpawnerRenderer : BlockEntitySpecialRenderer
             GLManager.GL.Translate(0.0F, -0.4F, 0.0F);
             GLManager.GL.Scale(scale, scale, scale);
             displayEntity.SetPositionAndAnglesKeepPrevAngles(x, y, z, 0.0F, 0.0F);
-            EntityRenderDispatcher.Instance.RenderEntityWithPosYaw(displayEntity, 0.0D, 0.0D, 0.0D, 0.0F, tickDelta);
+            tileEntityRenderer.EntityDispatcher.RenderEntityWithPosYaw(displayEntity, 0.0D, 0.0D, 0.0D, 0.0F, tickDelta);
         }
 
         GLManager.GL.PopMatrix();

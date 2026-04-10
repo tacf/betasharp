@@ -7,7 +7,7 @@ namespace BetaSharp.Client.Rendering.Blocks.Entities;
 
 public abstract class BlockEntitySpecialRenderer
 {
-    protected BlockEntityRenderer tileEntityRenderer;
+    protected IBlockEntityRenderDispatcher tileEntityRenderer;
 
     public abstract void renderTileEntityAt(BlockEntity blockEntity, double x, double y, double z, float tickDelta);
 
@@ -17,7 +17,7 @@ public abstract class BlockEntitySpecialRenderer
         textureManager.BindTexture(textureManager.GetTextureId(texturePath));
     }
 
-    public void setTileEntityRenderer(BlockEntityRenderer renderer)
+    public void setTileEntityRenderer(IBlockEntityRenderDispatcher renderer)
     {
         tileEntityRenderer = renderer;
     }

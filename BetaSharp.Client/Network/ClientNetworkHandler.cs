@@ -452,7 +452,7 @@ public class ClientNetworkHandler : NetHandler
         if (ent != null && collector != null)
         {
             _worldClient.Broadcaster.PlaySoundAtEntity(ent, "random.pop", 0.2F, ((_rand.NextFloat() - _rand.NextFloat()) * 0.7F + 1.0F) * 2.0F);
-            _context.ParticleManager.AddSpecialParticle(new LegacyParticleAdapter(new EntityPickupFX(_context.WorldHost.World, ent, collector, -0.5F)));
+            _context.ParticleManager.AddSpecialParticle(new LegacyParticleAdapter(new EntityPickupFX(_context.WorldHost.World, ent, collector, -0.5F, _context.EntityRenderDispatcher)));
             _worldClient.RemoveEntityFromWorld(packet.entityId);
         }
 
@@ -819,7 +819,7 @@ public class ClientNetworkHandler : NetHandler
         if (packet.type == PlayerConnectionUpdateS2CPacket.ConnectionUpdateType.Leave)
         {
             Entity? ent = _worldClient.GetEntity(packet.entityId);
-            EntityRenderDispatcher.Instance.SkinManager?.Release(packet.name);
+            _context.EntityRenderDispatcher.SkinManager?.Release(packet.name);
         }
     }
 

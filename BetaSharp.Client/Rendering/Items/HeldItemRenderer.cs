@@ -208,7 +208,7 @@ public class HeldItemRenderer
                 GLManager.GL.Rotate(-90.0F, 0.0F, 0.0F, 1.0F);
                 GLManager.GL.Rotate(59.0F, 0.0F, 0.0F, 1.0F);
                 GLManager.GL.Rotate(-65 * handSide, 0.0F, 1.0F, 0.0F);
-                EntityRenderer playerRendererBase = EntityRenderDispatcher.Instance.GetEntityRenderObject(_game.Player);
+                EntityRenderer playerRendererBase = _game.EntityRenderDispatcher.GetEntityRenderObject(_game.Player);
                 PlayerEntityRenderer playerRenderer = (PlayerEntityRenderer)playerRendererBase;
                 float armScale = 1.0F;
                 GLManager.GL.Scale(armScale, armScale, armScale);
@@ -293,7 +293,7 @@ public class HeldItemRenderer
             GLManager.GL.Rotate(-135.0F, 0.0F, 1.0F, 0.0F);
             GLManager.GL.Scale(1.0F, 1.0F, 1.0F);
             GLManager.GL.Translate(5.6F, 0.0F, 0.0F);
-            EntityRenderer playerRendererBase2 = EntityRenderDispatcher.Instance.GetEntityRenderObject(_game.Player);
+            EntityRenderer playerRendererBase2 = _game.EntityRenderDispatcher.GetEntityRenderObject(_game.Player);
             PlayerEntityRenderer playerRenderer2 = (PlayerEntityRenderer)playerRendererBase2;
             sqrtSwing = 1.0F;
             GLManager.GL.Scale(sqrtSwing, sqrtSwing, sqrtSwing);
@@ -496,7 +496,7 @@ public class HeldItemRenderer
 
     private void bindSkinTexture()
     {
-        var skinHandle = EntityRenderDispatcher.Instance.SkinManager?.GetTextureHandle(_game.Player?.Name);
+        var skinHandle = _game.EntityRenderDispatcher.SkinManager?.GetTextureHandle(_game.Player?.Name);
         if (skinHandle != null)
         {
             skinHandle.Bind();

@@ -153,7 +153,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
     {
         _world?.EventListeners.Remove(this);
 
-        EntityRenderDispatcher.Instance.World = world;
+        _game.EntityRenderDispatcher.World = world;
         _world = world;
         if (world != null)
         {
@@ -247,18 +247,18 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         }
         else
         {
-            BlockEntityRenderer.Instance.CacheActiveRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, partialTicks);
-            EntityRenderDispatcher.Instance.CacheRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, _game.Options, partialTicks);
+            _game.BlockEntityRenderDispatcher.CacheActiveRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, partialTicks);
+            _game.EntityRenderDispatcher.CacheRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, _game.Options, partialTicks);
             CountEntitiesTotal = 0;
             CountEntitiesRendered = 0;
             CountEntitiesHidden = 0;
             EntityLiving camera = _game.Camera;
-            EntityRenderDispatcher.OffsetX = camera.LastTickX + (camera.X - camera.LastTickX) * (double)partialTicks;
-            EntityRenderDispatcher.OffsetY = camera.LastTickY + (camera.Y - camera.LastTickY) * (double)partialTicks;
-            EntityRenderDispatcher.OffsetZ = camera.LastTickZ + (camera.Z - camera.LastTickZ) * (double)partialTicks;
-            BlockEntityRenderer.StaticPlayerX = camera.LastTickX + (camera.X - camera.LastTickX) * (double)partialTicks;
-            BlockEntityRenderer.StaticPlayerY = camera.LastTickY + (camera.Y - camera.LastTickY) * (double)partialTicks;
-            BlockEntityRenderer.StaticPlayerZ = camera.LastTickZ + (camera.Z - camera.LastTickZ) * (double)partialTicks;
+            _game.EntityRenderDispatcher.OffsetX = camera.LastTickX + (camera.X - camera.LastTickX) * (double)partialTicks;
+            _game.EntityRenderDispatcher.OffsetY = camera.LastTickY + (camera.Y - camera.LastTickY) * (double)partialTicks;
+            _game.EntityRenderDispatcher.OffsetZ = camera.LastTickZ + (camera.Z - camera.LastTickZ) * (double)partialTicks;
+            _game.BlockEntityRenderDispatcher.StaticPlayerX = camera.LastTickX + (camera.X - camera.LastTickX) * (double)partialTicks;
+            _game.BlockEntityRenderDispatcher.StaticPlayerY = camera.LastTickY + (camera.Y - camera.LastTickY) * (double)partialTicks;
+            _game.BlockEntityRenderDispatcher.StaticPlayerZ = camera.LastTickZ + (camera.Z - camera.LastTickZ) * (double)partialTicks;
             List<Entity> entities = _world.Entities.Entities;
             CountEntitiesTotal = entities.Count;
 
@@ -270,7 +270,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                 ++CountEntitiesRendered;
                 if (entity.ShouldRender(cameraPos))
                 {
-                    EntityRenderDispatcher.Instance.RenderEntity(entity, partialTicks);
+                    _game.EntityRenderDispatcher.RenderEntity(entity, partialTicks);
                 }
             }
 
@@ -308,7 +308,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                     if (_world.Reader.IsPosLoaded(MathHelper.Floor(entity.X), yFloor, MathHelper.Floor(entity.Z)))
                     {
                         ++CountEntitiesRendered;
-                        EntityRenderDispatcher.Instance.RenderEntity(entity, partialTicks);
+                        _game.EntityRenderDispatcher.RenderEntity(entity, partialTicks);
                     }
                 }
             }
@@ -318,7 +318,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                 BlockEntity blockEntity = _world.Entities.BlockEntities[index];
                 if (!blockEntity.isRemoved() && culler.IsBoundingBoxInFrustum(new Box(blockEntity.X, blockEntity.Y, blockEntity.Z, blockEntity.X + 1, blockEntity.Y + 1, blockEntity.Z + 1)))
                 {
-                    BlockEntityRenderer.Instance.RenderTileEntity(blockEntity, partialTicks);
+                    _game.BlockEntityRenderDispatcher.RenderTileEntity(blockEntity, partialTicks);
                 }
             }
         }
@@ -880,7 +880,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
     public void NotifyEntityAdded(Entity entity)
     {
         entity.UpdateCloak();
-        EntityRenderDispatcher.Instance.SkinManager.RequestDownload((entity as EntityPlayer)?.Name);
+        _game.EntityRenderDispatcher.SkinManager.RequestDownload((entity as EntityPlayer)?.Name);
     }
 
     public void NotifyEntityRemoved(Entity entity)

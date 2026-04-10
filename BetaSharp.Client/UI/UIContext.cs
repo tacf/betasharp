@@ -1,5 +1,7 @@
 using BetaSharp.Client.Input;
 using BetaSharp.Client.Options;
+using BetaSharp.Client.Rendering.Blocks.Entities;
+using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Client.Rendering;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.UI.Screens;
@@ -11,6 +13,8 @@ public sealed class UIContext(
     GameOptions options,
     ITextRenderer textRenderer,
     ITextureManager textureManager,
+    IEntityRenderDispatcher entityRenderDispatcher,
+    IBlockEntityRenderDispatcher blockEntityRenderDispatcher,
     Action playClickSound,
     Func<Vector2D<int>> displaySize,
     Func<Vector2D<int>> inputDisplaySize,
@@ -26,6 +30,8 @@ public sealed class UIContext(
     public GameOptions Options => options;
     public ITextRenderer TextRenderer => textRenderer;
     public ITextureManager TextureManager => textureManager;
+    public IEntityRenderDispatcher EntityRenderDispatcher => entityRenderDispatcher;
+    public IBlockEntityRenderDispatcher BlockEntityRenderDispatcher => blockEntityRenderDispatcher;
     public Action PlayClickSound => playClickSound;
     public VirtualCursor VirtualCursor => virtualCursor;
     public Timer Timer => timer;
