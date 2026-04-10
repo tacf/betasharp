@@ -4,7 +4,7 @@ using GLEnum = BetaSharp.Client.Rendering.Core.OpenGL.GLEnum;
 
 namespace BetaSharp.Client.Rendering.Core.Textures;
 
-public class GLTexture : IDisposable
+public class GLTexture : ITextureResource
 {
     private static readonly ILogger s_logger = Log.Instance.For<GLTexture>();
     private static readonly Dictionary<uint, (string Source, DateTime CreatedAt)> s_activeTextures = [];
@@ -31,18 +31,18 @@ public class GLTexture : IDisposable
         }
     }
 
-    public void SetFilter(TextureMinFilter min, TextureMagFilter mag)
+    public void SetFilter(TextureMinificationFilter min, TextureMagnificationFilter mag)
     {
         Bind();
-        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)min);
-        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)mag);
+        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureMinFilter, (int)MapMinFilter(min));
+        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureMagFilter, (int)MapMagFilter(mag));
     }
 
-    public void SetWrap(TextureWrapMode s, TextureWrapMode t)
+    public void SetWrap(TextureAddressMode s, TextureAddressMode t)
     {
         Bind();
-        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)s);
-        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)t);
+        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapS, (int)MapAddressMode(s));
+        GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureWrapT, (int)MapAddressMode(t));
     }
 
     public void SetMaxLevel(int level)
@@ -51,7 +51,13 @@ public class GLTexture : IDisposable
         GLManager.GL.TexParameter(GLEnum.Texture2D, GLEnum.TextureMaxLevel, level);
     }
 
-    public unsafe void Upload(int width, int height, byte* ptr, int level = 0, PixelFormat format = PixelFormat.Rgba, InternalFormat internalFormat = InternalFormat.Rgba)
+    public unsafe void Upload(
+        int width,
+        int height,
+        byte* ptr,
+        int level = 0,
+        TextureDataFormat format = TextureDataFormat.Rgba,
+        TextureStorageFormat internalFormat = TextureStorageFormat.Rgba)
     {
         if (level == 0)
         {
@@ -59,13 +65,38 @@ public class GLTexture : IDisposable
             Height = height;
         }
         Bind();
-        GLManager.GL.TexImage2D(TextureTarget.Texture2D, level, internalFormat, (uint)width, (uint)height, 0, format, PixelType.UnsignedByte, ptr);
+        GLManager.GL.TexImage2D(
+            TextureTarget.Texture2D,
+            level,
+            MapStorageFormat(internalFormat),
+            (uint)width,
+            (uint)height,
+            0,
+            MapDataFormat(format),
+            PixelType.UnsignedByte,
+            ptr);
     }
 
-    public unsafe void UploadSubImage(int x, int y, int width, int height, byte* ptr, int level = 0, PixelFormat format = PixelFormat.Rgba)
+    public unsafe void UploadSubImage(
+        int x,
+        int y,
+        int width,
+        int height,
+        byte* ptr,
+        int level = 0,
+        TextureDataFormat format = TextureDataFormat.Rgba)
     {
         Bind();
-        GLManager.GL.TexSubImage2D(GLEnum.Texture2D, level, x, y, (uint)width, (uint)height, (GLEnum)format, (GLEnum)PixelType.UnsignedByte, ptr);
+        GLManager.GL.TexSubImage2D(
+            GLEnum.Texture2D,
+            level,
+            x,
+            y,
+            (uint)width,
+            (uint)height,
+            (GLEnum)MapDataFormat(format),
+            (GLEnum)PixelType.UnsignedByte,
+            ptr);
     }
 
     public void SetAnisotropicFilter(float level)
@@ -98,5 +129,56 @@ public class GLTexture : IDisposable
         {
             s_logger.LogWarning("Leaked Texture ID: {Id}, Source: {Source}, Created At: {CreatedAt}", entry.Key, entry.Value.Source, entry.Value.CreatedAt);
         }
+    }
+
+    private static TextureMinFilter MapMinFilter(TextureMinificationFilter filter)
+    {
+        return filter switch
+        {
+            TextureMinificationFilter.Nearest => TextureMinFilter.Nearest,
+            TextureMinificationFilter.Linear => TextureMinFilter.Linear,
+            TextureMinificationFilter.NearestMipmapNearest => TextureMinFilter.NearestMipmapNearest,
+            _ => TextureMinFilter.Nearest
+        };
+    }
+
+    private static TextureMagFilter MapMagFilter(TextureMagnificationFilter filter)
+    {
+        return filter switch
+        {
+            TextureMagnificationFilter.Nearest => TextureMagFilter.Nearest,
+            TextureMagnificationFilter.Linear => TextureMagFilter.Linear,
+            _ => TextureMagFilter.Nearest
+        };
+    }
+
+    private static TextureWrapMode MapAddressMode(TextureAddressMode mode)
+    {
+        return mode switch
+        {
+            TextureAddressMode.Repeat => TextureWrapMode.Repeat,
+            TextureAddressMode.ClampToEdge => TextureWrapMode.ClampToEdge,
+            _ => TextureWrapMode.Repeat
+        };
+    }
+
+    private static PixelFormat MapDataFormat(TextureDataFormat format)
+    {
+        return format switch
+        {
+            TextureDataFormat.Rgba => PixelFormat.Rgba,
+            TextureDataFormat.Rgb => PixelFormat.Rgb,
+            _ => PixelFormat.Rgba
+        };
+    }
+
+    private static InternalFormat MapStorageFormat(TextureStorageFormat format)
+    {
+        return format switch
+        {
+            TextureStorageFormat.Rgba => InternalFormat.Rgba,
+            TextureStorageFormat.Rgba8 => InternalFormat.Rgba8,
+            _ => InternalFormat.Rgba
+        };
     }
 }

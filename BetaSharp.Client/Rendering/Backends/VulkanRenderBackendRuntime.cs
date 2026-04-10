@@ -3,6 +3,7 @@ using BetaSharp.Client.Diagnostics;
 using BetaSharp.Client.Options;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Presentation;
+using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Worlds.Core;
 using Microsoft.Extensions.Logging;
 
@@ -86,11 +87,31 @@ internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
     {
     }
 
-    public void ConfigureEntityRenderDispatcher(BetaSharp client, SkinManager skinManager)
+    public TextureManager CreateLegacyTextureManager(BetaSharp client, TexturePacks texturePacks, GameOptions options)
+    {
+        return new TextureManager(
+            client,
+            texturePacks,
+            options,
+            new NoOpTextureResourceFactory(),
+            new DirectTextureUploadService());
+    }
+
+    public TextRenderer CreateLegacyTextRenderer(GameOptions options, TextureManager textureManager)
+    {
+        return new TextRenderer(options, textureManager);
+    }
+
+    public SkinManager CreateLegacySkinManager(TextureManager textureManager)
+    {
+        return new SkinManager(textureManager);
+    }
+
+    public void ConfigureLegacyEntityRenderDispatcher(BetaSharp client, SkinManager skinManager)
     {
     }
 
-    public void RegisterDefaultDynamicTextures(BetaSharp client, TextureManager textureManager)
+    public void RegisterLegacyDynamicTextures(BetaSharp client, TextureManager textureManager)
     {
     }
 

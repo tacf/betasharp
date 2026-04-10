@@ -8,6 +8,7 @@ using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Client.Rendering.Items;
 using BetaSharp.Client.Rendering.Presentation;
+using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Worlds.Core;
 using Microsoft.Extensions.Logging;
 using Silk.NET.OpenGL;
@@ -194,13 +195,33 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
         GLTexture.LogLeakReport();
     }
 
-    public void ConfigureEntityRenderDispatcher(BetaSharp client, SkinManager skinManager)
+    public TextureManager CreateLegacyTextureManager(BetaSharp client, TexturePacks texturePacks, GameOptions options)
+    {
+        return new TextureManager(
+            client,
+            texturePacks,
+            options,
+            new OpenGlTextureResourceFactory(),
+            new DirectTextureUploadService());
+    }
+
+    public TextRenderer CreateLegacyTextRenderer(GameOptions options, TextureManager textureManager)
+    {
+        return new TextRenderer(options, textureManager);
+    }
+
+    public SkinManager CreateLegacySkinManager(TextureManager textureManager)
+    {
+        return new SkinManager(textureManager);
+    }
+
+    public void ConfigureLegacyEntityRenderDispatcher(BetaSharp client, SkinManager skinManager)
     {
         EntityRenderDispatcher.Instance.SkinManager = skinManager;
         EntityRenderDispatcher.Instance.HeldItemRenderer = new HeldItemRenderer(client);
     }
 
-    public void RegisterDefaultDynamicTextures(BetaSharp client, TextureManager textureManager)
+    public void RegisterLegacyDynamicTextures(BetaSharp client, TextureManager textureManager)
     {
         textureManager.AddDynamicTexture(new LavaSprite());
         textureManager.AddDynamicTexture(new WaterSprite());

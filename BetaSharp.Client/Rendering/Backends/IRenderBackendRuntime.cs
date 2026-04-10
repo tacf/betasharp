@@ -4,6 +4,7 @@ using BetaSharp.Client.Options;
 using BetaSharp.Client.Rendering;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Presentation;
+using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Worlds.Core;
 using Microsoft.Extensions.Logging;
 
@@ -13,8 +14,6 @@ internal interface IRenderBackendRuntime
 {
     RendererBackendKind Kind { get; }
     RendererBackendCapabilities Capabilities { get; }
-    bool SupportsLegacyOpenGlRenderPath => Capabilities.SupportsLegacyOpenGlRenderPath;
-    bool SupportsScreenshotCapture => Capabilities.SupportsScreenshotCapture;
 
     void InitializeGraphicsContext(DebugTelemetry telemetry);
     void ConfigureDefaultRenderState(GameOptions options, ILogger logger);
@@ -35,8 +34,23 @@ internal interface IRenderBackendRuntime
         TextureHandle logoTexture);
     void CleanupRenderResources();
     void LogRenderResourceReport();
-    void ConfigureEntityRenderDispatcher(BetaSharp client, SkinManager skinManager);
-    void RegisterDefaultDynamicTextures(BetaSharp client, TextureManager textureManager);
+    /// <summary>
+    /// Temporary migration bridge for legacy GL-bound asset service creation.
+    /// Remove once texture/text/skin services are backend-neutral.
+    /// </summary>
+    TextureManager CreateLegacyTextureManager(BetaSharp client, TexturePacks texturePacks, GameOptions options);
+    TextRenderer CreateLegacyTextRenderer(GameOptions options, TextureManager textureManager);
+    SkinManager CreateLegacySkinManager(TextureManager textureManager);
+    /// <summary>
+    /// Temporary migration bridge for legacy entity dispatcher wiring.
+    /// Remove once entity rendering is backend-neutral.
+    /// </summary>
+    void ConfigureLegacyEntityRenderDispatcher(BetaSharp client, SkinManager skinManager);
+    /// <summary>
+    /// Temporary migration bridge for GL-style dynamic texture registration.
+    /// Remove once texture uploads are routed through backend-neutral update queues.
+    /// </summary>
+    void RegisterLegacyDynamicTextures(BetaSharp client, TextureManager textureManager);
     ILoadingScreenRenderer CreateLoadingScreenRenderer(BetaSharp client);
     ISceneRenderer CreateSceneRenderer(BetaSharp client);
     IWorldRenderer CreateWorldRenderer(BetaSharp client, TextureManager textureManager);
