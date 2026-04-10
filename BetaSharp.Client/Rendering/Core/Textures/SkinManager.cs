@@ -19,14 +19,14 @@ public sealed class SkinManager : ISkinManager
 
     private readonly ConcurrentDictionary<string, Image<Rgba32>> _downloadedImages = new();
     private readonly ConcurrentDictionary<string, bool> _downloading = new();
+    private readonly ConcurrentDictionary<string, TextureHandle> _textureHandles = new();
     private readonly HttpClient _httpClient;
     private readonly ILogger _logger = Log.Instance.For<SkinManager>();
-    private readonly ConcurrentDictionary<string, TextureHandle> _textureHandles = new();
-    private readonly TextureManager _textureManager;
+    private readonly ITextureManager _textureManager;
 
     private int _cacheSize = 0;
 
-    public SkinManager(TextureManager textureManager)
+    public SkinManager(ITextureManager textureManager)
     {
         _textureManager = textureManager;
         _httpClient = new HttpClient
@@ -82,7 +82,9 @@ public sealed class SkinManager : ISkinManager
         _cacheSize = Directory.GetFiles(path, "*.png").Length;
     }
 
-    public void RequestDownload(string? username, bool cache = true)
+    public void RequestDownload(string? username) => RequestDownload(username, cache: true);
+
+    private void RequestDownload(string? username, bool cache)
     {
         if (string.IsNullOrWhiteSpace(username) || _textureHandles.ContainsKey(username)
                                                 || _downloadedImages.ContainsKey(username)
