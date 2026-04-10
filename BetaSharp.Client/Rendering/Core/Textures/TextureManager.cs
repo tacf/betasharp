@@ -3,7 +3,6 @@ using BetaSharp.Client.Options;
 using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Registries.Data;
 using Microsoft.Extensions.Logging;
-using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -27,13 +26,22 @@ public class TextureManager : IDisposable
     private bool _blur;
     private readonly TexturePacks _texturePacks;
     private readonly BetaSharp _game;
+    private readonly ITextureResourceFactory _textureResourceFactory;
+    private readonly ITextureUploadService _textureUploadService;
     private readonly Image<Rgba32> _missingTextureImage = new(256, 256);
 
-    public TextureManager(BetaSharp game, TexturePacks texturePacks, GameOptions options)
+    public TextureManager(
+        BetaSharp game,
+        TexturePacks texturePacks,
+        GameOptions options,
+        ITextureResourceFactory textureResourceFactory,
+        ITextureUploadService textureUploadService)
     {
         _game = game;
         _texturePacks = texturePacks;
         _gameOptions = options;
+        _textureResourceFactory = textureResourceFactory;
+        _textureUploadService = textureUploadService;
         _missingTextureImage.Mutate(ctx =>
         {
             ctx.BackgroundColor(Color.Magenta);
@@ -41,6 +49,8 @@ public class TextureManager : IDisposable
             ctx.Fill(Color.Black, new RectangleF(128, 128, 128, 128));
         });
     }
+
+    public int ActiveTextureCount => _textureResourceFactory.ActiveTextureCount;
 
     public int[] GetColors(string path)
     {
@@ -70,7 +80,7 @@ public class TextureManager : IDisposable
 
     public TextureHandle Load(Image<Rgba32> image)
     {
-        var texture = new GLTexture("Image_Direct");
+        ITextureResource texture = _textureResourceFactory.CreateTexture("Image_Direct");
         Load(image, texture, false);
         var handle = new TextureHandle(texture);
         _images[texture.Id] = (image, handle);
@@ -81,7 +91,7 @@ public class TextureManager : IDisposable
     {
         if (_textures.TryGetValue(path, out TextureHandle? handle)) return handle;
 
-        var texture = new GLTexture(path);
+        ITextureResource texture = _textureResourceFactory.CreateTexture(path);
         handle = new TextureHandle(texture);
         _textures[path] = handle;
 
@@ -103,7 +113,7 @@ public class TextureManager : IDisposable
 
     }
 
-    public unsafe void Load(Image<Rgba32> image, GLTexture texture, bool isTerrain)
+    public void Load(Image<Rgba32> image, ITextureResource texture, bool isTerrain)
     {
         texture.Bind();
 
@@ -118,14 +128,22 @@ public class TextureManager : IDisposable
                 Image<Rgba32> mip = mips[level];
                 byte[] pixels = new byte[mip.Width * mip.Height * 4];
                 mip.CopyPixelDataTo(pixels);
-                fixed (byte* ptr = pixels)
-                {
-                    texture.Upload(mip.Width, mip.Height, ptr, level, PixelFormat.Rgba, InternalFormat.Rgba8);
-                }
+                _textureUploadService.Upload(
+                    texture,
+                    mip.Width,
+                    mip.Height,
+                    pixels,
+                    level,
+                    TextureDataFormat.Rgba,
+                    TextureStorageFormat.Rgba8);
                 if (level > 0) mip.Dispose();
             }
 
-            texture.SetFilter(_gameOptions.UseMipmaps ? TextureMinFilter.NearestMipmapNearest : TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+            texture.SetFilter(
+                _gameOptions.UseMipmaps
+                    ? TextureMinificationFilter.NearestMipmapNearest
+                    : TextureMinificationFilter.Nearest,
+                TextureMagnificationFilter.Nearest);
             texture.SetMaxLevel(mipCount - 1);
 
             float aniso = _gameOptions.AnisotropicLevel == 0 ? 1.0f : (float)Math.Pow(2, _gameOptions.AnisotropicLevel);
@@ -136,15 +154,23 @@ public class TextureManager : IDisposable
             return;
         }
 
-        texture.SetFilter(_blur ? TextureMinFilter.Linear : TextureMinFilter.Nearest, _blur ? TextureMagFilter.Linear : TextureMagFilter.Nearest);
-        texture.SetWrap(_clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat, _clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat);
+        texture.SetFilter(
+            _blur ? TextureMinificationFilter.Linear : TextureMinificationFilter.Nearest,
+            _blur ? TextureMagnificationFilter.Linear : TextureMagnificationFilter.Nearest);
+        texture.SetWrap(
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat,
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat);
 
         byte[] rawPixels = new byte[image.Width * image.Height * 4];
         image.CopyPixelDataTo(rawPixels);
-        fixed (byte* ptr = rawPixels)
-        {
-            texture.Upload(image.Width, image.Height, ptr, 0, PixelFormat.Rgba, InternalFormat.Rgba);
-        }
+        _textureUploadService.Upload(
+            texture,
+            image.Width,
+            image.Height,
+            rawPixels,
+            0,
+            TextureDataFormat.Rgba,
+            TextureStorageFormat.Rgba);
 
         _clamp = false;
         _blur = false;
@@ -214,14 +240,18 @@ public class TextureManager : IDisposable
     }
 
 
-    public unsafe void Bind(int[] packedARGB, int width, int height, GLTexture texture)
+    public void Bind(int[] packedARGB, int width, int height, ITextureResource texture)
     {
         //TODO: this is potentially wrong but shouldn't crash
 
         texture.Bind();
 
-        texture.SetFilter(_blur ? TextureMinFilter.Linear : TextureMinFilter.Nearest, _blur ? TextureMagFilter.Linear : TextureMagFilter.Nearest);
-        texture.SetWrap(_clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat, _clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat);
+        texture.SetFilter(
+            _blur ? TextureMinificationFilter.Linear : TextureMinificationFilter.Nearest,
+            _blur ? TextureMagnificationFilter.Linear : TextureMagnificationFilter.Nearest);
+        texture.SetWrap(
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat,
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat);
 
         byte[] unpackedRGBA = new byte[width * height * 4];
 
@@ -238,13 +268,18 @@ public class TextureManager : IDisposable
             unpackedRGBA[i * 4 + 3] = (byte)a;
         }
 
-        fixed (byte* ptr = unpackedRGBA)
-        {
-            texture.UploadSubImage(0, 0, width, height, ptr, 0, PixelFormat.Rgba);
-        }
+        _textureUploadService.UploadSubImage(
+            texture,
+            0,
+            0,
+            width,
+            height,
+            unpackedRGBA,
+            0,
+            TextureDataFormat.Rgba);
     }
 
-    public void Delete(GLTexture texture)
+    public void Delete(ITextureResource texture)
     {
         KeyValuePair<string, TextureHandle> textureEntry = _textures.FirstOrDefault(x => x.Value.Texture == texture);
         if (textureEntry.Key != null) _textures.Remove(textureEntry.Key);
@@ -256,6 +291,24 @@ public class TextureManager : IDisposable
     public void Delete(TextureHandle handle)
     {
         if (handle.Texture != null) Delete(handle.Texture);
+    }
+
+    public void UploadSubImage(
+        TextureHandle handle,
+        int x,
+        int y,
+        int width,
+        int height,
+        ReadOnlySpan<byte> pixelData,
+        int level = 0,
+        TextureDataFormat format = TextureDataFormat.Rgba)
+    {
+        if (handle.Texture == null)
+        {
+            return;
+        }
+
+        _textureUploadService.UploadSubImage(handle.Texture, x, y, width, height, pixelData, level, format);
     }
 
 
@@ -276,7 +329,7 @@ public class TextureManager : IDisposable
         {
             entry.Value.Texture?.Dispose();
 
-            var newTexture = new GLTexture(entry.Key);
+            ITextureResource newTexture = _textureResourceFactory.CreateTexture(entry.Key);
             entry.Value.Texture = newTexture;
 
             try
@@ -299,7 +352,7 @@ public class TextureManager : IDisposable
         {
             entry.Value.Handle.Texture?.Dispose();
 
-            var newTexture = new GLTexture(entry.Value.Handle.Texture?.Source ?? "Image_Direct_Reload");
+            ITextureResource newTexture = _textureResourceFactory.CreateTexture(entry.Value.Handle.Source);
             entry.Value.Handle.Texture = newTexture;
             Load(entry.Value.Image, newTexture, false);
             _images[newTexture.Id] = entry.Value;
@@ -316,7 +369,7 @@ public class TextureManager : IDisposable
         _itemsHandle = null;
     }
 
-    public unsafe void Tick()
+    public void Tick()
     {
         _terrainHandle ??= _textures.FirstOrDefault(x => x.Key.EndsWith("/terrain.png")).Value
                            ?? GetTextureId("/terrain.png");
@@ -331,7 +384,7 @@ public class TextureManager : IDisposable
                 ? _terrainHandle
                 : _itemsHandle;
 
-            GLTexture? atlasTexture = atlasHandle?.Texture;
+            ITextureResource? atlasTexture = atlasHandle?.Texture;
             if (atlasTexture == null) continue;
 
             int targetTileSize = atlasTexture.Width / 16;
@@ -358,18 +411,21 @@ public class TextureManager : IDisposable
                 }
 
                 int finalReplicate = texture.Replicate;
+                ReadOnlySpan<byte> uploadPixelSpan = uploadPixels.AsSpan(0, uploadSize * uploadSize * 4);
 
-                fixed (byte* ptr = uploadPixels)
+                for (int x = 0; x < finalReplicate; x++)
                 {
-                    for (int x = 0; x < finalReplicate; x++)
+                    for (int y = 0; y < finalReplicate; y++)
                     {
-                        for (int y = 0; y < finalReplicate; y++)
-                        {
-                            atlasTexture.UploadSubImage(
-                               tileX + (x * uploadSize),
-                               tileY + (y * uploadSize),
-                               uploadSize, uploadSize, ptr, 0, PixelFormat.Rgba);
-                        }
+                        _textureUploadService.UploadSubImage(
+                            atlasTexture,
+                            tileX + (x * uploadSize),
+                            tileY + (y * uploadSize),
+                            uploadSize,
+                            uploadSize,
+                            uploadPixelSpan,
+                            0,
+                            TextureDataFormat.Rgba);
                     }
                 }
 
@@ -379,7 +435,13 @@ public class TextureManager : IDisposable
                     {
                         for (int y = 0; y < finalReplicate; y++)
                         {
-                            UpdateTileMipmaps(tileX + (x * uploadSize), tileY + (y * uploadSize), uploadSize, targetTileSize, uploadPixels, atlasTexture);
+                            UpdateTileMipmaps(
+                                tileX + (x * uploadSize),
+                                tileY + (y * uploadSize),
+                                uploadSize,
+                                targetTileSize,
+                                uploadPixels,
+                                atlasTexture);
                         }
                     }
                 }
@@ -416,7 +478,13 @@ public class TextureManager : IDisposable
         }
     }
 
-    private unsafe void UpdateTileMipmaps(int baseX, int baseY, int dataSize, int targetTileSize, byte[] tileData, GLTexture texture)
+    private void UpdateTileMipmaps(
+        int baseX,
+        int baseY,
+        int dataSize,
+        int targetTileSize,
+        byte[] tileData,
+        ITextureResource texture)
     {
         int maxMipLevels = (int)Math.Log2(targetTileSize) + 1;
         byte[] currentData = tileData;
@@ -458,11 +526,15 @@ public class TextureManager : IDisposable
 
                 int mipX = baseX >> mipLevel;
                 int mipY = baseY >> mipLevel;
-
-                fixed (byte* ptr = downsampled)
-                {
-                    texture.UploadSubImage(mipX, mipY, newSize, newSize, ptr, mipLevel, PixelFormat.Rgba);
-                }
+                _textureUploadService.UploadSubImage(
+                    texture,
+                    mipX,
+                    mipY,
+                    newSize,
+                    newSize,
+                    downsampled.AsSpan(0, newSize * newSize * 4),
+                    mipLevel,
+                    TextureDataFormat.Rgba);
 
                 if (mipLevel > 1)
                 {

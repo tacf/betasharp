@@ -3,7 +3,6 @@ using BetaSharp.Client.Options;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
 using Microsoft.Extensions.Logging;
-using Silk.NET.OpenGL;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -143,7 +142,7 @@ public class TextRenderer
         ClearAtlasRegion(0, 0, AtlasSize, AtlasSize);
 
         fontTextureName = textureManager.Load(_atlasImage);
-        fontTextureName.Texture?.SetFilter(TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+        fontTextureName.Texture?.SetFilter(TextureMinificationFilter.Nearest, TextureMagnificationFilter.Nearest);
 
         try
         {
@@ -238,7 +237,7 @@ public class TextRenderer
         return info;
     }
 
-    private unsafe void UploadAtlasSubImage(int x, int y, int width, int height)
+    private void UploadAtlasSubImage(int x, int y, int width, int height)
     {
         if (fontTextureName?.Texture == null) return;
 
@@ -264,10 +263,13 @@ public class TextRenderer
                 }
             });
 
-            fixed (byte* ptr = region)
-            {
-                fontTextureName.Texture!.UploadSubImage(x, y, width, height, ptr);
-            }
+            _textureManager.UploadSubImage(
+                fontTextureName,
+                x,
+                y,
+                width,
+                height,
+                region.AsSpan(0, bufferSize));
         }
         catch (Exception ex)
         {

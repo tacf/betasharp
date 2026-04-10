@@ -76,7 +76,7 @@ public class GameRenderer : ISceneRenderer
         MetricRegistry.Set(RenderMetrics.MeshVersionReleased, ChunkMeshVersion.TotalReleased);
         MetricRegistry.Set(RenderMetrics.TextureBindsLastFrame, TextureStats.BindsLastFrame);
         MetricRegistry.Set(RenderMetrics.TextureAvgBinds, (float)TextureStats.AverageBindsPerFrame);
-        MetricRegistry.Set(RenderMetrics.TextureActive, GLTexture.ActiveTextureCount);
+        MetricRegistry.Set(RenderMetrics.TextureActive, _client.TextureManager.ActiveTextureCount);
         MetricRegistry.Set(RenderMetrics.EntitiesRendered, _client.WorldRenderer.CountEntitiesRendered);
         MetricRegistry.Set(RenderMetrics.EntitiesHidden, _client.WorldRenderer.CountEntitiesHidden);
         MetricRegistry.Set(RenderMetrics.EntitiesTotal, _client.WorldRenderer.CountEntitiesTotal);

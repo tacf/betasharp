@@ -333,8 +333,8 @@ public partial class BetaSharp :
     private void SetupCoreSystems()
     {
         TexturePackList = new TexturePacks(this, new DirectoryInfo(_gameDataDir));
-        TextureManager = new TextureManager(this, TexturePackList, Options);
-        TextRenderer = new TextRenderer(Options, TextureManager);
+        TextureManager = _renderBackendRuntime.CreateLegacyTextureManager(this, TexturePackList, Options);
+        TextRenderer = _renderBackendRuntime.CreateLegacyTextRenderer(Options, TextureManager);
 
         UIContext = new UIContext(
             Options,
@@ -360,12 +360,12 @@ public partial class BetaSharp :
             mouseOffset: () => new Vector2D<int>((int)DebugViewportOffset.X, (int)DebugViewportOffset.Y)
         );
 
-        SkinManager = new SkinManager(TextureManager);
+        SkinManager = _renderBackendRuntime.CreateLegacySkinManager(TextureManager);
         WaterColors.loadColors(TextureManager.GetColors("/misc/watercolor.png"));
         GrassColors.loadColors(TextureManager.GetColors("/misc/grasscolor.png"));
         FoliageColors.loadColors(TextureManager.GetColors("/misc/foliagecolor.png"));
         SceneRenderer = _renderBackendRuntime.CreateSceneRenderer(this);
-        _renderBackendRuntime.ConfigureEntityRenderDispatcher(this, SkinManager);
+        _renderBackendRuntime.ConfigureLegacyEntityRenderDispatcher(this, SkinManager);
         StatFileWriter = new StatFileWriter(Session, _gameDataDir);
 
         StatStringFormatKeyInv format = new(this);
@@ -424,7 +424,7 @@ public partial class BetaSharp :
         SoundManager.LoadSoundSettings(Options);
         DefaultMusicCategories.Register(SoundManager);
 
-        _renderBackendRuntime.RegisterDefaultDynamicTextures(this, TextureManager);
+        _renderBackendRuntime.RegisterLegacyDynamicTextures(this, TextureManager);
 
         WorldRenderer = _renderBackendRuntime.CreateWorldRenderer(this, TextureManager);
         SetMainViewport(Display.getFramebufferWidth(), Display.getFramebufferHeight());
