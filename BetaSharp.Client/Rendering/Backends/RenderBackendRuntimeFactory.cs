@@ -1,3 +1,6 @@
+using BetaSharp.Client.Rendering.Backends.OpenGL;
+using BetaSharp.Client.Rendering.Backends.Vulkan;
+
 namespace BetaSharp.Client.Rendering.Backends;
 
 internal static class RenderBackendRuntimeFactory

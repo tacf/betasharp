@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 using BetaSharp.Client.Rendering;
 using Silk.NET.GLFW;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 namespace BetaSharp.Client;
@@ -16,7 +15,6 @@ public static unsafe class Display
     private static readonly object _lock = new();
     private static readonly bool _isMacOS = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
     private static IWindow? _window;
-    private static GL? _gl;
     private static readonly Glfw? _glfw;
 
     // Display properties
@@ -52,7 +50,7 @@ public static unsafe class Display
         {
             lock (_lock)
             {
-                return UsesOpenGlContext && _gl != null;
+                return UsesOpenGlContext && _window != null;
             }
         }
     }
@@ -556,15 +554,6 @@ public static unsafe class Display
 
     private static void onLoad()
     {
-        if (UsesOpenGlContext)
-        {
-            _gl = GL.GetApi(_window);
-        }
-        else
-        {
-            _gl = null;
-        }
-
         refreshFramebufferSize();
         if (_window != null && _glfw != null)
         {
@@ -680,12 +669,10 @@ public static unsafe class Display
             if (!isCreated())
                 return;
 
-            _gl?.Dispose();
             _window?.Close();
             _window?.Dispose();
 
             _window = null;
-            _gl = null;
             _closeRequested = false;
             _wasResized = false;
             _framebufferWidth = 0;
@@ -694,14 +681,6 @@ public static unsafe class Display
 
             resetDisplayMode();
         }
-    }
-
-    /// <summary>
-    /// Gets the OpenGL context.
-    /// </summary>
-    public static GL? getGL()
-    {
-        return _gl;
     }
 
     /// <summary>

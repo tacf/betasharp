@@ -1,5 +1,5 @@
 using BetaSharp.Blocks;
-using BetaSharp.Client.Rendering.Particles;
+using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Entities;
 using BetaSharp.Items;
 using BetaSharp.Worlds.Core;
@@ -17,7 +17,8 @@ public interface IParticleManager
     void renderParticles(Entity camera, float partialTick);
     void renderSpecialParticles(Entity camera, float partialTick);
     void clearEffects(World world);
-    void AddSpecialParticle(ISpecialParticle particle);
+    void AddPickupParticle(Entity target, Entity collector, float yOffset, IEntityRenderDispatcher entityRenderDispatcher);
+    void AddFootstep(double x, double y, double z);
     void AddSmoke(double x, double y, double z, double vx, double vy, double vz, float scaleMultiplier = 1.0f);
     void AddFlame(double x, double y, double z, double vx, double vy, double vz);
     void AddExplode(double x, double y, double z, double vx, double vy, double vz);

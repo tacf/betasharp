@@ -2,7 +2,7 @@ using BetaSharp.Client.Rendering.Chunks;
 using BetaSharp.Util;
 using BetaSharp.Worlds.Core;
 
-namespace BetaSharp.Client.Rendering.Backends;
+namespace BetaSharp.Client.Rendering.Backends.OpenGL;
 
 internal sealed class OpenGlChunkRendererFactory : IChunkRendererFactory
 {

@@ -7,7 +7,7 @@ using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Worlds.Core;
 using Microsoft.Extensions.Logging;
 
-namespace BetaSharp.Client.Rendering.Backends;
+namespace BetaSharp.Client.Rendering.Backends.Vulkan;
 
 internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
 {

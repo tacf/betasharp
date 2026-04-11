@@ -5,7 +5,7 @@ using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Client.UI.Rendering;
 
-namespace BetaSharp.Client.Rendering.Backends;
+namespace BetaSharp.Client.Rendering.Backends.Vulkan;
 
 internal sealed class VulkanRenderBackendResourceServices : IRenderBackendResourceServices
 {

@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Silk.NET.OpenGL;
 using LegacyGLEnum = BetaSharp.Client.Rendering.Core.OpenGL.GLEnum;
 
-namespace BetaSharp.Client.Rendering.Backends;
+namespace BetaSharp.Client.Rendering.Backends.OpenGL;
 
 internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
 {
@@ -21,20 +21,14 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
 
     public void InitializeGraphicsContext(DebugTelemetry telemetry)
     {
-        GL silkGl = Display.getGL()!;
+        GL silkGl = GL.GetApi(Display.getWindow());
         (float r, float g, float b) = Display.GetInitialBackgroundColor();
         silkGl.ClearColor(r, g, b, 1.0f);
         silkGl.Enable(EnableCap.Multisample);
 
         GLManager.Init(silkGl);
-        if (GLManager.GL is LegacyGL legacyGl)
-        {
-            telemetry.CaptureSystemInfo(legacyGl);
-        }
-        else
-        {
-            telemetry.CaptureSystemInfo(null);
-        }
+        LegacyGL? legacyGl = GLManager.GL as LegacyGL;
+        telemetry.CaptureSystemInfo(ReadGraphicsApiSnapshot(legacyGl));
     }
 
     public void ConfigureDefaultRenderState(GameOptions options, ILogger logger)
@@ -241,5 +235,79 @@ internal sealed class OpenGlRenderBackendRuntime : IRenderBackendRuntime
         tessellator.addVertexWithUV(x + width, y + 0, 0, (texX + width) * uScale, (texY + 0) * vScale);
         tessellator.addVertexWithUV(x + 0, y + 0, 0, (texX + 0) * uScale, (texY + 0) * vScale);
         tessellator.draw();
+    }
+
+    private static DebugGraphicsApiSnapshot ReadGraphicsApiSnapshot(LegacyGL? gl)
+    {
+        if (gl == null)
+        {
+            return DebugGraphicsApiSnapshot.Empty;
+        }
+
+        string apiVersion = TryGetGlString(gl, StringName.Version);
+        return new DebugGraphicsApiSnapshot(
+            GpuName: TryGetGlString(gl, StringName.Renderer),
+            GpuVram: TryGetGpuVram(gl),
+            ApiVersion: apiVersion,
+            ShaderLanguageVersion: TryGetGlString(gl, StringName.ShadingLanguageVersion),
+            DriverVersion: DebugTelemetry.UnknownValue);
+    }
+
+    private static string TryGetGlString(LegacyGL gl, StringName name)
+    {
+        try
+        {
+            string? value = gl.SilkGL.GetStringS(name);
+            return string.IsNullOrWhiteSpace(value) ? DebugTelemetry.UnknownValue : value.Trim();
+        }
+        catch
+        {
+            return DebugTelemetry.UnknownValue;
+        }
+    }
+
+    private static string TryGetGpuVram(LegacyGL gl)
+    {
+        try
+        {
+            if (!gl.IsExtensionPresent("GL_NVX_gpu_memory_info"))
+            {
+                return DebugTelemetry.UnknownValue;
+            }
+
+            int dedicatedVidMemKb = gl.SilkGL.GetInteger((Silk.NET.OpenGL.GLEnum)0x9047);
+            if (dedicatedVidMemKb > 0)
+            {
+                return FormatMemoryKilobytes(dedicatedVidMemKb);
+            }
+
+            int totalAvailableKb = gl.SilkGL.GetInteger((Silk.NET.OpenGL.GLEnum)0x9048);
+            if (totalAvailableKb > 0)
+            {
+                return FormatMemoryKilobytes(totalAvailableKb);
+            }
+        }
+        catch
+        {
+        }
+
+        return DebugTelemetry.UnknownValue;
+    }
+
+    private static string FormatMemoryKilobytes(long kilobytes)
+    {
+        if (kilobytes <= 0)
+        {
+            return DebugTelemetry.UnknownValue;
+        }
+
+        double gib = kilobytes / 1024.0D / 1024.0D;
+        if (gib >= 1.0D)
+        {
+            return $"{gib:0.##} GB";
+        }
+
+        double mib = kilobytes / 1024.0D;
+        return $"{mib:0} MB";
     }
 }

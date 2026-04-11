@@ -864,7 +864,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                     case "explode": pm.AddExplode(var2, var4, var6, var8, var10, var12); break;
                     case "flame": pm.AddFlame(var2, var4, var6, var8, var10, var12); break;
                     case "lava": pm.AddLava(var2, var4, var6); break;
-                    case "footstep": pm.AddSpecialParticle(new LegacyParticleAdapter(new EntityFootStepFX(_textureManager, _world, var2, var4, var6))); break;
+                    case "footstep": pm.AddFootstep(var2, var4, var6); break;
                     case "splash": pm.AddSplash(var2, var4, var6, var8, var10, var12); break;
                     case "largesmoke": pm.AddSmoke(var2, var4, var6, var8, var10, var12, 2.5f); break;
                     case "reddust": pm.AddReddust(var2, var4, var6, (float)var8, (float)var10, (float)var12); break;

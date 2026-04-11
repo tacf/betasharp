@@ -1,5 +1,5 @@
 using BetaSharp.Blocks;
-using BetaSharp.Client.Rendering.Particles;
+using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Entities;
 using BetaSharp.Items;
 using BetaSharp.Worlds.Core;
@@ -26,7 +26,11 @@ internal sealed class NoOpParticleManager : IParticleManager
     {
     }
 
-    public void AddSpecialParticle(ISpecialParticle particle)
+    public void AddPickupParticle(Entity target, Entity collector, float yOffset, IEntityRenderDispatcher entityRenderDispatcher)
+    {
+    }
+
+    public void AddFootstep(double x, double y, double z)
     {
     }
 
