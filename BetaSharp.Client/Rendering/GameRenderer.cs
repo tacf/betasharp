@@ -17,8 +17,6 @@ using BetaSharp.Util.Maths;
 using BetaSharp.Worlds.Core;
 using BetaSharp.Worlds.Generation.Biomes;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using GLEnum = BetaSharp.Client.Rendering.Core.OpenGL.GLEnum;
 
 namespace BetaSharp.Client.Rendering;
 
@@ -26,6 +24,7 @@ public class GameRenderer : ISceneRenderer
 {
     private readonly bool _cloudFog = false;
     private readonly BetaSharp _client;
+    private readonly ISceneRenderBackend _sceneRenderBackend;
     private float _viewDistance;
     public CameraController cameraController;
     private int _ticks;
@@ -36,7 +35,6 @@ public class GameRenderer : ISceneRenderer
     private long _prevFrameTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     private readonly JavaRandom _random = new();
     private int _rainSoundCounter;
-    private readonly float[] _fogColorBuffer = new float[16];
     private float _fogColorRed;
     private float _fogColorGreen;
     private float _fogColorBlue;
@@ -48,6 +46,7 @@ public class GameRenderer : ISceneRenderer
     public GameRenderer(BetaSharp game)
     {
         _client = game;
+        _sceneRenderBackend = game.SceneRenderBackend;
         cameraController = new CameraController(game);
     }
 
@@ -168,22 +167,22 @@ public class GameRenderer : ISceneRenderer
     private void renderWorld(float tickDelta)
     {
         _viewDistance = _client.Options.renderDistance * 16.0f;
-        GLManager.GL.MatrixMode(GLEnum.Projection);
-        GLManager.GL.LoadIdentity();
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
+        _sceneRenderBackend.LoadIdentity();
 
         if (cameraController.CameraZoom != 1.0D)
         {
-            GLManager.GL.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch, 0.0F);
-            GLManager.GL.Scale(cameraController.CameraZoom, cameraController.CameraZoom, 1.0D);
-            GLU.gluPerspective(cameraController.GetFov(tickDelta), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
+            _sceneRenderBackend.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch, 0.0F);
+            _sceneRenderBackend.Scale((float)cameraController.CameraZoom, (float)cameraController.CameraZoom, 1.0F);
+            _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
         }
         else
         {
-            GLU.gluPerspective(cameraController.GetFov(tickDelta), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
+            _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
         }
 
-        GLManager.GL.MatrixMode(GLEnum.Modelview);
-        GLManager.GL.LoadIdentity();
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
+        _sceneRenderBackend.LoadIdentity();
 
         cameraController.ApplyDamageTiltEffect(tickDelta);
         if (_client.Options.ViewBobbing)
@@ -196,9 +195,9 @@ public class GameRenderer : ISceneRenderer
         {
             float var5 = 5.0F / (var4 * var4 + 5.0F) - var4 * 0.04F;
             var5 *= var5;
-            GLManager.GL.Rotate((_ticks + tickDelta) * 20.0F, 0.0F, 1.0F, 1.0F);
-            GLManager.GL.Scale(1.0F / var5, 1.0F, 1.0F);
-            GLManager.GL.Rotate(-(_ticks + tickDelta) * 20.0F, 0.0F, 1.0F, 1.0F);
+            _sceneRenderBackend.Rotate((_ticks + tickDelta) * 20.0F, 0.0F, 1.0F, 1.0F);
+            _sceneRenderBackend.Scale(1.0F / var5, 1.0F, 1.0F);
+            _sceneRenderBackend.Rotate(-(_ticks + tickDelta) * 20.0F, 0.0F, 1.0F, 1.0F);
         }
 
         cameraController.ApplyCameraTransform(tickDelta);
@@ -206,19 +205,19 @@ public class GameRenderer : ISceneRenderer
 
     private void renderFirstPersonHand(float tickDelta)
     {
-        GLManager.GL.MatrixMode(GLEnum.Projection);
-        GLManager.GL.LoadIdentity();
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
+        _sceneRenderBackend.LoadIdentity();
         if (cameraController.CameraZoom != 1.0D)
         {
-            GLManager.GL.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch, 0.0F);
-            GLManager.GL.Scale(cameraController.CameraZoom, cameraController.CameraZoom, 1.0D);
+            _sceneRenderBackend.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch, 0.0F);
+            _sceneRenderBackend.Scale((float)cameraController.CameraZoom, (float)cameraController.CameraZoom, 1.0F);
         }
 
-        GLU.gluPerspective(cameraController.GetFov(tickDelta, true), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
-        GLManager.GL.MatrixMode(GLEnum.Modelview);
-        GLManager.GL.LoadIdentity();
+        _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta, true), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
+        _sceneRenderBackend.LoadIdentity();
 
-        GLManager.GL.PushMatrix();
+        _sceneRenderBackend.PushMatrix();
         cameraController.ApplyDamageTiltEffect(tickDelta);
         if (_client.Options.ViewBobbing)
         {
@@ -230,7 +229,7 @@ public class GameRenderer : ISceneRenderer
             HeldItemRenderer.renderItemInFirstPerson(tickDelta);
         }
 
-        GLManager.GL.PopMatrix();
+        _sceneRenderBackend.PopMatrix();
         if (_client.Options.CameraMode == EnumCameraMode.FirstPerson && !_client.Camera.isSleeping())
         {
             HeldItemRenderer.renderOverlays(tickDelta);
@@ -341,17 +340,17 @@ public class GameRenderer : ISceneRenderer
             }
             else
             {
-                GLManager.GL.Viewport(0, 0, (uint)_client.PresentationTargetWidth, (uint)_client.PresentationTargetHeight);
-                GLManager.GL.MatrixMode(GLEnum.Projection);
-                GLManager.GL.LoadIdentity();
-                GLManager.GL.MatrixMode(GLEnum.Modelview);
-                GLManager.GL.LoadIdentity();
+                _sceneRenderBackend.SetViewport(0, 0, (uint)_client.PresentationTargetWidth, (uint)_client.PresentationTargetHeight);
+                _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
+                _sceneRenderBackend.LoadIdentity();
+                _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
+                _sceneRenderBackend.LoadIdentity();
                 setupHudRender();
             }
 
             if (_client.CurrentScreen != null)
             {
-                GLManager.GL.Clear(ClearBufferMask.DepthBufferBit);
+                _sceneRenderBackend.Clear(SceneClearBufferMask.Depth);
                 setupHudRender();
                 _client.CurrentScreen.Render(scaledMouseX, scaledMouseY, tickDelta);
 
@@ -401,8 +400,8 @@ public class GameRenderer : ISceneRenderer
 
     public void renderFrame(float tickDelta, long time)
     {
-        GLManager.GL.Enable(GLEnum.CullFace);
-        GLManager.GL.Enable(GLEnum.DepthTest);
+        _sceneRenderBackend.Enable(SceneRenderCapability.CullFace);
+        _sceneRenderBackend.Enable(SceneRenderCapability.DepthTest);
 
         using (Profiler.Begin("GetMouseOver"))
         {
@@ -418,11 +417,11 @@ public class GameRenderer : ISceneRenderer
 
         using (Profiler.Begin("UpdateFog"))
         {
-            GLManager.GL.Viewport(0, 0, (uint)_client.PresentationTargetWidth, (uint)_client.PresentationTargetHeight);
+            _sceneRenderBackend.SetViewport(0, 0, (uint)_client.PresentationTargetWidth, (uint)_client.PresentationTargetHeight);
             updateSkyAndFogColors(tickDelta);
         }
-        GLManager.GL.Clear(ClearBufferMask.DepthBufferBit | ClearBufferMask.ColorBufferBit);
-        GLManager.GL.Enable(GLEnum.CullFace);
+        _sceneRenderBackend.Clear(SceneClearBufferMask.Depth | SceneClearBufferMask.Color);
+        _sceneRenderBackend.Enable(SceneRenderCapability.CullFace);
         renderWorld(tickDelta);
         Frustum.Instance();
         if (_client.Options.renderDistance >= 8)
@@ -431,14 +430,14 @@ public class GameRenderer : ISceneRenderer
             worldRenderer.RenderSky(tickDelta);
         }
 
-        GLManager.GL.Enable(GLEnum.Fog);
+        _sceneRenderBackend.Enable(SceneRenderCapability.Fog);
         applyFog(1);
 
         FrustrumCuller frustrumCuller = new();
         frustrumCuller.SetPosition(entX, entY, entZ);
 
         applyFog(0);
-        GLManager.GL.Enable(GLEnum.Fog);
+        _sceneRenderBackend.Enable(SceneRenderCapability.Fog);
         _client.TextureManager.BindTexture(_client.TextureManager.GetTextureId("/terrain.png"));
         Lighting.turnOff();
 
@@ -447,7 +446,7 @@ public class GameRenderer : ISceneRenderer
             worldRenderer.SortAndRender(entity, 0, (double)tickDelta, frustrumCuller);
         }
 
-        GLManager.GL.ShadeModel(GLEnum.Flat);
+        _sceneRenderBackend.SetShadeModel(SceneShadeModel.Flat);
         Lighting.turnOn();
 
         using (Profiler.Begin("RenderEntities"))
@@ -469,47 +468,47 @@ public class GameRenderer : ISceneRenderer
         if (_client.ObjectMouseOver.Type != HitResultType.MISS && entity.isInFluid(Material.Water) && entity is EntityPlayer)
         {
             entityPlayer = (EntityPlayer)entity;
-            GLManager.GL.Disable(GLEnum.AlphaTest);
+            _sceneRenderBackend.Disable(SceneRenderCapability.AlphaTest);
             worldRenderer.DrawBlockBreaking(entityPlayer, _client.ObjectMouseOver, entityPlayer.inventory.GetItemInHand(), tickDelta);
             worldRenderer.DrawSelectionBox(entityPlayer, _client.ObjectMouseOver, 0, entityPlayer.inventory.GetItemInHand(), tickDelta);
-            GLManager.GL.Enable(GLEnum.AlphaTest);
+            _sceneRenderBackend.Enable(SceneRenderCapability.AlphaTest);
         }
 
-        GLManager.GL.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        _sceneRenderBackend.SetBlendFunction(SceneBlendFactor.SrcAlpha, SceneBlendFactor.OneMinusSrcAlpha);
         applyFog(0);
-        GLManager.GL.Enable(GLEnum.Blend);
-        GLManager.GL.Disable(GLEnum.CullFace);
+        _sceneRenderBackend.Enable(SceneRenderCapability.Blend);
+        _sceneRenderBackend.Disable(SceneRenderCapability.CullFace);
         _client.TextureManager.BindTexture(_client.TextureManager.GetTextureId("/terrain.png"));
 
         using (Profiler.Begin("SortAndRenderTranslucent"))
         {
             worldRenderer.SortAndRender(entity, 1, tickDelta, frustrumCuller);
 
-            GLManager.GL.ShadeModel(GLEnum.Flat);
+            _sceneRenderBackend.SetShadeModel(SceneShadeModel.Flat);
         }
 
         //TODO: SELCTION BOX/BLOCK BREAKING VISUALIZATON DON'T APPEAR PROPERLY MOST OF THE TIME, SAME WITH ENTITY SHADOWS. VIEW BOBBING MAKES ENTITES BOB UP AND DOWN
 
-        GLManager.GL.DepthMask(true);
-        GLManager.GL.Enable(GLEnum.CullFace);
-        GLManager.GL.Disable(GLEnum.Blend);
+        _sceneRenderBackend.SetDepthMask(true);
+        _sceneRenderBackend.Enable(SceneRenderCapability.CullFace);
+        _sceneRenderBackend.Disable(SceneRenderCapability.Blend);
         if (!cameraController.IsZoomActive && entity is EntityPlayer && _client.ObjectMouseOver.Type != HitResultType.MISS && !entity.isInFluid(Material.Water))
         {
             entityPlayer = (EntityPlayer)entity;
-            GLManager.GL.Disable(GLEnum.AlphaTest);
+            _sceneRenderBackend.Disable(SceneRenderCapability.AlphaTest);
             worldRenderer.DrawBlockBreaking(entityPlayer, _client.ObjectMouseOver, entityPlayer.inventory.GetItemInHand(), tickDelta);
             worldRenderer.DrawSelectionBox(entityPlayer, _client.ObjectMouseOver, 0, entityPlayer.inventory.GetItemInHand(), tickDelta);
-            GLManager.GL.Enable(GLEnum.AlphaTest);
+            _sceneRenderBackend.Enable(SceneRenderCapability.AlphaTest);
         }
 
         renderSnow(tickDelta);
-        GLManager.GL.Disable(GLEnum.Fog);
+        _sceneRenderBackend.Disable(SceneRenderCapability.Fog);
         if (_targetedEntity != null)
         {
         }
 
         applyFog(0);
-        GLManager.GL.Enable(GLEnum.Fog);
+        _sceneRenderBackend.Enable(SceneRenderCapability.Fog);
 
         if (_client.ShowChunkBorders)
         {
@@ -517,12 +516,12 @@ public class GameRenderer : ISceneRenderer
         }
 
         worldRenderer.RenderClouds(tickDelta);
-        GLManager.GL.Disable(GLEnum.Fog);
+        _sceneRenderBackend.Disable(SceneRenderCapability.Fog);
         applyFog(1);
 
         if (!cameraController.IsZoomActive)
         {
-            GLManager.GL.Clear(ClearBufferMask.DepthBufferBit);
+            _sceneRenderBackend.Clear(SceneClearBufferMask.Depth);
             renderFirstPersonHand(tickDelta);
         }
     }
@@ -537,15 +536,15 @@ public class GameRenderer : ISceneRenderer
         int playerChunkX = _client.Player.chunkX;
         int playerChunkZ = _client.Player.chunkZ;
 
-        GLManager.GL.MatrixMode(GLEnum.Modelview);
-        GLManager.GL.PushMatrix();
-        GLManager.GL.Translate((float)-camX, (float)-camY, (float)-camZ);
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
+        _sceneRenderBackend.PushMatrix();
+        _sceneRenderBackend.Translate((float)-camX, (float)-camY, (float)-camZ);
 
-        GLManager.GL.Disable(GLEnum.Texture2D);
-        GLManager.GL.Disable(GLEnum.Lighting);
-        GLManager.GL.Disable(GLEnum.Fog);
-        GLManager.GL.Enable(GLEnum.DepthTest);
-        GLManager.GL.DepthMask(true);
+        _sceneRenderBackend.Disable(SceneRenderCapability.Texture2D);
+        _sceneRenderBackend.Disable(SceneRenderCapability.Lighting);
+        _sceneRenderBackend.Disable(SceneRenderCapability.Fog);
+        _sceneRenderBackend.Enable(SceneRenderCapability.DepthTest);
+        _sceneRenderBackend.SetDepthMask(true);
 
         double minX = playerChunkX * 16.0;
         double maxX = (playerChunkX + 1) * 16.0;
@@ -618,8 +617,8 @@ public class GameRenderer : ISceneRenderer
         }
 
         tess.draw();
-        GLManager.GL.PopMatrix();
-        GLManager.GL.Enable(GLEnum.Texture2D);
+        _sceneRenderBackend.PopMatrix();
+        _sceneRenderBackend.Enable(SceneRenderCapability.Texture2D);
     }
 
     private void renderRain()
@@ -698,11 +697,11 @@ public class GameRenderer : ISceneRenderer
             int var6 = MathHelper.Floor(var3.y);
             int var7 = MathHelper.Floor(var3.z);
             Tessellator var8 = Tessellator.instance;
-            GLManager.GL.Disable(GLEnum.CullFace);
-            GLManager.GL.Normal3(0.0F, 1.0F, 0.0F);
-            GLManager.GL.Enable(GLEnum.Blend);
-            GLManager.GL.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-            GLManager.GL.AlphaFunc(GLEnum.Greater, 0.01F);
+            _sceneRenderBackend.Disable(SceneRenderCapability.CullFace);
+            _sceneRenderBackend.SetNormal(0.0F, 1.0F, 0.0F);
+            _sceneRenderBackend.Enable(SceneRenderCapability.Blend);
+            _sceneRenderBackend.SetBlendFunction(SceneBlendFactor.SrcAlpha, SceneBlendFactor.OneMinusSrcAlpha);
+            _sceneRenderBackend.SetAlphaFunction(SceneAlphaFunction.Greater, 0.01F);
             _client.TextureManager.BindTexture(_client.TextureManager.GetTextureId("/environment/snow.png"));
             double var9 = var3.lastTickX + (var3.x - var3.lastTickX) * (double)tickDelta;
             double var11 = var3.lastTickY + (var3.y - var3.lastTickY) * (double)tickDelta;
@@ -764,7 +763,7 @@ public class GameRenderer : ISceneRenderer
                             float var35 = MathHelper.Sqrt(var31 * var31 + var33 * var33) / var16;
                             var8.startDrawingQuads();
                             float var36 = var4.GetLuminance(var19, var23, var20);
-                            GLManager.GL.Color4(var36, var36, var36, ((1.0F - var35 * var35) * 0.3F + 0.5F) * var2);
+                            _sceneRenderBackend.SetColor(var36, var36, var36, ((1.0F - var35 * var35) * 0.3F + 0.5F) * var2);
                             var8.setTranslationD(-var9 * 1.0D, -var11 * 1.0D, -var13 * 1.0D);
                             var8.addVertexWithUV(var19 + 0, var24, var20 + 0.5D, (double)(0.0F * var26 + var29), (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
                             var8.addVertexWithUV(var19 + 1, var24, var20 + 0.5D, (double)(1.0F * var26 + var29), (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
@@ -816,7 +815,7 @@ public class GameRenderer : ISceneRenderer
                             float var40 = MathHelper.Sqrt(var38 * var38 + var39 * var39) / var16;
                             var8.startDrawingQuads();
                             float var32 = var4.GetLuminance(var19, 128, var20) * 0.85F + 0.15F;
-                            GLManager.GL.Color4(var32, var32, var32, ((1.0F - var40 * var40) * 0.5F + 0.5F) * var2);
+                            _sceneRenderBackend.SetColor(var32, var32, var32, ((1.0F - var40 * var40) * 0.5F + 0.5F) * var2);
                             var8.setTranslationD(-var9 * 1.0D, -var11 * 1.0D, -var13 * 1.0D);
                             var8.addVertexWithUV(var19 + 0, var23, var20 + 0.5D, (double)(0.0F * var37), (double)(var23 * var37 / 4.0F + var26 * var37));
                             var8.addVertexWithUV(var19 + 1, var23, var20 + 0.5D, (double)(1.0F * var37), (double)(var23 * var37 / 4.0F + var26 * var37));
@@ -833,33 +832,33 @@ public class GameRenderer : ISceneRenderer
                 }
             }
 
-            GLManager.GL.Enable(GLEnum.CullFace);
-            GLManager.GL.Disable(GLEnum.Blend);
-            GLManager.GL.AlphaFunc(GLEnum.Greater, 0.1F);
+            _sceneRenderBackend.Enable(SceneRenderCapability.CullFace);
+            _sceneRenderBackend.Disable(SceneRenderCapability.Blend);
+            _sceneRenderBackend.SetAlphaFunction(SceneAlphaFunction.Greater, 0.1F);
         }
     }
 
     public void setupHudRender()
     {
         ScaledResolution sr = new(_client.Options, _client.DisplayWidth, _client.DisplayHeight);
-        GLManager.GL.Clear(ClearBufferMask.DepthBufferBit);
-        GLManager.GL.MatrixMode(GLEnum.Projection);
-        GLManager.GL.LoadIdentity();
-        GLManager.GL.Ortho(0.0D, sr.ScaledWidthDouble, sr.ScaledHeightDouble, 0.0D, 1000.0D, 3000.0D);
-        GLManager.GL.MatrixMode(GLEnum.Modelview);
-        GLManager.GL.LoadIdentity();
-        GLManager.GL.Translate(0.0F, 0.0F, -2000.0F);
+        _sceneRenderBackend.Clear(SceneClearBufferMask.Depth);
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
+        _sceneRenderBackend.LoadIdentity();
+        _sceneRenderBackend.Ortho(0.0D, sr.ScaledWidthDouble, sr.ScaledHeightDouble, 0.0D, 1000.0D, 3000.0D);
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
+        _sceneRenderBackend.LoadIdentity();
+        _sceneRenderBackend.Translate(0.0F, 0.0F, -2000.0F);
     }
 
     public void DrawVirtualCursor(int x, int y)
     {
         if (_client.IsControllerMode && _client.CurrentScreen?.IsEditingSlider != true)
         {
-            GLManager.GL.Disable(GLEnum.Lighting);
-            GLManager.GL.Disable(GLEnum.DepthTest);
-            GLManager.GL.Enable(GLEnum.Blend);
-            GLManager.GL.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-            GLManager.GL.Color4(1.0f, 1.0f, 1.0f, 1.0f);
+            _sceneRenderBackend.Disable(SceneRenderCapability.Lighting);
+            _sceneRenderBackend.Disable(SceneRenderCapability.DepthTest);
+            _sceneRenderBackend.Enable(SceneRenderCapability.Blend);
+            _sceneRenderBackend.SetBlendFunction(SceneBlendFactor.SrcAlpha, SceneBlendFactor.OneMinusSrcAlpha);
+            _sceneRenderBackend.SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
             TextureHandle textureId = _client.TextureManager.GetTextureId("/gui/Pointer.png");
             _client.TextureManager.BindTexture(textureId);
@@ -879,8 +878,8 @@ public class GameRenderer : ISceneRenderer
             tess.addVertexWithUV(x, y, zLevel, 0.0, 0.0);
             tess.draw();
 
-            GLManager.GL.Disable(GLEnum.Blend);
-            GLManager.GL.Enable(GLEnum.DepthTest);
+            _sceneRenderBackend.Disable(SceneRenderCapability.Blend);
+            _sceneRenderBackend.Enable(SceneRenderCapability.DepthTest);
         }
     }
 
@@ -948,70 +947,62 @@ public class GameRenderer : ISceneRenderer
         _fogColorGreen *= var12;
         _fogColorBlue *= var12;
 
-        GLManager.GL.ClearColor(_fogColorRed, _fogColorGreen, _fogColorBlue, 0.0F);
+        _sceneRenderBackend.ClearColor(_fogColorRed, _fogColorGreen, _fogColorBlue, 0.0F);
     }
 
     private void applyFog(int mode)
     {
         EntityLiving var3 = _client.Camera;
-        GLManager.GL.Fog(GLEnum.FogColor, updateFogColorBuffer(_fogColorRed, _fogColorGreen, _fogColorBlue, 1.0F));
+        _sceneRenderBackend.SetFogColor(_fogColorRed, _fogColorGreen, _fogColorBlue, 1.0F);
         _client.WorldRenderer.SetChunkFogColor(_fogColorRed, _fogColorGreen, _fogColorBlue, 1.0f);
-        GLManager.GL.Normal3(0.0F, -1.0F, 0.0F);
-        GLManager.GL.Color4(1.0F, 1.0F, 1.0F, 1.0F);
+        _sceneRenderBackend.SetNormal(0.0F, -1.0F, 0.0F);
+        _sceneRenderBackend.SetColor(1.0F, 1.0F, 1.0F, 1.0F);
         if (_cloudFog)
         {
-            GLManager.GL.Fog(GLEnum.FogMode, (int)GLEnum.Exp);
-            GLManager.GL.Fog(GLEnum.FogDensity, 0.1F);
+            _sceneRenderBackend.SetFogMode(SceneFogMode.Exp);
+            _sceneRenderBackend.SetFogDensity(0.1F);
             _client.WorldRenderer.SetChunkFogMode(1);
             _client.WorldRenderer.SetChunkFogDensity(0.1f);
         }
         else if (var3.isInFluid(Material.Water))
         {
-            GLManager.GL.Fog(GLEnum.FogMode, (int)GLEnum.Exp);
-            GLManager.GL.Fog(GLEnum.FogDensity, 0.1F);
+            _sceneRenderBackend.SetFogMode(SceneFogMode.Exp);
+            _sceneRenderBackend.SetFogDensity(0.1F);
             _client.WorldRenderer.SetChunkFogMode(1);
             _client.WorldRenderer.SetChunkFogDensity(0.1f);
         }
         else if (var3.isInFluid(Material.Lava))
         {
-            GLManager.GL.Fog(GLEnum.FogMode, (int)GLEnum.Exp);
-            GLManager.GL.Fog(GLEnum.FogDensity, 2.0F);
+            _sceneRenderBackend.SetFogMode(SceneFogMode.Exp);
+            _sceneRenderBackend.SetFogDensity(2.0F);
             _client.WorldRenderer.SetChunkFogMode(1);
             _client.WorldRenderer.SetChunkFogDensity(2.0f);
         }
         else
         {
-            GLManager.GL.Fog(GLEnum.FogMode, (int)GLEnum.Linear);
-            GLManager.GL.Fog(GLEnum.FogStart, _viewDistance * 0.25F);
-            GLManager.GL.Fog(GLEnum.FogEnd, _viewDistance);
+            _sceneRenderBackend.SetFogMode(SceneFogMode.Linear);
+            _sceneRenderBackend.SetFogStart(_viewDistance * 0.25F);
+            _sceneRenderBackend.SetFogEnd(_viewDistance);
             _client.WorldRenderer.SetChunkFogMode(0);
             _client.WorldRenderer.SetChunkFogStart(_viewDistance * 0.25f);
             _client.WorldRenderer.SetChunkFogEnd(_viewDistance);
             if (mode < 0)
             {
-                GLManager.GL.Fog(GLEnum.FogStart, 0.0F);
-                GLManager.GL.Fog(GLEnum.FogEnd, _viewDistance * 0.8F);
+                _sceneRenderBackend.SetFogStart(0.0F);
+                _sceneRenderBackend.SetFogEnd(_viewDistance * 0.8F);
                 _client.WorldRenderer.SetChunkFogStart(0.0f);
                 _client.WorldRenderer.SetChunkFogEnd(_viewDistance * 0.8f);
             }
 
             if (_client.World.Dimension.IsNether)
             {
-                GLManager.GL.Fog(GLEnum.FogStart, 0.0F);
+                _sceneRenderBackend.SetFogStart(0.0F);
                 _client.WorldRenderer.SetChunkFogStart(0.0f);
             }
         }
 
-        GLManager.GL.Enable(GLEnum.ColorMaterial);
-        GLManager.GL.ColorMaterial(GLEnum.Front, GLEnum.Ambient);
+        _sceneRenderBackend.Enable(SceneRenderCapability.ColorMaterial);
+        _sceneRenderBackend.SetColorMaterial(SceneColorMaterialFace.Front, SceneColorMaterialParameter.Ambient);
     }
 
-    private float[] updateFogColorBuffer(float var1, float var2, float var3, float var4)
-    {
-        _fogColorBuffer[0] = var1;
-        _fogColorBuffer[1] = var2;
-        _fogColorBuffer[2] = var3;
-        _fogColorBuffer[3] = var4;
-        return _fogColorBuffer;
-    }
 }

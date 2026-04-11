@@ -18,6 +18,7 @@ internal interface IRenderBackendResourceServices
     IEntityRenderDispatcher EntityRenderDispatcher { get; }
     IBlockEntityRenderDispatcher BlockEntityRenderDispatcher { get; }
     IUiRenderBackend UiRenderBackend { get; }
+    ISceneRenderBackend SceneRenderBackend { get; }
 
     void ConfigureEntityRendering(BetaSharp client);
     void RegisterDynamicTextures(BetaSharp client);

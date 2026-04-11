@@ -15,6 +15,7 @@ internal sealed class VulkanRenderBackendResourceServices : IRenderBackendResour
     public IEntityRenderDispatcher EntityRenderDispatcher { get; }
     public IBlockEntityRenderDispatcher BlockEntityRenderDispatcher { get; }
     public IUiRenderBackend UiRenderBackend { get; }
+    public ISceneRenderBackend SceneRenderBackend { get; }
 
     public VulkanRenderBackendResourceServices(BetaSharp client, TexturePacks texturePacks, GameOptions options)
     {
@@ -32,6 +33,7 @@ internal sealed class VulkanRenderBackendResourceServices : IRenderBackendResour
             EntityDispatcher = EntityRenderDispatcher
         };
         UiRenderBackend = new NoOpUiRenderBackend();
+        SceneRenderBackend = new NoOpSceneRenderBackend();
     }
 
     public void ConfigureEntityRendering(BetaSharp client)
