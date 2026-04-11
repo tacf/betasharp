@@ -148,6 +148,7 @@ public partial class BetaSharp :
 
     public ISceneRenderer SceneRenderer { get; private set; } = new NoOpSceneRenderer();
     public IWorldRenderer WorldRenderer { get; private set; } = new NoOpWorldRenderer();
+    public ISceneRenderBackend SceneRenderBackend { get; private set; } = new NoOpSceneRenderBackend();
     public int PresentationTargetWidth => _renderPresentation.FramebufferWidth;
     public int PresentationTargetHeight => _renderPresentation.FramebufferHeight;
     public bool IsPresentationBlitSkipped => _renderPresentation.SkipBlit;
@@ -343,6 +344,7 @@ public partial class BetaSharp :
         SkinManager = _backendResourceServices.SkinManager;
         EntityRenderDispatcher = _backendResourceServices.EntityRenderDispatcher;
         BlockEntityRenderDispatcher = _backendResourceServices.BlockEntityRenderDispatcher;
+        SceneRenderBackend = _backendResourceServices.SceneRenderBackend;
 
         UIContext = new UIContext(
             Options,

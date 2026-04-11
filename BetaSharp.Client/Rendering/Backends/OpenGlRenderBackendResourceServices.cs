@@ -17,6 +17,7 @@ internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResour
     public IEntityRenderDispatcher EntityRenderDispatcher { get; }
     public IBlockEntityRenderDispatcher BlockEntityRenderDispatcher { get; }
     public IUiRenderBackend UiRenderBackend { get; }
+    public ISceneRenderBackend SceneRenderBackend { get; }
 
     public OpenGlRenderBackendResourceServices(BetaSharp client, TexturePacks texturePacks, GameOptions options)
     {
@@ -31,6 +32,7 @@ internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResour
         EntityRenderDispatcher = global::BetaSharp.Client.Rendering.Entities.EntityRenderDispatcher.Instance;
         BlockEntityRenderDispatcher = BlockEntityRenderer.Instance;
         UiRenderBackend = new OpenGlUiRenderBackend();
+        SceneRenderBackend = new OpenGlSceneRenderBackend();
     }
 
     public void ConfigureEntityRendering(BetaSharp client)
