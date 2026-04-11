@@ -1,6 +1,5 @@
 using BetaSharp.Blocks;
 using BetaSharp.Blocks.Entities;
-using BetaSharp.Client.Entities.FX;
 using BetaSharp.Client.Options;
 using BetaSharp.Client.Rendering.Blocks;
 using BetaSharp.Client.Rendering.Blocks.Entities;
@@ -865,7 +864,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                     case "explode": pm.AddExplode(x, y, z, velocityX, velocityY, velocityZ); break;
                     case "flame": pm.AddFlame(x, y, z, velocityX, velocityY, velocityZ); break;
                     case "lava": pm.AddLava(x, y, z); break;
-                    case "footstep": pm.AddSpecialParticle(new LegacyParticleAdapter(new EntityFootStepFX(_textureManager, _world, x, y, z))); break;
+                    case "footstep": pm.AddFootstep(x, y, z); break;
                     case "splash": pm.AddSplash(x, y, z, velocityX, velocityY, velocityZ); break;
                     case "largesmoke": pm.AddSmoke(x, y, z, velocityX, velocityY, velocityZ, 2.5f); break;
                     case "reddust": pm.AddReddust(x, y, z, (float)velocityX, (float)velocityY, (float)velocityZ); break;

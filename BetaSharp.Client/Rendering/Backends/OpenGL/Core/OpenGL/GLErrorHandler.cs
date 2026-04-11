@@ -12,7 +12,7 @@ internal class GLErrorHandler
 
     public unsafe GLErrorHandler()
     {
-        GL gl = Display.getGL()!;
+        GL gl = GL.GetApi(Display.getWindow());
 
         _debugProcCallback = DebugCallback;
 

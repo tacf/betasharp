@@ -7,7 +7,7 @@ using BetaSharp.Client.Rendering.Items;
 using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Client.UI.Rendering;
 
-namespace BetaSharp.Client.Rendering.Backends;
+namespace BetaSharp.Client.Rendering.Backends.OpenGL;
 
 internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResourceServices
 {

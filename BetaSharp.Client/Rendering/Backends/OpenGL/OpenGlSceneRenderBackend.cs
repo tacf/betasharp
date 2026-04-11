@@ -3,7 +3,7 @@ using BetaSharp.Client.Rendering.Core.OpenGL;
 using Silk.NET.OpenGL;
 using GLEnum = BetaSharp.Client.Rendering.Core.OpenGL.GLEnum;
 
-namespace BetaSharp.Client.Rendering.Backends;
+namespace BetaSharp.Client.Rendering.Backends.OpenGL;
 
 internal sealed class OpenGlSceneRenderBackend : ISceneRenderBackend
 {

@@ -1,5 +1,7 @@
 using BetaSharp.Blocks;
+using BetaSharp.Client.Entities.FX;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Client.Rendering.Particles;
 using BetaSharp.Entities;
 using BetaSharp.Items;
@@ -84,7 +86,17 @@ public class ParticleManager : IParticleManager
 
     public int ActiveParticleCount => _layers[0].Count + _layers[1].Count + _layers[2].Count;
 
-    public void AddSpecialParticle(ISpecialParticle particle)
+    public void AddPickupParticle(Entity target, Entity collector, float yOffset, IEntityRenderDispatcher entityRenderDispatcher)
+    {
+        AddSpecialParticle(new LegacyParticleAdapter(new EntityPickupFX(worldObj, target, collector, yOffset, entityRenderDispatcher)));
+    }
+
+    public void AddFootstep(double x, double y, double z)
+    {
+        AddSpecialParticle(new LegacyParticleAdapter(new EntityFootStepFX(_textureManager, worldObj, x, y, z)));
+    }
+
+    private void AddSpecialParticle(ISpecialParticle particle)
     {
         _specialParticles.Add(particle);
     }
