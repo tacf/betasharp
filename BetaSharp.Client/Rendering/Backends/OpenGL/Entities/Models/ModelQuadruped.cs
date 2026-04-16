@@ -1,3 +1,4 @@
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Util.Maths;
 
 namespace BetaSharp.Client.Rendering.Entities.Models;
@@ -33,15 +34,15 @@ public class ModelQuadruped : ModelBase
         leg4.setRotationPoint(3.0F, 24 - var1, -5.0F);
     }
 
-    public override void render(float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
     {
         setRotationAngles(var1, var2, var3, var4, var5, var6);
-        head.render(var6);
-        body.render(var6);
-        leg1.render(var6);
-        leg2.render(var6);
-        leg3.render(var6);
-        leg4.render(var6);
+        head.render(gl, var6);
+        body.render(gl, var6);
+        leg1.render(gl, var6);
+        leg2.render(gl, var6);
+        leg3.render(gl, var6);
+        leg4.render(gl, var6);
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)

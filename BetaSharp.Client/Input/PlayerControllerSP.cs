@@ -128,12 +128,12 @@ public class PlayerControllerSP : PlayerController
     {
         if (curBlockDamage <= 0.0F)
         {
-            Game.SceneRenderer.SetDamagePartialTime(0.0F);
+            Game.SceneOrchestrator.SetDamagePartialTime(0.0F);
         }
         else
         {
             float var2 = prevBlockDamage + (curBlockDamage - prevBlockDamage) * var1;
-            Game.SceneRenderer.SetDamagePartialTime(var2);
+            Game.SceneOrchestrator.SetDamagePartialTime(var2);
         }
 
     }

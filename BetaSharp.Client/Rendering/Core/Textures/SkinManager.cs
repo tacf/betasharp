@@ -56,7 +56,12 @@ public sealed class SkinManager : ISkinManager
         }
     }
 
-    public void RequestDownload(string? username, bool cache = false)
+    public void RequestDownload(string? username)
+    {
+        RequestDownload(username, cache: false);
+    }
+
+    public void RequestDownload(string? username, bool cache)
     {
         if (string.IsNullOrWhiteSpace(username) || _textureHandles.ContainsKey(username)
                                                 || _downloadedImages.ContainsKey(username)

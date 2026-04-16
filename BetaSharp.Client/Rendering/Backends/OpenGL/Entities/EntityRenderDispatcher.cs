@@ -6,6 +6,7 @@ using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Entities.Models;
 using BetaSharp.Client.Rendering.Items;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 using BetaSharp.Items;
 using BetaSharp.Util.Maths;
@@ -24,7 +25,7 @@ public class EntityRenderDispatcher : IEntityRenderDispatcher
     public ITextureManager TextureManager { get; private set; }
     public ISkinManager SkinManager { get; set; }
     public IHeldItemRenderer HeldItemRenderer { get; set; } = new NoOpHeldItemRenderer();
-    public ISceneRenderBackend SceneRenderBackend { get; private set; } = new NoOpSceneRenderBackend();
+    public ILegacyFixedFunctionApi SceneRenderBackend { get; private set; } = new NoOpLegacyFixedFunctionApi();
     public World World { get; set; }
     public EntityLiving CameraEntity { get; private set; }
     public float PlayerViewY { get; set; }
@@ -92,7 +93,7 @@ public class EntityRenderDispatcher : IEntityRenderDispatcher
         return GetEntityClassRenderObject(entity.GetType());
     }
 
-    public void CacheRenderInfo(World world, ITextureManager textureManager, ITextRenderer textRenderer, EntityLiving camera, GameOptions options, ISceneRenderBackend sceneRenderBackend, float tickDelta)
+    public void CacheRenderInfo(World world, ITextureManager textureManager, ITextRenderer textRenderer, EntityLiving camera, GameOptions options, ILegacyFixedFunctionApi sceneRenderBackend, float tickDelta)
     {
         World = world;
         TextureManager = textureManager;

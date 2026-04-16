@@ -1,5 +1,7 @@
 using BetaSharp.Blocks.Entities;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Entities;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Worlds.Core;
 using BetaSharp.Worlds.Core.Systems;
 
@@ -8,6 +10,7 @@ namespace BetaSharp.Client.Rendering.Blocks.Entities;
 public abstract class BlockEntitySpecialRenderer
 {
     protected IBlockEntityRenderDispatcher tileEntityRenderer;
+    protected ILegacyFixedFunctionApi Scene => tileEntityRenderer.EntityDispatcher.SceneRenderBackend;
 
     public abstract void renderTileEntityAt(BlockEntity blockEntity, double x, double y, double z, float tickDelta);
 

@@ -8,6 +8,7 @@ using BetaSharp.Client.Rendering.Chunks;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Items;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Diagnostics;
 using BetaSharp.Entities;
 using BetaSharp.Profiling;
@@ -20,11 +21,11 @@ using Silk.NET.Maths;
 
 namespace BetaSharp.Client.Rendering;
 
-public class GameRenderer : ISceneRenderer
+public class GameRenderer : ISceneOrchestrator
 {
     private readonly bool _cloudFog = false;
     private readonly BetaSharp _client;
-    private readonly ISceneRenderBackend _sceneRenderBackend;
+    private readonly ILegacyFixedFunctionApi _sceneRenderBackend;
     private float _viewDistance;
     public CameraController cameraController;
     private int _ticks;
@@ -46,7 +47,7 @@ public class GameRenderer : ISceneRenderer
     public GameRenderer(BetaSharp game)
     {
         _client = game;
-        _sceneRenderBackend = game.SceneRenderBackend;
+        _sceneRenderBackend = game.LegacyFixedFunctionApi;
         cameraController = new CameraController(game);
     }
 
@@ -341,7 +342,7 @@ public class GameRenderer : ISceneRenderer
             else
             {
                 _sceneRenderBackend.SetViewport(0, 0, (uint)_client.PresentationTargetWidth, (uint)_client.PresentationTargetHeight);
-                _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
+        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
                 _sceneRenderBackend.LoadIdentity();
                 _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
                 _sceneRenderBackend.LoadIdentity();

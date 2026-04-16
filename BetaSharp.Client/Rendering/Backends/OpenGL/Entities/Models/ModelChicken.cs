@@ -1,3 +1,4 @@
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Util.Maths;
 
 namespace BetaSharp.Client.Rendering.Entities.Models;
@@ -42,17 +43,17 @@ public class ModelChicken : ModelBase
         leftWing.setRotationPoint(4.0F, -3 + var1, 0.0F);
     }
 
-    public override void render(float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
     {
         setRotationAngles(var1, var2, var3, var4, var5, var6);
-        head.render(var6);
-        bill.render(var6);
-        chin.render(var6);
-        body.render(var6);
-        rightLeg.render(var6);
-        leftLeg.render(var6);
-        rightWing.render(var6);
-        leftWing.render(var6);
+        head.render(gl, var6);
+        bill.render(gl, var6);
+        chin.render(gl, var6);
+        body.render(gl, var6);
+        rightLeg.render(gl, var6);
+        leftLeg.render(gl, var6);
+        rightWing.render(gl, var6);
+        leftWing.render(gl, var6);
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)

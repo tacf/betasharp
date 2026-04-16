@@ -1,6 +1,7 @@
 using BetaSharp.Blocks;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 using BetaSharp.Util.Maths;
 using BetaSharp.Worlds.Core;
@@ -12,7 +13,7 @@ public abstract class EntityRenderer
     public IEntityRenderDispatcher Dispatcher { get; set; } = null!;
     protected float ShadowRadius = 0.0F;
     protected float ShadowStrength = 1.0F;
-    protected ISceneRenderBackend Scene => Dispatcher.SceneRenderBackend;
+    protected ILegacyFixedFunctionApi Scene => Dispatcher.SceneRenderBackend;
 
     protected World World => Dispatcher.World;
     public ITextRenderer TextRenderer => Dispatcher.GetTextRenderer();

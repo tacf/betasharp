@@ -4,6 +4,7 @@ using BetaSharp.Client.Guis;
 using BetaSharp.Client.Rendering.Blocks;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Entities.Models;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 using BetaSharp.Items;
 using BetaSharp.Util.Maths;
@@ -129,7 +130,7 @@ public class PlayerEntityRenderer : LivingEntityRenderer
         if (helmetStack != null && helmetStack.getItem().id < 256)
         {
             Scene.PushMatrix();
-            _modelBipedMain.bipedHead.transform(1.0F / 16.0F);
+            _modelBipedMain.bipedHead.transform(Scene, 1.0F / 16.0F);
             if (BlockRenderer.IsSideLit(Block.Blocks[helmetStack.ItemId].getRenderType()))
             {
                 float helmetScale = 10.0F / 16.0F;
@@ -159,7 +160,7 @@ public class PlayerEntityRenderer : LivingEntityRenderer
                 Scene.Rotate(-earYawOffset, 0.0F, 1.0F, 0.0F);
                 float earScale = 4.0F / 3.0F;
                 Scene.Scale(earScale, earScale, earScale);
-                _modelBipedMain.renderEars(1.0F / 16.0F);
+                _modelBipedMain.renderEars(Scene, 1.0F / 16.0F);
                 Scene.PopMatrix();
             }
         }
@@ -206,7 +207,7 @@ public class PlayerEntityRenderer : LivingEntityRenderer
             Scene.Rotate(capeSideSwing / 2.0F, 0.0F, 0.0F, 1.0F);
             Scene.Rotate(-capeSideSwing / 2.0F, 0.0F, 1.0F, 0.0F);
             Scene.Rotate(180.0F, 0.0F, 1.0F, 0.0F);
-            _modelBipedMain.renderCloak(1.0F / 16.0F);
+            _modelBipedMain.renderCloak(Scene, 1.0F / 16.0F);
             Scene.PopMatrix();
         }
 
@@ -214,7 +215,7 @@ public class PlayerEntityRenderer : LivingEntityRenderer
         if (heldStack != null)
         {
             Scene.PushMatrix();
-            _modelBipedMain.bipedRightArm.transform(1.0F / 16.0F);
+            _modelBipedMain.bipedRightArm.transform(Scene, 1.0F / 16.0F);
             Scene.Translate(-(1.0F / 16.0F), 7.0F / 16.0F, 1.0F / 16.0F);
             if (player.fishHook != null)
             {
@@ -270,7 +271,7 @@ public class PlayerEntityRenderer : LivingEntityRenderer
     {
         _modelBipedMain.onGround = 0.0F;
         _modelBipedMain.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F / 16.0F);
-        _modelBipedMain.bipedRightArm.render(1.0F / 16.0F);
+        _modelBipedMain.bipedRightArm.render(Scene, 1.0F / 16.0F);
     }
 
     protected void func_22016_b(EntityPlayer player, double x, double y, double z)

@@ -1,5 +1,6 @@
 using BetaSharp.Client.Rendering;
 using BetaSharp.Client.Rendering.Core;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 using BetaSharp.Util.Maths;
 
@@ -59,24 +60,24 @@ public class ModelWolf : ModelBase
         wolfSnout.setRotationPoint(-0.5F, var2, -7.0F);
     }
 
-    public override void render(float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
     {
-        base.render(var1, var2, var3, var4, var5, var6);
+        base.render(gl, var1, var2, var3, var4, var5, var6);
         setRotationAngles(var1, var2, var3, var4, var5, var6);
-        wolfHeadMain.renderWithRotation(var6);
-        wolfBody.render(var6);
-        wolfLeg1.render(var6);
-        wolfLeg2.render(var6);
-        wolfLeg3.render(var6);
-        wolfLeg4.render(var6);
-        wolfRightEar.renderWithRotation(var6);
-        wolfLeftEar.renderWithRotation(var6);
-        wolfSnout.renderWithRotation(var6);
-        wolfTail.renderWithRotation(var6);
-        wolfMane.render(var6);
+        wolfHeadMain.renderWithRotation(gl, var6);
+        wolfBody.render(gl, var6);
+        wolfLeg1.render(gl, var6);
+        wolfLeg2.render(gl, var6);
+        wolfLeg3.render(gl, var6);
+        wolfLeg4.render(gl, var6);
+        wolfRightEar.renderWithRotation(gl, var6);
+        wolfLeftEar.renderWithRotation(gl, var6);
+        wolfSnout.renderWithRotation(gl, var6);
+        wolfTail.renderWithRotation(gl, var6);
+        wolfMane.render(gl, var6);
     }
 
-    public override void setLivingAnimations(EntityLiving var1, float var2, float var3, float var4)
+    public override void setLivingAnimations(EntityLiving var1, float var2, float var3, float var4, ILegacyFixedFunctionApi gl)
     {
         EntityWolf var5 = (EntityWolf)var1;
         if (var5.isWolfAngry())
@@ -133,7 +134,7 @@ public class ModelWolf : ModelBase
         if (var5.getWolfShaking())
         {
             float var7 = var5.getBrightnessAtEyes(var4) * var5.getShadingWhileShaking(var4);
-            SceneRenderBackendContext.Current.SetColorRgb(var7, var7, var7);
+            gl.SetColorRgb(var7, var7, var7);
         }
 
     }

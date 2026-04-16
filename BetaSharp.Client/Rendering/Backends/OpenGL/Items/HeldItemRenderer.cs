@@ -4,6 +4,7 @@ using BetaSharp.Client.Entities;
 using BetaSharp.Client.Rendering.Blocks;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Entities;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 using BetaSharp.Items;
 using BetaSharp.Util.Maths;
@@ -14,7 +15,7 @@ namespace BetaSharp.Client.Rendering.Items;
 public class HeldItemRenderer : IHeldItemRenderer
 {
     private readonly BetaSharp _game;
-    private readonly ISceneRenderBackend _sceneRenderBackend;
+    private readonly ILegacyFixedFunctionApi _sceneRenderBackend;
     private ItemStack itemToRender;
     private float equippedProgress;
     private float prevEquippedProgress;
@@ -26,7 +27,7 @@ public class HeldItemRenderer : IHeldItemRenderer
     public HeldItemRenderer(BetaSharp game)
     {
         _game = game;
-        _sceneRenderBackend = game.SceneRenderBackend;
+        _sceneRenderBackend = game.LegacyFixedFunctionApi;
         mapRenderer = new MapItemRenderer(game.TextRenderer, game.Options, game.TextureManager);
     }
 

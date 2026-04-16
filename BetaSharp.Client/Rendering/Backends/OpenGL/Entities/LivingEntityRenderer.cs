@@ -1,6 +1,7 @@
 using BetaSharp.Client.Guis;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Entities.Models;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 using BetaSharp.Util.Maths;
 using Microsoft.Extensions.Logging;
@@ -64,14 +65,14 @@ public class LivingEntityRenderer : EntityRenderer
 
             LoadDownloadableImageTexture((entity as EntityPlayer)?.name, entity.getTexture());
             Scene.Enable(SceneRenderCapability.AlphaTest);
-            mainModel.setLivingAnimations(entity, walkAnimationPhase, walkAnimationSpeed, tickDelta);
-            mainModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+            mainModel.setLivingAnimations(entity, walkAnimationPhase, walkAnimationSpeed, tickDelta, Scene);
+            mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
 
             for (int renderPass = 0; renderPass < 4; ++renderPass)
             {
                 if (ShouldRenderPass(entity, renderPass, tickDelta))
                 {
-                    renderPassModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
                     Scene.Disable(SceneRenderCapability.Blend);
                     Scene.Enable(SceneRenderCapability.AlphaTest);
                 }
@@ -90,14 +91,14 @@ public class LivingEntityRenderer : EntityRenderer
                 if (entity.hurtTime > 0 || entity.deathTime > 0)
                 {
                     Scene.SetColor(brightness, 0.0F, 0.0F, 0.4F);
-                    mainModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
 
                     for (int renderPass = 0; renderPass < 4; ++renderPass)
                     {
                         if (func_27005_b(entity, renderPass, tickDelta))
                         {
                             Scene.SetColor(brightness, 0.0F, 0.0F, 0.4F);
-                            renderPassModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                            renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
                         }
                     }
                 }
@@ -109,14 +110,14 @@ public class LivingEntityRenderer : EntityRenderer
                     float colorBlue = (colorMultiplier & 255) / 255.0F;
                     float colorAlpha = (colorMultiplier >> 24 & 255) / 255.0F;
                     Scene.SetColor(colorRed, colorGreen, colorBlue, colorAlpha);
-                    mainModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
 
                     for (int renderPass = 0; renderPass < 4; ++renderPass)
                     {
                         if (func_27005_b(entity, renderPass, tickDelta))
                         {
                             Scene.SetColor(colorRed, colorGreen, colorBlue, colorAlpha);
-                            renderPassModel.render(walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                            renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
                         }
                     }
                 }

@@ -1,3 +1,4 @@
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Util.Maths;
 
 namespace BetaSharp.Client.Rendering.Entities.Models;

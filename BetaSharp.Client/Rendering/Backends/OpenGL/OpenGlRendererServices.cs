@@ -4,12 +4,13 @@ using BetaSharp.Client.Rendering.Blocks.Entities;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Entities;
 using BetaSharp.Client.Rendering.Items;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Client.UI.Rendering;
 
 namespace BetaSharp.Client.Rendering.Backends.OpenGL;
 
-internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResourceServices
+internal sealed class OpenGlRendererServices : IRendererServices
 {
     public ITextureManager TextureManager { get; }
     public ITextRenderer TextRenderer { get; }
@@ -17,9 +18,9 @@ internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResour
     public IEntityRenderDispatcher EntityRenderDispatcher { get; }
     public IBlockEntityRenderDispatcher BlockEntityRenderDispatcher { get; }
     public IUiRenderBackend UiRenderBackend { get; }
-    public ISceneRenderBackend SceneRenderBackend { get; }
+    public ILegacyFixedFunctionApi LegacyFixedFunctionApi { get; }
 
-    public OpenGlRenderBackendResourceServices(BetaSharp client, TexturePacks texturePacks, GameOptions options)
+    public OpenGlRendererServices(BetaSharp client, TexturePacks texturePacks, GameOptions options)
     {
         TextureManager = new TextureManager(
             client,
@@ -32,7 +33,7 @@ internal sealed class OpenGlRenderBackendResourceServices : IRenderBackendResour
         EntityRenderDispatcher = global::BetaSharp.Client.Rendering.Entities.EntityRenderDispatcher.Instance;
         BlockEntityRenderDispatcher = BlockEntityRenderer.Instance;
         UiRenderBackend = new OpenGlUiRenderBackend();
-        SceneRenderBackend = new OpenGlSceneRenderBackend();
+        LegacyFixedFunctionApi = new OpenGlLegacyFixedFunctionApi();
     }
 
     public void ConfigureEntityRendering(BetaSharp client)

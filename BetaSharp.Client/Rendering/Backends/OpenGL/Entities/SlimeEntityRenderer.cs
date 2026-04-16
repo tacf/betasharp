@@ -1,5 +1,6 @@
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Entities.Models;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 
 namespace BetaSharp.Client.Rendering.Entities;

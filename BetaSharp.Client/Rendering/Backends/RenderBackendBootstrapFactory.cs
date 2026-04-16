@@ -3,14 +3,14 @@ using BetaSharp.Client.Rendering.Backends.Vulkan;
 
 namespace BetaSharp.Client.Rendering.Backends;
 
-internal static class RenderBackendRuntimeFactory
+internal static class RenderBackendBootstrapFactory
 {
-    public static IRenderBackendRuntime Create(RendererBackendKind backend)
+    public static IRenderBackendBootstrap Create(RendererBackendKind backend)
     {
         return backend switch
         {
-            RendererBackendKind.OpenGL => new OpenGlRenderBackendRuntime(),
-            RendererBackendKind.Vulkan => new VulkanRenderBackendRuntime(),
+            RendererBackendKind.OpenGL => new OpenGlRenderBackendBootstrap(),
+            RendererBackendKind.Vulkan => new VulkanRenderBackendBootstrap(),
             _ => throw new NotSupportedException($"Unsupported renderer backend: {backend}")
         };
     }

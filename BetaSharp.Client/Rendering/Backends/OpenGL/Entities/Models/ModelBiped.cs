@@ -1,3 +1,4 @@
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Util.Maths;
 
 namespace BetaSharp.Client.Rendering.Entities.Models;
@@ -63,16 +64,16 @@ public class ModelBiped : ModelBase
         bipedLeftLeg.setRotationPoint(2.0F, 12.0F + var2, 0.0F);
     }
 
-    public override void render(float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
     {
         setRotationAngles(var1, var2, var3, var4, var5, var6);
-        bipedHead.render(var6);
-        bipedBody.render(var6);
-        bipedRightArm.render(var6);
-        bipedLeftArm.render(var6);
-        bipedRightLeg.render(var6);
-        bipedLeftLeg.render(var6);
-        bipedHeadwear.render(var6);
+        bipedHead.render(gl, var6);
+        bipedBody.render(gl, var6);
+        bipedRightArm.render(gl, var6);
+        bipedLeftArm.render(gl, var6);
+        bipedRightLeg.render(gl, var6);
+        bipedLeftLeg.render(gl, var6);
+        bipedHeadwear.render(gl, var6);
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)
@@ -162,17 +163,17 @@ public class ModelBiped : ModelBase
         bipedLeftArm.rotateAngleX -= MathHelper.Sin(var3 * 0.067F) * 0.05F;
     }
 
-    public void renderEars(float var1)
+    public void renderEars(ILegacyFixedFunctionApi gl, float var1)
     {
         bipedEars.rotateAngleY = bipedHead.rotateAngleY;
         bipedEars.rotateAngleX = bipedHead.rotateAngleX;
         bipedEars.rotationPointX = 0.0F;
         bipedEars.rotationPointY = 0.0F;
-        bipedEars.render(var1);
+        bipedEars.render(gl, var1);
     }
 
-    public void renderCloak(float var1)
+    public void renderCloak(ILegacyFixedFunctionApi gl, float var1)
     {
-        bipedCloak.render(var1);
+        bipedCloak.render(gl, var1);
     }
 }

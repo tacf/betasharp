@@ -1,3 +1,5 @@
+using BetaSharp.Client.Rendering.Legacy;
+
 namespace BetaSharp.Client.Rendering.Entities.Models;
 
 public class ModelSquid : ModelBase
@@ -38,14 +40,14 @@ public class ModelSquid : ModelBase
 
     }
 
-    public override void render(float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
     {
         setRotationAngles(var1, var2, var3, var4, var5, var6);
-        squidBody.render(var6);
+        squidBody.render(gl, var6);
 
         for (int var7 = 0; var7 < squidTentacles.Length; ++var7)
         {
-            squidTentacles[var7].render(var6);
+            squidTentacles[var7].render(gl, var6);
         }
 
     }

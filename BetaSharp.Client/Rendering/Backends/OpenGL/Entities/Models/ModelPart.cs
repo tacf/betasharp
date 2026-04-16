@@ -1,6 +1,7 @@
 using BetaSharp.Client.Rendering;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Legacy;
 
 namespace BetaSharp.Client.Rendering.Entities.Models;
 
@@ -21,7 +22,6 @@ public class ModelPart
     public bool mirror = false;
     public bool visible = true;
     public bool hidden = false;
-    private static ISceneRenderBackend Scene => SceneRenderBackendContext.Current;
 
     public ModelPart(int var1, int var2)
     {
@@ -91,7 +91,7 @@ public class ModelPart
         rotationPointZ = var3;
     }
 
-    public void render(float var1)
+    public void render(ILegacyFixedFunctionApi gl, float var1)
     {
         if (!hidden)
         {
@@ -99,50 +99,50 @@ public class ModelPart
             {
                 if (!compiled)
                 {
-                    compileDisplayList(var1);
+                    compileDisplayList(gl, var1);
                 }
 
                 if (rotateAngleX == 0.0F && rotateAngleY == 0.0F && rotateAngleZ == 0.0F)
                 {
                     if (rotationPointX == 0.0F && rotationPointY == 0.0F && rotationPointZ == 0.0F)
                     {
-                        Scene.CallDisplayList(displayList);
+                        gl.CallDisplayList(displayList);
                     }
                     else
                     {
-                        Scene.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
-                        Scene.CallDisplayList(displayList);
-                        Scene.Translate(-rotationPointX * var1, -rotationPointY * var1, -rotationPointZ * var1);
+                        gl.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
+                        gl.CallDisplayList(displayList);
+                        gl.Translate(-rotationPointX * var1, -rotationPointY * var1, -rotationPointZ * var1);
                     }
                 }
                 else
                 {
-                    Scene.PushMatrix();
-                    Scene.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
+                    gl.PushMatrix();
+                    gl.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
                     if (rotateAngleZ != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                        gl.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                     }
 
                     if (rotateAngleY != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                        gl.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                     }
 
                     if (rotateAngleX != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                        gl.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                     }
 
-                    Scene.CallDisplayList(displayList);
-                    Scene.PopMatrix();
+                    gl.CallDisplayList(displayList);
+                    gl.PopMatrix();
                 }
 
             }
         }
     }
 
-    public void renderWithRotation(float var1)
+    public void renderWithRotation(ILegacyFixedFunctionApi gl, float var1)
     {
         if (!hidden)
         {
@@ -150,33 +150,33 @@ public class ModelPart
             {
                 if (!compiled)
                 {
-                    compileDisplayList(var1);
+                    compileDisplayList(gl, var1);
                 }
 
-                Scene.PushMatrix();
-                Scene.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
+                gl.PushMatrix();
+                gl.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
                 if (rotateAngleY != 0.0F)
                 {
-                    Scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                    gl.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                 }
 
                 if (rotateAngleX != 0.0F)
                 {
-                    Scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                    gl.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                 }
 
                 if (rotateAngleZ != 0.0F)
                 {
-                    Scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                    gl.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                 }
 
-                Scene.CallDisplayList(displayList);
-                Scene.PopMatrix();
+                gl.CallDisplayList(displayList);
+                gl.PopMatrix();
             }
         }
     }
 
-    public void transform(float var1)
+    public void transform(ILegacyFixedFunctionApi gl, float var1)
     {
         if (!hidden)
         {
@@ -184,32 +184,32 @@ public class ModelPart
             {
                 if (!compiled)
                 {
-                    compileDisplayList(var1);
+                    compileDisplayList(gl, var1);
                 }
 
                 if (rotateAngleX == 0.0F && rotateAngleY == 0.0F && rotateAngleZ == 0.0F)
                 {
                     if (rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F)
                     {
-                        Scene.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
+                        gl.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
                     }
                 }
                 else
                 {
-                    Scene.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
+                    gl.Translate(rotationPointX * var1, rotationPointY * var1, rotationPointZ * var1);
                     if (rotateAngleZ != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                        gl.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                     }
 
                     if (rotateAngleY != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                        gl.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                     }
 
                     if (rotateAngleX != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                        gl.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                     }
                 }
 
@@ -217,10 +217,10 @@ public class ModelPart
         }
     }
 
-    private void compileDisplayList(float var1)
+    private void compileDisplayList(ILegacyFixedFunctionApi gl, float var1)
     {
-        displayList = Scene.GenerateDisplayLists(1);
-        Scene.BeginDisplayList(displayList);
+        displayList = gl.GenerateDisplayLists(1);
+        gl.BeginDisplayList(displayList);
         Tessellator var2 = Tessellator.instance;
 
         for (int var3 = 0; var3 < faces.Length; ++var3)
@@ -228,7 +228,7 @@ public class ModelPart
             faces[var3].draw(var2, var1);
         }
 
-        Scene.EndDisplayList();
+        gl.EndDisplayList();
         compiled = true;
     }
 }

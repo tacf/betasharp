@@ -1,16 +1,19 @@
+using BetaSharp.Client;
+using BetaSharp.Client.Rendering;
+using BetaSharp.Client.Rendering.Blocks.Entities;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Entities;
-using BetaSharp.Client.Rendering.Blocks.Entities;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Client.UI.Rendering;
 
 namespace BetaSharp.Client.Rendering.Backends;
 
 /// <summary>
-/// Backend-owned render resource bundle used during startup.
-/// Keeps legacy texture/text/skin bootstrapping and dynamic texture wiring
-/// behind the selected backend runtime.
+/// Transitional startup bundle used while the client is still migrating off the legacy fixed-function path.
+/// The bundle keeps legacy resource/bootstrap concerns together, but names the OpenGL compatibility surface
+/// explicitly so it does not look backend-neutral.
 /// </summary>
-internal interface IRenderBackendResourceServices
+internal interface ILegacyRendererServices
 {
     ITextureManager TextureManager { get; }
     ITextRenderer TextRenderer { get; }
@@ -18,8 +21,7 @@ internal interface IRenderBackendResourceServices
     IEntityRenderDispatcher EntityRenderDispatcher { get; }
     IBlockEntityRenderDispatcher BlockEntityRenderDispatcher { get; }
     IUiRenderBackend UiRenderBackend { get; }
-    ISceneRenderBackend SceneRenderBackend { get; }
-
+    ILegacyFixedFunctionApi LegacyFixedFunctionApi { get; }
     void ConfigureEntityRendering(BetaSharp client);
     void RegisterDynamicTextures(BetaSharp client);
 }

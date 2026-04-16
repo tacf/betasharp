@@ -1,8 +1,9 @@
 using BetaSharp.Worlds.Core;
+
 namespace BetaSharp.Client.Rendering;
 
 /// <summary>
-/// Owns per-frame scene orchestration for the active renderer backend.
+/// Owns per-frame scene orchestration for the active renderer.
 /// </summary>
 /// <remarks>
 /// Scope:
@@ -10,7 +11,7 @@ namespace BetaSharp.Client.Rendering;
 /// - high-level render-side gameplay integration (targeting, equipped-item resets, cloud updates)
 /// - render metric publication and scene-level invalidation requests
 /// </remarks>
-public interface ISceneRenderer
+public interface ISceneOrchestrator
 {
     void OnFrameUpdate(float tickDelta);
     void Tick(float partialTicks);
