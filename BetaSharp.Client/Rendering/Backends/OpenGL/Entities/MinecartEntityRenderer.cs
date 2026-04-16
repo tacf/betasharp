@@ -81,7 +81,7 @@ public class MinecartEntityRenderer : EntityRenderer
 
         loadTexture("/item/cart.png");
         Scene.Scale(-1.0F, -1.0F, 1.0F);
-        modelMinecart.render(0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 1.0F / 16.0F);
+        modelMinecart.render(Scene, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 1.0F / 16.0F);
         Scene.PopMatrix();
     }
 

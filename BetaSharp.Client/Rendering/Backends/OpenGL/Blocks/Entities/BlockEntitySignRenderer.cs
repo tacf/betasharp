@@ -3,6 +3,7 @@ using BetaSharp.Blocks.Entities;
 using BetaSharp.Client.Guis;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Entities.Models;
+using BetaSharp.Client.Rendering.Legacy;
 
 namespace BetaSharp.Client.Rendering.Blocks.Entities;
 
@@ -52,7 +53,7 @@ public class BlockEntitySignRenderer : BlockEntitySpecialRenderer
         bindTextureByName("/item/sign.png");
         GLManager.GL.PushMatrix();
         GLManager.GL.Scale(signScale, -signScale, -signScale);
-        signModel.Render();
+        signModel.Render(Scene);
         GLManager.GL.PopMatrix();
         ITextRenderer textRenderer = getFontRenderer();
         float textScale = (float)(1.0D / 60.0D) * signScale;

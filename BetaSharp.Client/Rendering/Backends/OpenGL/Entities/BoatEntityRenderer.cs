@@ -1,5 +1,6 @@
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Entities.Models;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Entities;
 using BetaSharp.Util.Maths;
 
@@ -39,7 +40,7 @@ public class BoatEntityRenderer : EntityRenderer
         Scene.Scale(1.0F / modelScale, 1.0F / modelScale, 1.0F / modelScale);
         loadTexture("/item/boat.png");
         Scene.Scale(-1.0F, -1.0F, 1.0F);
-        modelBoat.render(0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 1.0F / 16.0F);
+        modelBoat.render(Scene, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 1.0F / 16.0F);
         Scene.PopMatrix();
     }
 

@@ -128,7 +128,7 @@ public class PlayerControllerSP : PlayerController
     {
         if (curBlockDamage <= 0.0F)
         {
-            Game.SceneRenderer.SetDamagePartialTime(0.0F);
+            Game.SceneOrchestrator.SetDamagePartialTime(0.0F);
         }
         else
         {

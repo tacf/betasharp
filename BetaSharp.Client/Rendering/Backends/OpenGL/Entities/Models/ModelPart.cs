@@ -1,6 +1,7 @@
 using BetaSharp.Client.Rendering;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
+using BetaSharp.Client.Rendering.Legacy;
 
 namespace BetaSharp.Client.Rendering.Entities.Models;
 
@@ -21,7 +22,6 @@ public class ModelPart
     public bool mirror = false;
     public bool visible = true;
     public bool hidden = false;
-    private static ISceneRenderBackend Scene => SceneRenderBackendContext.Current;
 
     public ModelPart(int textureOffsetX, int textureOffsetY)
     {
@@ -123,7 +123,9 @@ public class ModelPart
         rotationPointZ = z;
     }
 
-    public void render(float scale)
+    public void render(float scale) => render(SceneRenderBackendContext.Current, scale);
+
+    public void render(ILegacyFixedFunctionApi scene, float scale)
     {
         if (!hidden)
         {
@@ -131,49 +133,51 @@ public class ModelPart
             {
                 if (!compiled)
                 {
-                    compileDisplayList(scale);
+                    compileDisplayList(scene, scale);
                 }
 
                 if (rotateAngleX == 0.0F && rotateAngleY == 0.0F && rotateAngleZ == 0.0F)
                 {
                     if (rotationPointX == 0.0F && rotationPointY == 0.0F && rotationPointZ == 0.0F)
                     {
-                        Scene.CallDisplayList(displayList);
+                        scene.CallDisplayList(displayList);
                     }
                     else
                     {
-                        Scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
-                        Scene.CallDisplayList(displayList);
-                        Scene.Translate(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
+                        scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
+                        scene.CallDisplayList(displayList);
+                        scene.Translate(-rotationPointX * scale, -rotationPointY * scale, -rotationPointZ * scale);
                     }
                 }
                 else
                 {
-                    Scene.PushMatrix();
-                    Scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
+                    scene.PushMatrix();
+                    scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
                     if (rotateAngleZ != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                        scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                     }
 
                     if (rotateAngleY != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                        scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                     }
 
                     if (rotateAngleX != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                        scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                     }
 
-                    Scene.CallDisplayList(displayList);
-                    Scene.PopMatrix();
+                    scene.CallDisplayList(displayList);
+                    scene.PopMatrix();
                 }
             }
         }
     }
 
-    public void renderWithRotation(float scale)
+    public void renderWithRotation(float scale) => renderWithRotation(SceneRenderBackendContext.Current, scale);
+
+    public void renderWithRotation(ILegacyFixedFunctionApi scene, float scale)
     {
         if (!hidden)
         {
@@ -181,33 +185,35 @@ public class ModelPart
             {
                 if (!compiled)
                 {
-                    compileDisplayList(scale);
+                    compileDisplayList(scene, scale);
                 }
 
-                Scene.PushMatrix();
-                Scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
+                scene.PushMatrix();
+                scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
                 if (rotateAngleY != 0.0F)
                 {
-                    Scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                    scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                 }
 
                 if (rotateAngleX != 0.0F)
                 {
-                    Scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                    scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                 }
 
                 if (rotateAngleZ != 0.0F)
                 {
-                    Scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                    scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                 }
 
-                Scene.CallDisplayList(displayList);
-                Scene.PopMatrix();
+                scene.CallDisplayList(displayList);
+                scene.PopMatrix();
             }
         }
     }
 
-    public void transform(float scale)
+    public void transform(float scale) => transform(SceneRenderBackendContext.Current, scale);
+
+    public void transform(ILegacyFixedFunctionApi scene, float scale)
     {
         if (!hidden)
         {
@@ -215,42 +221,42 @@ public class ModelPart
             {
                 if (!compiled)
                 {
-                    compileDisplayList(scale);
+                    compileDisplayList(scene, scale);
                 }
 
                 if (rotateAngleX == 0.0F && rotateAngleY == 0.0F && rotateAngleZ == 0.0F)
                 {
                     if (rotationPointX != 0.0F || rotationPointY != 0.0F || rotationPointZ != 0.0F)
                     {
-                        Scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
+                        scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
                     }
                 }
                 else
                 {
-                    Scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
+                    scene.Translate(rotationPointX * scale, rotationPointY * scale, rotationPointZ * scale);
                     if (rotateAngleZ != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                        scene.Rotate(rotateAngleZ * (180.0F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                     }
 
                     if (rotateAngleY != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                        scene.Rotate(rotateAngleY * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                     }
 
                     if (rotateAngleX != 0.0F)
                     {
-                        Scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                        scene.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                     }
                 }
             }
         }
     }
 
-    private void compileDisplayList(float scale)
+    private void compileDisplayList(ILegacyFixedFunctionApi scene, float scale)
     {
-        displayList = Scene.GenerateDisplayLists(1);
-        Scene.BeginDisplayList(displayList);
+        displayList = scene.GenerateDisplayLists(1);
+        scene.BeginDisplayList(displayList);
         Tessellator tessellator = Tessellator.instance;
 
         for (int faceIndex = 0; faceIndex < faces.Length; ++faceIndex)
@@ -258,7 +264,7 @@ public class ModelPart
             faces[faceIndex].draw(tessellator, scale);
         }
 
-        Scene.EndDisplayList();
+        scene.EndDisplayList();
         compiled = true;
     }
 }

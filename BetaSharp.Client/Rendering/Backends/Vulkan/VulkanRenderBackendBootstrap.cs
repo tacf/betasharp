@@ -1,18 +1,15 @@
-using BetaSharp.Client.Diagnostics.GuiBackends;
 using BetaSharp.Client.Diagnostics;
 using BetaSharp.Client.Options;
 using BetaSharp.Client.Rendering.Core.Textures;
-using BetaSharp.Client.Rendering.Presentation;
-using BetaSharp.Client.Resource.Pack;
-using BetaSharp.Worlds.Core;
 using Microsoft.Extensions.Logging;
 
 namespace BetaSharp.Client.Rendering.Backends.Vulkan;
 
-internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
+internal sealed class VulkanRenderBackendBootstrap : IRenderBackendBootstrap
 {
     public RendererBackendKind Kind => RendererBackendKind.Vulkan;
     public RendererBackendCapabilities Capabilities => RendererBackendCapabilities.For(Kind);
+    public IRendererFactory RendererFactory => VulkanRendererFactory.Instance;
 
     public void InitializeGraphicsContext(DebugTelemetry telemetry)
     {
@@ -51,7 +48,7 @@ internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
 
     public void CheckBackendErrors(string location, ILogger logger)
     {
-        // No-op for now. Vulkan validation output is handled by the Vulkan debug messenger when implemented.
+        // Vulkan validation output is handled by the Vulkan debug messenger when implemented.
     }
 
     public void UpdateWindow(bool processMessages)
@@ -68,17 +65,6 @@ internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
         return false;
     }
 
-    public void RenderStartupScreen(
-        GameOptions options,
-        int displayWidth,
-        int displayHeight,
-        int framebufferWidth,
-        int framebufferHeight,
-        TextureHandle logoTexture)
-    {
-        UpdateWindow(true);
-    }
-
     public void CleanupRenderResources()
     {
     }
@@ -87,38 +73,7 @@ internal sealed class VulkanRenderBackendRuntime : IRenderBackendRuntime
     {
     }
 
-    public IRenderBackendResourceServices CreateResourceServices(BetaSharp client, TexturePacks texturePacks, GameOptions options)
+    public void RenderStartupScreen(GameOptions options, int displayWidth, int displayHeight, int framebufferWidth, int framebufferHeight, int splashTextureId)
     {
-        return new VulkanRenderBackendResourceServices(client, texturePacks, options);
-    }
-
-    public ILoadingScreenRenderer CreateLoadingScreenRenderer(BetaSharp client)
-    {
-        return new NoOpLoadingScreenRenderer(client);
-    }
-
-    public ISceneRenderer CreateSceneRenderer(BetaSharp client)
-    {
-        return new NoOpSceneRenderer();
-    }
-
-    public IWorldRenderer CreateWorldRenderer(BetaSharp client, ITextureManager textureManager)
-    {
-        return new NoOpWorldRenderer();
-    }
-
-    public IParticleManager CreateParticleManager(World? world, ITextureManager textureManager)
-    {
-        return new NoOpParticleManager();
-    }
-
-    public IRenderPresentation CreatePresentation(int width, int height, GameOptions options)
-    {
-        return RenderPresentationFactory.Create(Kind, width, height, options);
-    }
-
-    public IImGuiRendererBackend CreateImGuiRendererBackend()
-    {
-        return ImGuiRendererBackendFactory.Create(Kind);
     }
 }

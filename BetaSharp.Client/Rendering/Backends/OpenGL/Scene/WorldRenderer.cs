@@ -7,6 +7,7 @@ using BetaSharp.Client.Rendering.Chunks;
 using BetaSharp.Client.Rendering.Core;
 using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.Rendering.Entities;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Client.Rendering.Particles;
 using BetaSharp.Entities;
 using BetaSharp.Items;
@@ -32,7 +33,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
     private readonly IChunkRendererFactory _chunkRendererFactory;
     private readonly ITextureManager _textureManager;
     private readonly BetaSharp _game;
-    private readonly ISceneRenderBackend _sceneRenderBackend;
+    private readonly ILegacyFixedFunctionApi _sceneRenderBackend;
     private int _cloudOffsetX;
     private readonly int _starGLCallList;
     private readonly int _glSkyList;
@@ -44,7 +45,7 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
     public WorldRenderer(BetaSharp gameInstance, ITextureManager textureManager, IChunkRendererFactory chunkRendererFactory)
     {
         _game = gameInstance;
-        _sceneRenderBackend = gameInstance.SceneRenderBackend;
+        _sceneRenderBackend = gameInstance.LegacyFixedFunctionApi;
         _textureManager = textureManager;
         _chunkRendererFactory = chunkRendererFactory;
 

@@ -8,7 +8,7 @@ using Shader = BetaSharp.Client.Rendering.Core.Shader;
 
 namespace BetaSharp.Client.Rendering.Presentation;
 
-public class OpenGlRenderPresentation : IRenderPresentation
+public class OpenGlRenderPresentation : IFramePresenter
 {
     private readonly Framebuffer _mainFbo;
     private readonly Shader _gammaShader;

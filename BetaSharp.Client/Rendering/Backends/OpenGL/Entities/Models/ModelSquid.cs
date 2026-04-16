@@ -1,3 +1,5 @@
+using BetaSharp.Client.Rendering.Legacy;
+
 namespace BetaSharp.Client.Rendering.Entities.Models;
 
 public class ModelSquid : ModelBase

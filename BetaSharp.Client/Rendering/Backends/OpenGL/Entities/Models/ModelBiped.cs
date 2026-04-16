@@ -1,3 +1,5 @@
+using BetaSharp.Client.Rendering;
+using BetaSharp.Client.Rendering.Legacy;
 using BetaSharp.Util.Maths;
 
 namespace BetaSharp.Client.Rendering.Entities.Models;
@@ -162,17 +164,21 @@ public class ModelBiped : ModelBase
         bipedLeftArm.rotateAngleX -= MathHelper.Sin(ageInTicks * 0.067F) * 0.05F;
     }
 
-    public void renderEars(float scale)
+    public void renderEars(float scale) => renderEars(SceneRenderBackendContext.Current, scale);
+
+    public void renderEars(ILegacyFixedFunctionApi scene, float scale)
     {
         bipedEars.rotateAngleY = bipedHead.rotateAngleY;
         bipedEars.rotateAngleX = bipedHead.rotateAngleX;
         bipedEars.rotationPointX = 0.0F;
         bipedEars.rotationPointY = 0.0F;
-        bipedEars.render(scale);
+        bipedEars.render(scene, scale);
     }
 
-    public void renderCloak(float scale)
+    public void renderCloak(float scale) => renderCloak(SceneRenderBackendContext.Current, scale);
+
+    public void renderCloak(ILegacyFixedFunctionApi scene, float scale)
     {
-        bipedCloak.render(scale);
+        bipedCloak.render(scene, scale);
     }
 }
