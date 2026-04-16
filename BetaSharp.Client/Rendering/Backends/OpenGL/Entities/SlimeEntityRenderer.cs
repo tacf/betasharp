@@ -7,7 +7,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class SlimeEntityRenderer : LivingEntityRenderer
 {
-
     private readonly ModelBase scaleAmount;
 
     public SlimeEntityRenderer(ModelBase mainModel, ModelBase var2, float var3) : base(mainModel, var3)
@@ -39,7 +38,8 @@ public class SlimeEntityRenderer : LivingEntityRenderer
     protected void scaleSlime(EntitySlime var1, float var2)
     {
         int var3 = var1.getSlimeSize();
-        float var4 = (var1.prevSquishAmount + (var1.squishAmount - var1.prevSquishAmount) * var2) / (var3 * 0.5F + 1.0F);
+        float var4 = (var1.prevSquishAmount + (var1.squishAmount - var1.prevSquishAmount) * var2) /
+                     (var3 * 0.5F + 1.0F);
         float var5 = 1.0F / (var4 + 1.0F);
         float var6 = var3;
         Scene.Scale(var5 * var6, 1.0F / var5 * var6, var5 * var6);

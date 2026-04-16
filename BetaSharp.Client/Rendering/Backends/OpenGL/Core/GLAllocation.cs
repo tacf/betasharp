@@ -5,6 +5,7 @@ public class GLAllocation
     private static readonly List<int> displayLists = new();
     private static readonly List<int> textureNames = new();
     private static readonly object l = new();
+
     public static int generateDisplayLists(int var0)
     {
         lock (l)
@@ -75,6 +76,7 @@ public class GLAllocation
                 {
                     textureIds[i] = (uint)textureNames[i];
                 }
+
                 GLManager.GL.DeleteTextures(textureIds);
             }
 

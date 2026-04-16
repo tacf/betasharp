@@ -4,7 +4,6 @@ namespace BetaSharp.Client.Rendering.Entities.Models;
 
 public class ModelMinecart : ModelBase
 {
-
     public ModelPart[] sideModels = new ModelPart[7];
 
     public ModelMinecart()
@@ -38,7 +37,8 @@ public class ModelMinecart : ModelBase
         sideModels[5].rotateAngleX = (float)Math.PI * -0.5F;
     }
 
-    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5,
+        float var6)
     {
         sideModels[5].rotationPointY = 4.0F - var3;
 
@@ -46,7 +46,6 @@ public class ModelMinecart : ModelBase
         {
             sideModels[var7].render(gl, var6);
         }
-
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)

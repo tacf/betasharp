@@ -5,7 +5,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class WolfEntityRenderer : LivingEntityRenderer
 {
-
     public WolfEntityRenderer(ModelBase mainModel, float shadowRadius) : base(mainModel, shadowRadius)
     {
     }
@@ -34,7 +33,8 @@ public class WolfEntityRenderer : LivingEntityRenderer
         return func_25004_a((EntityWolf)var1, var2);
     }
 
-    public override void DoRenderLiving(EntityLiving var1, double var2, double var4, double var6, float var8, float var9)
+    public override void DoRenderLiving(EntityLiving var1, double var2, double var4, double var6, float var8,
+        float var9)
     {
         renderWolf((EntityWolf)var1, var2, var4, var6, var8, var9);
     }

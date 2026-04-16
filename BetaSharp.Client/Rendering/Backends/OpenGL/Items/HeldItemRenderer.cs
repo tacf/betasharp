@@ -37,7 +37,8 @@ public class HeldItemRenderer : IHeldItemRenderer
         if (item.ItemId < 256 && BlockRenderer.IsSideLit(Block.Blocks[item.ItemId].getRenderType()))
         {
             _game.TextureManager.BindTexture(_game.TextureManager.GetTextureId("/terrain.png"));
-            BlockRenderer.RenderBlockOnInventory(Block.Blocks[item.ItemId], item.getDamage(), entity.getBrightnessAtEyes(1.0F), Tessellator.instance);
+            BlockRenderer.RenderBlockOnInventory(Block.Blocks[item.ItemId], item.getDamage(),
+                entity.getBrightnessAtEyes(1.0F), Tessellator.instance);
         }
         else
         {
@@ -157,7 +158,8 @@ public class HeldItemRenderer : IHeldItemRenderer
         Lighting.turnOn();
         _sceneRenderBackend.PopMatrix();
         ItemStack var5 = itemToRender;
-        float var6 = _game.World.GetLuminance(MathHelper.Floor(var3.x), MathHelper.Floor(var3.y), MathHelper.Floor(var3.z));
+        float var6 =
+            _game.World.GetLuminance(MathHelper.Floor(var3.x), MathHelper.Floor(var3.y), MathHelper.Floor(var3.z));
         float var8;
         float var9;
         float var10;
@@ -182,7 +184,8 @@ public class HeldItemRenderer : IHeldItemRenderer
             float swingProgress = var3.getSwingProgress(var1);
             var9 = MathHelper.Sin(swingProgress * (float)Math.PI);
             var10 = MathHelper.Sin(MathHelper.Sqrt(swingProgress) * (float)Math.PI);
-            _sceneRenderBackend.Translate(-var10 * 0.4F, MathHelper.Sin(MathHelper.Sqrt(swingProgress) * (float)Math.PI * 2.0F) * 0.2F, -var9 * 0.2F);
+            _sceneRenderBackend.Translate(-var10 * 0.4F,
+                MathHelper.Sin(MathHelper.Sqrt(swingProgress) * (float)Math.PI * 2.0F) * 0.2F, -var9 * 0.2F);
             swingProgress = 1.0F - var4 / 45.0F + 0.1F;
             if (swingProgress < 0.0F)
             {
@@ -195,7 +198,8 @@ public class HeldItemRenderer : IHeldItemRenderer
             }
 
             swingProgress = -MathHelper.Cos(swingProgress * (float)Math.PI) * 0.5F + 0.5F;
-            _sceneRenderBackend.Translate(0.0F, 0.0F * var14 - (1.0F - var2) * 1.2F - swingProgress * 0.5F + 0.04F, -0.9F * var14);
+            _sceneRenderBackend.Translate(0.0F, 0.0F * var14 - (1.0F - var2) * 1.2F - swingProgress * 0.5F + 0.04F,
+                -0.9F * var14);
             _sceneRenderBackend.Rotate(90.0F, 0.0F, 1.0F, 0.0F);
             _sceneRenderBackend.Rotate(swingProgress * -85.0F, 0.0F, 0.0F, 1.0F);
             _sceneRenderBackend.Enable(SceneRenderCapability.RescaleNormal);
@@ -252,7 +256,8 @@ public class HeldItemRenderer : IHeldItemRenderer
             var8 = var3.getSwingProgress(var1);
             var9 = MathHelper.Sin(var8 * (float)Math.PI);
             var10 = MathHelper.Sin(MathHelper.Sqrt(var8) * (float)Math.PI);
-            _sceneRenderBackend.Translate(-var10 * 0.4F, MathHelper.Sin(MathHelper.Sqrt(var8) * (float)Math.PI * 2.0F) * 0.2F, -var9 * 0.2F);
+            _sceneRenderBackend.Translate(-var10 * 0.4F,
+                MathHelper.Sin(MathHelper.Sqrt(var8) * (float)Math.PI * 2.0F) * 0.2F, -var9 * 0.2F);
             _sceneRenderBackend.Translate(0.7F * var14, -0.65F * var14 - (1.0F - var2) * 0.6F, -0.9F * var14);
             _sceneRenderBackend.Rotate(45.0F, 0.0F, 1.0F, 0.0F);
             _sceneRenderBackend.Enable(SceneRenderCapability.RescaleNormal);
@@ -279,7 +284,8 @@ public class HeldItemRenderer : IHeldItemRenderer
             var8 = var3.getSwingProgress(var1);
             var9 = MathHelper.Sin(var8 * (float)Math.PI);
             var10 = MathHelper.Sin(MathHelper.Sqrt(var8) * (float)Math.PI);
-            _sceneRenderBackend.Translate(-var10 * 0.3F, MathHelper.Sin(MathHelper.Sqrt(var8) * (float)Math.PI * 2.0F) * 0.4F, -var9 * 0.4F);
+            _sceneRenderBackend.Translate(-var10 * 0.3F,
+                MathHelper.Sin(MathHelper.Sqrt(var8) * (float)Math.PI * 2.0F) * 0.4F, -var9 * 0.4F);
             _sceneRenderBackend.Translate(0.8F * var14, -(12.0F / 16.0F) * var14 - (1.0F - var2) * 0.6F, -0.9F * var14);
             _sceneRenderBackend.Rotate(45.0F, 0.0F, 1.0F, 0.0F);
             _sceneRenderBackend.Enable(SceneRenderCapability.RescaleNormal);
@@ -463,7 +469,8 @@ public class HeldItemRenderer : IHeldItemRenderer
             var4 = true;
         }
 
-        if (var2 != null && itemToRender != null && var2 != itemToRender && var2.ItemId == itemToRender.ItemId && var2.getDamage() == itemToRender.getDamage())
+        if (var2 != null && itemToRender != null && var2 != itemToRender && var2.ItemId == itemToRender.ItemId &&
+            var2.getDamage() == itemToRender.getDamage())
         {
             itemToRender = var2;
             var4 = true;
@@ -488,7 +495,6 @@ public class HeldItemRenderer : IHeldItemRenderer
             itemToRender = var2;
             field_20099_f = var1.inventory.SelectedSlot;
         }
-
     }
 
     public void ResetEquippedProgress()

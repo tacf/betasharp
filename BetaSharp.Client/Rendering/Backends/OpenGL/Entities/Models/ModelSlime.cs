@@ -25,14 +25,14 @@ public class ModelSlime : ModelBase
             slimeMouth = new ModelPart(32, 8);
             slimeMouth.addBox(0.0F, 21.0F, -3.5F, 1, 1, 1);
         }
-
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)
     {
     }
 
-    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5,
+        float var6)
     {
         setRotationAngles(var1, var2, var3, var4, var5, var6);
         slimeBodies.render(gl, var6);
@@ -42,6 +42,5 @@ public class ModelSlime : ModelBase
             slimeLeftEye.render(gl, var6);
             slimeMouth.render(gl, var6);
         }
-
     }
 }

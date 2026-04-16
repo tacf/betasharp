@@ -37,7 +37,8 @@ public class ModelCow : ModelQuadruped
         --leg4.rotationPointZ;
     }
 
-    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5,
+        float var6)
     {
         base.render(gl, var1, var2, var3, var4, var5, var6);
         horn1.render(gl, var6);

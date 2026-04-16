@@ -68,12 +68,18 @@ public class ModelPart
         corners[5] = var16;
         corners[6] = var17;
         corners[7] = var18;
-        faces[0] = new Quad([var16, var12, var13, var17], textureOffsetX + var6 + var4, textureOffsetY + var6, textureOffsetX + var6 + var4 + var6, textureOffsetY + var6 + var5);
-        faces[1] = new Quad([var20, var15, var18, var14], textureOffsetX + 0, textureOffsetY + var6, textureOffsetX + var6, textureOffsetY + var6 + var5);
-        faces[2] = new Quad([var16, var15, var20, var12], textureOffsetX + var6, textureOffsetY + 0, textureOffsetX + var6 + var4, textureOffsetY + var6);
-        faces[3] = new Quad([var13, var14, var18, var17], textureOffsetX + var6 + var4, textureOffsetY + 0, textureOffsetX + var6 + var4 + var4, textureOffsetY + var6);
-        faces[4] = new Quad([var12, var20, var14, var13], textureOffsetX + var6, textureOffsetY + var6, textureOffsetX + var6 + var4, textureOffsetY + var6 + var5);
-        faces[5] = new Quad([var15, var16, var17, var18], textureOffsetX + var6 + var4 + var6, textureOffsetY + var6, textureOffsetX + var6 + var4 + var6 + var4, textureOffsetY + var6 + var5);
+        faces[0] = new Quad([var16, var12, var13, var17], textureOffsetX + var6 + var4, textureOffsetY + var6,
+            textureOffsetX + var6 + var4 + var6, textureOffsetY + var6 + var5);
+        faces[1] = new Quad([var20, var15, var18, var14], textureOffsetX + 0, textureOffsetY + var6,
+            textureOffsetX + var6, textureOffsetY + var6 + var5);
+        faces[2] = new Quad([var16, var15, var20, var12], textureOffsetX + var6, textureOffsetY + 0,
+            textureOffsetX + var6 + var4, textureOffsetY + var6);
+        faces[3] = new Quad([var13, var14, var18, var17], textureOffsetX + var6 + var4, textureOffsetY + 0,
+            textureOffsetX + var6 + var4 + var4, textureOffsetY + var6);
+        faces[4] = new Quad([var12, var20, var14, var13], textureOffsetX + var6, textureOffsetY + var6,
+            textureOffsetX + var6 + var4, textureOffsetY + var6 + var5);
+        faces[5] = new Quad([var15, var16, var17, var18], textureOffsetX + var6 + var4 + var6, textureOffsetY + var6,
+            textureOffsetX + var6 + var4 + var6 + var4, textureOffsetY + var6 + var5);
         if (mirror)
         {
             for (int var19 = 0; var19 < faces.Length; ++var19)
@@ -81,7 +87,6 @@ public class ModelPart
                 faces[var19].flipFace();
             }
         }
-
     }
 
     public void setRotationPoint(float var1, float var2, float var3)
@@ -137,7 +142,6 @@ public class ModelPart
                     gl.CallDisplayList(displayList);
                     gl.PopMatrix();
                 }
-
             }
         }
     }
@@ -212,7 +216,6 @@ public class ModelPart
                         gl.Rotate(rotateAngleX * (180.0F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                     }
                 }
-
             }
         }
     }

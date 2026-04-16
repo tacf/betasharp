@@ -2,7 +2,6 @@ namespace BetaSharp.Client.Rendering.Entities.Models;
 
 public class ModelSkeleton : ModelZombie
 {
-
     public ModelSkeleton()
     {
         float var1 = 0.0F;

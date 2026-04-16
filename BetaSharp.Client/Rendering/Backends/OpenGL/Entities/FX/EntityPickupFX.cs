@@ -8,7 +8,6 @@ namespace BetaSharp.Client.Entities.FX;
 
 public class EntityPickupFX : EntityFX
 {
-
     private readonly IEntityRenderDispatcher _entityRenderDispatcher;
     private readonly Entity target;
     private readonly Entity source;
@@ -21,7 +20,8 @@ public class EntityPickupFX : EntityFX
         Entity target,
         Entity source,
         float yOffset,
-        IEntityRenderDispatcher entityRenderDispatcher) : base(world, target.x, target.y, target.z, target.velocityX, target.velocityY, target.velocityZ)
+        IEntityRenderDispatcher entityRenderDispatcher) : base(world, target.x, target.y, target.z, target.velocityX,
+        target.velocityY, target.velocityZ)
     {
         this.target = target;
         this.source = source;
@@ -30,7 +30,8 @@ public class EntityPickupFX : EntityFX
         maxAge = 3;
     }
 
-    public override void renderParticle(Tessellator t, float partialTick, float rotX, float rotY, float rotZ, float upX, float upZ)
+    public override void renderParticle(Tessellator t, float partialTick, float rotX, float rotY, float rotZ, float upX,
+        float upZ)
     {
         float lifeProgress = ((float)currentAge + partialTick) / (float)maxAge;
         lifeProgress *= lifeProgress;
@@ -51,7 +52,8 @@ public class EntityPickupFX : EntityFX
         renderY -= interpPosY;
         renderZ -= interpPosZ;
         GLManager.GL.Color4(luminance, luminance, luminance, 1.0F);
-        _entityRenderDispatcher.RenderEntityWithPosYaw(target, (double)((float)renderX), (double)((float)renderY), (double)((float)renderZ), target.yaw, partialTick);
+        _entityRenderDispatcher.RenderEntityWithPosYaw(target, (double)((float)renderX), (double)((float)renderY),
+            (double)((float)renderZ), target.yaw, partialTick);
     }
 
     public override void tick()
@@ -61,7 +63,6 @@ public class EntityPickupFX : EntityFX
         {
             markDead();
         }
-
     }
 
     public override int getFXLayer()

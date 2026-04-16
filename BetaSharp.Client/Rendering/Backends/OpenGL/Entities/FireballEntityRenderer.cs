@@ -7,7 +7,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class FireballEntityRenderer : EntityRenderer
 {
-
     public void render(EntityFireball var1, double x, double y, double z, float yaw, float tickDelta)
     {
         Scene.PushMatrix();

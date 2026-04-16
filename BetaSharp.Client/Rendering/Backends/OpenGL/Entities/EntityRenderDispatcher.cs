@@ -93,7 +93,8 @@ public class EntityRenderDispatcher : IEntityRenderDispatcher
         return GetEntityClassRenderObject(entity.GetType());
     }
 
-    public void CacheRenderInfo(World world, ITextureManager textureManager, ITextRenderer textRenderer, EntityLiving camera, GameOptions options, ILegacyFixedFunctionApi sceneRenderBackend, float tickDelta)
+    public void CacheRenderInfo(World world, ITextureManager textureManager, ITextRenderer textRenderer,
+        EntityLiving camera, GameOptions options, ILegacyFixedFunctionApi sceneRenderBackend, float tickDelta)
     {
         World = world;
         TextureManager = textureManager;
@@ -103,10 +104,12 @@ public class EntityRenderDispatcher : IEntityRenderDispatcher
         _fontRenderer = textRenderer;
         if (camera.isSleeping())
         {
-            int blockId = world.Reader.GetBlockId(MathHelper.Floor(camera.x), MathHelper.Floor(camera.y), MathHelper.Floor(camera.z));
+            int blockId = world.Reader.GetBlockId(MathHelper.Floor(camera.x), MathHelper.Floor(camera.y),
+                MathHelper.Floor(camera.z));
             if (blockId == Block.Bed.id)
             {
-                int bedMetadata = world.Reader.GetBlockMeta(MathHelper.Floor(camera.x), MathHelper.Floor(camera.y), MathHelper.Floor(camera.z));
+                int bedMetadata = world.Reader.GetBlockMeta(MathHelper.Floor(camera.x), MathHelper.Floor(camera.y),
+                    MathHelper.Floor(camera.z));
                 int bedFacing = bedMetadata & 3;
                 PlayerViewY = bedFacing * 90 + 180;
                 PlayerViewX = 0.0F;

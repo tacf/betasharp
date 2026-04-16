@@ -16,7 +16,8 @@ public class FallingBlockEntityRenderer : EntityRenderer
         ShadowRadius = 0.5F;
     }
 
-    public void doRenderFallingSand(EntityFallingSand var1, double var2, double var4, double var6, float var8, float var9)
+    public void doRenderFallingSand(EntityFallingSand var1, double var2, double var4, double var6, float var8,
+        float var9)
     {
         Scene.PushMatrix();
         Scene.Translate((float)var2, (float)var4, (float)var6);
@@ -24,7 +25,8 @@ public class FallingBlockEntityRenderer : EntityRenderer
         Block var10 = Block.Blocks[var1.blockId];
         IWorldContext var11 = var1.world;
         Scene.Disable(SceneRenderCapability.Lighting);
-        BlockRenderer.RenderBlockFallingSand(var10, var11, MathHelper.Floor(var1.x), MathHelper.Floor(var1.y), MathHelper.Floor(var1.z), Tessellator.instance);
+        BlockRenderer.RenderBlockFallingSand(var10, var11, MathHelper.Floor(var1.x), MathHelper.Floor(var1.y),
+            MathHelper.Floor(var1.z), Tessellator.instance);
         Scene.Enable(SceneRenderCapability.Lighting);
         Scene.PopMatrix();
     }

@@ -11,7 +11,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class LivingEntityRenderer : EntityRenderer
 {
-
     protected ModelBase mainModel;
     protected ModelBase renderPassModel;
     private readonly ILogger<LivingEntityRenderer> _logger = Log.Instance.For<LivingEntityRenderer>();
@@ -56,7 +55,8 @@ public class LivingEntityRenderer : EntityRenderer
             Scene.Scale(-1.0F, -1.0F, 1.0F);
             PreRenderCallback(entity, tickDelta);
             Scene.Translate(0.0F, -24.0F * modelScale - (1 / 128f), 0.0F);
-            float walkAnimationSpeed = entity.lastWalkAnimationSpeed + (entity.walkAnimationSpeed - entity.lastWalkAnimationSpeed) * tickDelta;
+            float walkAnimationSpeed = entity.lastWalkAnimationSpeed +
+                                       (entity.walkAnimationSpeed - entity.lastWalkAnimationSpeed) * tickDelta;
             float walkAnimationPhase = entity.animationPhase - entity.walkAnimationSpeed * (1.0F - tickDelta);
             if (walkAnimationSpeed > 1.0F)
             {
@@ -66,13 +66,15 @@ public class LivingEntityRenderer : EntityRenderer
             LoadDownloadableImageTexture((entity as EntityPlayer)?.name, entity.getTexture());
             Scene.Enable(SceneRenderCapability.AlphaTest);
             mainModel.setLivingAnimations(entity, walkAnimationPhase, walkAnimationSpeed, tickDelta, Scene);
-            mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+            mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch,
+                modelScale);
 
             for (int renderPass = 0; renderPass < 4; ++renderPass)
             {
                 if (ShouldRenderPass(entity, renderPass, tickDelta))
                 {
-                    renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress,
+                        headYaw - bodyYaw, pitch, modelScale);
                     Scene.Disable(SceneRenderCapability.Blend);
                     Scene.Enable(SceneRenderCapability.AlphaTest);
                 }
@@ -91,14 +93,16 @@ public class LivingEntityRenderer : EntityRenderer
                 if (entity.hurtTime > 0 || entity.deathTime > 0)
                 {
                     Scene.SetColor(brightness, 0.0F, 0.0F, 0.4F);
-                    mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress,
+                        headYaw - bodyYaw, pitch, modelScale);
 
                     for (int renderPass = 0; renderPass < 4; ++renderPass)
                     {
                         if (func_27005_b(entity, renderPass, tickDelta))
                         {
                             Scene.SetColor(brightness, 0.0F, 0.0F, 0.4F);
-                            renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                            renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress,
+                                headYaw - bodyYaw, pitch, modelScale);
                         }
                     }
                 }
@@ -110,14 +114,16 @@ public class LivingEntityRenderer : EntityRenderer
                     float colorBlue = (colorMultiplier & 255) / 255.0F;
                     float colorAlpha = (colorMultiplier >> 24 & 255) / 255.0F;
                     Scene.SetColor(colorRed, colorGreen, colorBlue, colorAlpha);
-                    mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                    mainModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress,
+                        headYaw - bodyYaw, pitch, modelScale);
 
                     for (int renderPass = 0; renderPass < 4; ++renderPass)
                     {
                         if (func_27005_b(entity, renderPass, tickDelta))
                         {
                             Scene.SetColor(colorRed, colorGreen, colorBlue, colorAlpha);
-                            renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress, headYaw - bodyYaw, pitch, modelScale);
+                            renderPassModel.render(Scene, walkAnimationPhase, walkAnimationSpeed, animationProgress,
+                                headYaw - bodyYaw, pitch, modelScale);
                         }
                     }
                 }
@@ -158,7 +164,6 @@ public class LivingEntityRenderer : EntityRenderer
 
             Scene.Rotate(deathAnimationProgress * getDeathMaxRotation(entity), 0.0F, 0.0F, 1.0F);
         }
-
     }
 
     protected float func_167_c(EntityLiving entity, float tickDelta)
@@ -205,10 +210,10 @@ public class LivingEntityRenderer : EntityRenderer
         {
             renderLivingLabel(entity, entity.id.ToString(), x, y, z, 64);
         }
-
     }
 
-    protected void renderLivingLabel(EntityLiving entity, string labelText, double x, double y, double z, int maxDistance)
+    protected void renderLivingLabel(EntityLiving entity, string labelText, double x, double y, double z,
+        int maxDistance)
     {
         float distanceToCamera = entity.getDistance(Dispatcher.CameraEntity);
         if (distanceToCamera <= maxDistance)
@@ -244,10 +249,12 @@ public class LivingEntityRenderer : EntityRenderer
             tessellator.addVertex(halfLabelWidth + 1, -1 + verticalOffset, 0.0D);
             tessellator.draw();
             Scene.Enable(SceneRenderCapability.Texture2D);
-            textRenderer.DrawString(labelText, -textRenderer.GetStringWidth(labelText) / 2, verticalOffset, Color.WhiteAlpha20);
+            textRenderer.DrawString(labelText, -textRenderer.GetStringWidth(labelText) / 2, verticalOffset,
+                Color.WhiteAlpha20);
             Scene.Enable(SceneRenderCapability.DepthTest);
             Scene.SetDepthMask(true);
-            textRenderer.DrawString(labelText, -textRenderer.GetStringWidth(labelText) / 2, verticalOffset, Color.WhiteAlpha20);
+            textRenderer.DrawString(labelText, -textRenderer.GetStringWidth(labelText) / 2, verticalOffset,
+                Color.WhiteAlpha20);
             Scene.Enable(SceneRenderCapability.Lighting);
             Scene.Disable(SceneRenderCapability.Blend);
             Scene.SetColor(1.0F, 1.0F, 1.0F, 1.0F);

@@ -7,6 +7,7 @@ public class LegacyParticleAdapter(EntityFX fx) : ISpecialParticle
 {
     public bool IsDead => fx.dead;
     public void Tick() => fx.tick();
+
     public void Render(Tessellator t, float partialTick, double interpX, double interpY, double interpZ)
     {
         EntityFX.interpPosX = interpX;

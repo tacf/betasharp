@@ -7,7 +7,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class LightningEntityRenderer : EntityRenderer
 {
-
     public void render(EntityLightningBolt var1, double x, double y, double z, float yaw, float tickDelta)
     {
         Tessellator var10 = Tessellator.instance;

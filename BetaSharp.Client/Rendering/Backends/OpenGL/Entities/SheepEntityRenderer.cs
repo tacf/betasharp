@@ -6,7 +6,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class SheepEntityRenderer : LivingEntityRenderer
 {
-
     public SheepEntityRenderer(ModelBase mainModel, ModelBase var2, float var3) : base(mainModel, var3)
     {
         setRenderPassModel(var2);
@@ -19,7 +18,8 @@ public class SheepEntityRenderer : LivingEntityRenderer
             loadTexture("/mob/sheep_fur.png");
             float var4 = var1.getBrightnessAtEyes(var3);
             int var5 = var1.getFleeceColor();
-            Scene.SetColorRgb(var4 * EntitySheep.fleeceColorTable[var5][0], var4 * EntitySheep.fleeceColorTable[var5][1], var4 * EntitySheep.fleeceColorTable[var5][2]);
+            Scene.SetColorRgb(var4 * EntitySheep.fleeceColorTable[var5][0],
+                var4 * EntitySheep.fleeceColorTable[var5][1], var4 * EntitySheep.fleeceColorTable[var5][2]);
             return true;
         }
         else

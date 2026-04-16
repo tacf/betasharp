@@ -8,7 +8,6 @@ namespace BetaSharp.Client.Rendering.Entities.Models;
 
 public class ModelWolf : ModelBase
 {
-
     public ModelPart wolfHeadMain;
     public ModelPart wolfBody;
     public ModelPart wolfLeg1;
@@ -60,7 +59,8 @@ public class ModelWolf : ModelBase
         wolfSnout.setRotationPoint(-0.5F, var2, -7.0F);
     }
 
-    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5,
+        float var6)
     {
         base.render(gl, var1, var2, var3, var4, var5, var6);
         setRotationAngles(var1, var2, var3, var4, var5, var6);
@@ -77,7 +77,8 @@ public class ModelWolf : ModelBase
         wolfMane.render(gl, var6);
     }
 
-    public override void setLivingAnimations(EntityLiving var1, float var2, float var3, float var4, ILegacyFixedFunctionApi gl)
+    public override void setLivingAnimations(EntityLiving var1, float var2, float var3, float var4,
+        ILegacyFixedFunctionApi gl)
     {
         EntityWolf var5 = (EntityWolf)var1;
         if (var5.isWolfAngry())
@@ -136,7 +137,6 @@ public class ModelWolf : ModelBase
             float var7 = var5.getBrightnessAtEyes(var4) * var5.getShadingWhileShaking(var4);
             gl.SetColorRgb(var7, var7, var7);
         }
-
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)

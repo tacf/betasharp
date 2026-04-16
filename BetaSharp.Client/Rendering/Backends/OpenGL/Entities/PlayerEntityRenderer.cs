@@ -13,7 +13,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class PlayerEntityRenderer : LivingEntityRenderer
 {
-
     private readonly ModelBiped _modelBipedMain;
     private readonly ModelBiped _modelArmorChestplate = new(1.0F);
     private readonly ModelBiped _modelArmor = new(0.5F);
@@ -32,7 +31,8 @@ public class PlayerEntityRenderer : LivingEntityRenderer
             Item armorItem = armorStack.getItem();
             if (armorItem is ItemArmor itemArmor)
             {
-                loadTexture("/armor/" + s_armorFilenamePrefix[itemArmor.renderIndex] + "_" + (armorSlot == 2 ? 2 : 1) + ".png");
+                loadTexture("/armor/" + s_armorFilenamePrefix[itemArmor.renderIndex] + "_" + (armorSlot == 2 ? 2 : 1) +
+                            ".png");
                 ModelBiped armorModel = armorSlot == 2 ? _modelArmor : _modelArmorChestplate;
                 armorModel.bipedHead.visible = armorSlot == 0;
                 armorModel.bipedHeadwear.visible = armorSlot == 0;
@@ -113,7 +113,8 @@ public class PlayerEntityRenderer : LivingEntityRenderer
                     tessellator.draw();
                     Scene.Enable(SceneRenderCapability.Texture2D);
                     Scene.SetDepthMask(true);
-                    textRenderer.DrawString(playerName, -textRenderer.GetStringWidth(playerName) / 2, 0, Color.WhiteAlpha20);
+                    textRenderer.DrawString(playerName, -textRenderer.GetStringWidth(playerName) / 2, 0,
+                        Color.WhiteAlpha20);
                     Scene.Enable(SceneRenderCapability.Lighting);
                     Scene.Disable(SceneRenderCapability.Blend);
                     Scene.SetColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -121,7 +122,6 @@ public class PlayerEntityRenderer : LivingEntityRenderer
                 }
             }
         }
-
     }
 
     protected void RenderSpecials(EntityPlayer player, float tickDelta)
@@ -149,7 +149,7 @@ public class PlayerEntityRenderer : LivingEntityRenderer
             for (int earIndex = 0; earIndex < 2; ++earIndex)
             {
                 float earYawOffset = player.prevYaw + (player.yaw - player.prevYaw) * tickDelta
-                    - (player.lastBodyYaw + (player.bodyYaw - player.lastBodyYaw) * tickDelta);
+                                     - (player.lastBodyYaw + (player.bodyYaw - player.lastBodyYaw) * tickDelta);
                 float earPitch = player.prevPitch + (player.pitch - player.prevPitch) * tickDelta;
                 Scene.PushMatrix();
                 Scene.Rotate(earYawOffset, 0.0F, 1.0F, 0.0F);
@@ -170,11 +170,11 @@ public class PlayerEntityRenderer : LivingEntityRenderer
             Scene.PushMatrix();
             Scene.Translate(0.0F, 0.0F, 2.0F / 16.0F);
             double capeDeltaX = player.prevCapeX + (player.capeX - player.prevCapeX) * (double)tickDelta
-                - (player.prevX + (player.x - player.prevX) * (double)tickDelta);
+                                - (player.prevX + (player.x - player.prevX) * (double)tickDelta);
             double capeDeltaY = player.prevCapeY + (player.capeY - player.prevCapeY) * (double)tickDelta
-                - (player.prevY + (player.y - player.prevY) * (double)tickDelta);
+                                - (player.prevY + (player.y - player.prevY) * (double)tickDelta);
             double capeDeltaZ = player.prevCapeZ + (player.capeZ - player.prevCapeZ) * (double)tickDelta
-                - (player.prevZ + (player.z - player.prevZ) * (double)tickDelta);
+                                - (player.prevZ + (player.z - player.prevZ) * (double)tickDelta);
             float bodyYaw = player.lastBodyYaw + (player.bodyYaw - player.lastBodyYaw) * tickDelta;
             double bodyYawSin = MathHelper.Sin(bodyYaw * (float)Math.PI / 180.0F);
             double bodyYawCos = -MathHelper.Cos(bodyYaw * (float)Math.PI / 180.0F);
@@ -196,8 +196,11 @@ public class PlayerEntityRenderer : LivingEntityRenderer
                 capeForwardSwing = 0.0F;
             }
 
-            float stepBobbing = player.prevStepBobbingAmount + (player.stepBobbingAmount - player.prevStepBobbingAmount) * tickDelta;
-            capeLift += MathHelper.Sin((player.prevHorizontalSpeed + (player.horizontalSpeed - player.prevHorizontalSpeed) * tickDelta) * 6.0F) * 32.0F * stepBobbing;
+            float stepBobbing = player.prevStepBobbingAmount +
+                                (player.stepBobbingAmount - player.prevStepBobbingAmount) * tickDelta;
+            capeLift += MathHelper.Sin((player.prevHorizontalSpeed +
+                                        (player.horizontalSpeed - player.prevHorizontalSpeed) * tickDelta) * 6.0F) *
+                        32.0F * stepBobbing;
             if (player.isSneaking())
             {
                 capeLift += 25.0F;
@@ -258,7 +261,6 @@ public class PlayerEntityRenderer : LivingEntityRenderer
             Dispatcher.HeldItemRenderer.renderItem(player, heldStack);
             Scene.PopMatrix();
         }
-
     }
 
     protected void func_186_b(EntityPlayer player, float tickDelta)
@@ -284,7 +286,6 @@ public class PlayerEntityRenderer : LivingEntityRenderer
         {
             base.Func_22012_b(player, x, y, z);
         }
-
     }
 
     protected void func_22017_a(EntityPlayer player, float animationProgress, float bodyYaw, float tickDelta)
@@ -299,7 +300,6 @@ public class PlayerEntityRenderer : LivingEntityRenderer
         {
             base.RotateCorpse(player, animationProgress, bodyYaw, tickDelta);
         }
-
     }
 
     protected override void PassSpecialRender(EntityLiving entity, double x, double y, double z)

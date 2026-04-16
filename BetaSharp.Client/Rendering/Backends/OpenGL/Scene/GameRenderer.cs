@@ -59,6 +59,7 @@ public class GameRenderer : ISceneOrchestrator
     public void UpdateClouds() => _client.WorldRenderer.UpdateClouds();
     public void ChangeWorld(World world) => _client.WorldRenderer.ChangeWorld(world);
     public void SetDamagePartialTime(float value) => _client.WorldRenderer.DamagePartialTime = value;
+
     public void PublishRenderMetrics()
     {
         if (!_client.WorldRenderer.TryGetChunkStats(out ChunkRendererStats chunkStats))
@@ -126,7 +127,10 @@ public class GameRenderer : ISceneOrchestrator
         _targetedEntity = null;
 
         float searchMargin = 1.0F;
-        List<Entity> entities = _client.World.Entities.GetEntities(_client.Camera, _client.Camera.boundingBox.Stretch(lookVec.x * reachDistance, lookVec.y * reachDistance, lookVec.z * reachDistance).Expand((double)searchMargin, (double)searchMargin, (double)searchMargin));
+        List<Entity> entities = _client.World.Entities.GetEntities(_client.Camera,
+            _client.Camera.boundingBox
+                .Stretch(lookVec.x * reachDistance, lookVec.y * reachDistance, lookVec.z * reachDistance)
+                .Expand((double)searchMargin, (double)searchMargin, (double)searchMargin));
 
         double closestDistance = 0.0D;
         for (int i = 0; i < entities.Count; ++i)
@@ -135,7 +139,8 @@ public class GameRenderer : ISceneOrchestrator
             if (ent.isCollidable())
             {
                 float targetingMargin = ent.getTargetingMargin();
-                Box box = ent.boundingBox.Expand((double)targetingMargin, (double)targetingMargin, (double)targetingMargin);
+                Box box = ent.boundingBox.Expand((double)targetingMargin, (double)targetingMargin,
+                    (double)targetingMargin);
                 HitResult hit = box.Raycast(cameraPosition, targetVec);
 
                 if (box.Contains(cameraPosition))
@@ -173,13 +178,16 @@ public class GameRenderer : ISceneOrchestrator
 
         if (cameraController.CameraZoom != 1.0D)
         {
-            _sceneRenderBackend.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch, 0.0F);
+            _sceneRenderBackend.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch,
+                0.0F);
             _sceneRenderBackend.Scale((float)cameraController.CameraZoom, (float)cameraController.CameraZoom, 1.0F);
-            _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
+            _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta),
+                _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
         }
         else
         {
-            _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
+            _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta),
+                _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
         }
 
         _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
@@ -191,7 +199,8 @@ public class GameRenderer : ISceneOrchestrator
             cameraController.ApplyViewBobbing(tickDelta);
         }
 
-        float var4 = _client.Player.lastScreenDistortion + (_client.Player.changeDimensionCooldown - _client.Player.lastScreenDistortion) * tickDelta;
+        float var4 = _client.Player.lastScreenDistortion +
+                     (_client.Player.changeDimensionCooldown - _client.Player.lastScreenDistortion) * tickDelta;
         if (var4 > 0.0F)
         {
             float var5 = 5.0F / (var4 * var4 + 5.0F) - var4 * 0.04F;
@@ -210,11 +219,13 @@ public class GameRenderer : ISceneOrchestrator
         _sceneRenderBackend.LoadIdentity();
         if (cameraController.CameraZoom != 1.0D)
         {
-            _sceneRenderBackend.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch, 0.0F);
+            _sceneRenderBackend.Translate((float)cameraController.CameraYaw, (float)-cameraController.CameraPitch,
+                0.0F);
             _sceneRenderBackend.Scale((float)cameraController.CameraZoom, (float)cameraController.CameraZoom, 1.0F);
         }
 
-        _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta, true), _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
+        _sceneRenderBackend.Perspective(cameraController.GetFov(tickDelta, true),
+            _client.DisplayWidth / (float)_client.DisplayHeight, 0.05F, _viewDistance * 2.0F);
         _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
         _sceneRenderBackend.LoadIdentity();
 
@@ -225,7 +236,8 @@ public class GameRenderer : ISceneOrchestrator
             cameraController.ApplyViewBobbing(tickDelta);
         }
 
-        if (_client.Options.CameraMode == EnumCameraMode.FirstPerson && !_client.Camera.isSleeping() && !_client.Options.HideGUI)
+        if (_client.Options.CameraMode == EnumCameraMode.FirstPerson && !_client.Camera.isSleeping() &&
+            !_client.Options.HideGUI)
         {
             HeldItemRenderer.renderItemInFirstPerson(tickDelta);
         }
@@ -265,7 +277,8 @@ public class GameRenderer : ISceneOrchestrator
             float var4 = _client.MouseHelper.DeltaX * var3;
             float var5 = _client.MouseHelper.DeltaY * var3;
 
-            bool zoomHeldForSensitivity = _client.CurrentScreen == null && _client.InGameHasFocus && Keyboard.isKeyDown(_client.Options.KeyBindZoom.keyCode);
+            bool zoomHeldForSensitivity = _client.CurrentScreen == null && _client.InGameHasFocus &&
+                                          Keyboard.isKeyDown(_client.Options.KeyBindZoom.keyCode);
             if (zoomHeldForSensitivity)
             {
                 float zoomProgress = 1.0F / System.Math.Clamp(_client.Options.ZoomScale, 1.25F, 20.0F);
@@ -287,10 +300,13 @@ public class GameRenderer : ISceneOrchestrator
                 var4 = _mouseFilterXAxis.Smooth(var4, 0.05F * var3);
                 var5 = _mouseFilterYAxis.Smooth(var5, 0.05F * var3);
             }
+
             _client.Player.changeLookDirection(var4, var5 * var6);
         }
 
-        bool zoomHeld = (_client.CurrentScreen == null && _client.InGameHasFocus && Keyboard.isKeyDown(_client.Options.KeyBindZoom.keyCode)) || ControllerManager.IsZoomHeld();
+        bool zoomHeld =
+            (_client.CurrentScreen == null && _client.InGameHasFocus &&
+             Keyboard.isKeyDown(_client.Options.KeyBindZoom.keyCode)) || ControllerManager.IsZoomHeld();
         cameraController.SetZoomState(zoomHeld, _client.Options.ZoomScale);
 
         if (!_client.SkipRenderWorld)
@@ -312,6 +328,7 @@ public class GameRenderer : ISceneOrchestrator
                 scaledMouseX = (Mouse.getX() - vpOffsetX) * scaledWidth / _client.DisplayWidth;
                 scaledMouseY = scaledHeight - (Mouse.getY() - vpOffsetY) * scaledHeight / _client.DisplayHeight - 1;
             }
+
             int var7 = 30 + (int)(_client.Options.LimitFramerate * 210.0f);
             bool desiredVSync = _client.Options.VSync && var7 >= 240;
 
@@ -341,8 +358,9 @@ public class GameRenderer : ISceneOrchestrator
             }
             else
             {
-                _sceneRenderBackend.SetViewport(0, 0, (uint)_client.PresentationTargetWidth, (uint)_client.PresentationTargetHeight);
-        _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
+                _sceneRenderBackend.SetViewport(0, 0, (uint)_client.PresentationTargetWidth,
+                    (uint)_client.PresentationTargetHeight);
+                _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Projection);
                 _sceneRenderBackend.LoadIdentity();
                 _sceneRenderBackend.SetMatrixMode(SceneMatrixMode.Modelview);
                 _sceneRenderBackend.LoadIdentity();
@@ -418,9 +436,11 @@ public class GameRenderer : ISceneOrchestrator
 
         using (Profiler.Begin("UpdateFog"))
         {
-            _sceneRenderBackend.SetViewport(0, 0, (uint)_client.PresentationTargetWidth, (uint)_client.PresentationTargetHeight);
+            _sceneRenderBackend.SetViewport(0, 0, (uint)_client.PresentationTargetWidth,
+                (uint)_client.PresentationTargetHeight);
             updateSkyAndFogColors(tickDelta);
         }
+
         _sceneRenderBackend.Clear(SceneClearBufferMask.Depth | SceneClearBufferMask.Color);
         _sceneRenderBackend.Enable(SceneRenderCapability.CullFace);
         renderWorld(tickDelta);
@@ -466,12 +486,15 @@ public class GameRenderer : ISceneOrchestrator
         }
 
         EntityPlayer entityPlayer = default;
-        if (_client.ObjectMouseOver.Type != HitResultType.MISS && entity.isInFluid(Material.Water) && entity is EntityPlayer)
+        if (_client.ObjectMouseOver.Type != HitResultType.MISS && entity.isInFluid(Material.Water) &&
+            entity is EntityPlayer)
         {
             entityPlayer = (EntityPlayer)entity;
             _sceneRenderBackend.Disable(SceneRenderCapability.AlphaTest);
-            worldRenderer.DrawBlockBreaking(entityPlayer, _client.ObjectMouseOver, entityPlayer.inventory.GetItemInHand(), tickDelta);
-            worldRenderer.DrawSelectionBox(entityPlayer, _client.ObjectMouseOver, 0, entityPlayer.inventory.GetItemInHand(), tickDelta);
+            worldRenderer.DrawBlockBreaking(entityPlayer, _client.ObjectMouseOver,
+                entityPlayer.inventory.GetItemInHand(), tickDelta);
+            worldRenderer.DrawSelectionBox(entityPlayer, _client.ObjectMouseOver, 0,
+                entityPlayer.inventory.GetItemInHand(), tickDelta);
             _sceneRenderBackend.Enable(SceneRenderCapability.AlphaTest);
         }
 
@@ -493,12 +516,15 @@ public class GameRenderer : ISceneOrchestrator
         _sceneRenderBackend.SetDepthMask(true);
         _sceneRenderBackend.Enable(SceneRenderCapability.CullFace);
         _sceneRenderBackend.Disable(SceneRenderCapability.Blend);
-        if (!cameraController.IsZoomActive && entity is EntityPlayer && _client.ObjectMouseOver.Type != HitResultType.MISS && !entity.isInFluid(Material.Water))
+        if (!cameraController.IsZoomActive && entity is EntityPlayer &&
+            _client.ObjectMouseOver.Type != HitResultType.MISS && !entity.isInFluid(Material.Water))
         {
             entityPlayer = (EntityPlayer)entity;
             _sceneRenderBackend.Disable(SceneRenderCapability.AlphaTest);
-            worldRenderer.DrawBlockBreaking(entityPlayer, _client.ObjectMouseOver, entityPlayer.inventory.GetItemInHand(), tickDelta);
-            worldRenderer.DrawSelectionBox(entityPlayer, _client.ObjectMouseOver, 0, entityPlayer.inventory.GetItemInHand(), tickDelta);
+            worldRenderer.DrawBlockBreaking(entityPlayer, _client.ObjectMouseOver,
+                entityPlayer.inventory.GetItemInHand(), tickDelta);
+            worldRenderer.DrawSelectionBox(entityPlayer, _client.ObjectMouseOver, 0,
+                entityPlayer.inventory.GetItemInHand(), tickDelta);
             _sceneRenderBackend.Enable(SceneRenderCapability.AlphaTest);
         }
 
@@ -646,7 +672,8 @@ public class GameRenderer : ISceneOrchestrator
                 int var17 = var6 + _random.NextInt(var7) - _random.NextInt(var7);
                 int var18 = var3.Reader.GetTopSolidBlockY(var16, var17);
                 int var19 = var3.Reader.GetBlockId(var16, var18 - 1, var17);
-                if (var18 <= var5 + var7 && var18 >= var5 - var7 && var3.GetBiomeSource().GetBiome(var16, var17).CanSpawnLightningBolt())
+                if (var18 <= var5 + var7 && var18 >= var5 - var7 &&
+                    var3.GetBiomeSource().GetBiome(var16, var17).CanSpawnLightningBolt())
                 {
                     float var20 = _random.NextFloat();
                     float var21 = _random.NextFloat();
@@ -654,7 +681,8 @@ public class GameRenderer : ISceneOrchestrator
                     {
                         if (Block.Blocks[var19].material == Material.Lava)
                         {
-                            _client.ParticleManager.AddSmoke(var16 + var20, var18 + 0.1F - Block.Blocks[var19].BoundingBox.MinY, var17 + var21, 0.0, 0.0, 0.0);
+                            _client.ParticleManager.AddSmoke(var16 + var20,
+                                var18 + 0.1F - Block.Blocks[var19].BoundingBox.MinY, var17 + var21, 0.0, 0.0, 0.0);
                         }
                         else
                         {
@@ -666,7 +694,8 @@ public class GameRenderer : ISceneOrchestrator
                                 var12 = (double)(var17 + var21);
                             }
 
-                            _client.ParticleManager.AddRain(var16 + var20, var18 + 0.1F - Block.Blocks[var19].BoundingBox.MinY, var17 + var21);
+                            _client.ParticleManager.AddRain(var16 + var20,
+                                var18 + 0.1F - Block.Blocks[var19].BoundingBox.MinY, var17 + var21);
                         }
                     }
                 }
@@ -675,7 +704,9 @@ public class GameRenderer : ISceneOrchestrator
             if (var14 > 0 && _random.NextInt(3) < _rainSoundCounter++)
             {
                 _rainSoundCounter = 0;
-                if (var10 > var2.y + 1.0D && var3.Reader.GetTopSolidBlockY(MathHelper.Floor(var2.x), MathHelper.Floor(var2.z)) > MathHelper.Floor(var2.y))
+                if (var10 > var2.y + 1.0D &&
+                    var3.Reader.GetTopSolidBlockY(MathHelper.Floor(var2.x), MathHelper.Floor(var2.z)) >
+                    MathHelper.Floor(var2.y))
                 {
                     _client.World.Broadcaster.PlaySoundAtPos(var8, var10, var12, "ambient.weather.rain", 0.1F, 0.5F);
                 }
@@ -710,7 +741,8 @@ public class GameRenderer : ISceneOrchestrator
             int var15 = MathHelper.Floor(var11);
             byte var16 = 10;
 
-            Biome[] var17 = var4.GetBiomeSource().GetBiomesInArea(var5 - var16, var7 - var16, var16 * 2 + 1, var16 * 2 + 1);
+            Biome[] var17 = var4.GetBiomeSource()
+                .GetBiomesInArea(var5 - var16, var7 - var16, var16 * 2 + 1, var16 * 2 + 1);
             int var18 = 0;
 
             int var19;
@@ -754,7 +786,8 @@ public class GameRenderer : ISceneOrchestrator
                         var26 = 1.0F;
                         if (var24 != var25)
                         {
-                            _random.SetSeed(var19 * var19 * 3121 + var19 * 45238971 + var20 * var20 * 418711 + var20 * 13761);
+                            _random.SetSeed(var19 * var19 * 3121 + var19 * 45238971 + var20 * var20 * 418711 +
+                                            var20 * 13761);
                             float var27 = _ticks + tickDelta;
                             float var28 = ((_ticks & 511) + tickDelta) / 512.0F;
                             float var29 = _random.NextFloat() + var27 * 0.01F * (float)_random.NextGaussian();
@@ -764,16 +797,25 @@ public class GameRenderer : ISceneOrchestrator
                             float var35 = MathHelper.Sqrt(var31 * var31 + var33 * var33) / var16;
                             var8.startDrawingQuads();
                             float var36 = var4.GetLuminance(var19, var23, var20);
-                            _sceneRenderBackend.SetColor(var36, var36, var36, ((1.0F - var35 * var35) * 0.3F + 0.5F) * var2);
+                            _sceneRenderBackend.SetColor(var36, var36, var36,
+                                ((1.0F - var35 * var35) * 0.3F + 0.5F) * var2);
                             var8.setTranslationD(-var9 * 1.0D, -var11 * 1.0D, -var13 * 1.0D);
-                            var8.addVertexWithUV(var19 + 0, var24, var20 + 0.5D, (double)(0.0F * var26 + var29), (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
-                            var8.addVertexWithUV(var19 + 1, var24, var20 + 0.5D, (double)(1.0F * var26 + var29), (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
-                            var8.addVertexWithUV(var19 + 1, var25, var20 + 0.5D, (double)(1.0F * var26 + var29), (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
-                            var8.addVertexWithUV(var19 + 0, var25, var20 + 0.5D, (double)(0.0F * var26 + var29), (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
-                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 0, (double)(0.0F * var26 + var29), (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
-                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 1, (double)(1.0F * var26 + var29), (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
-                            var8.addVertexWithUV(var19 + 0.5D, var25, var20 + 1, (double)(1.0F * var26 + var29), (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
-                            var8.addVertexWithUV(var19 + 0.5D, var25, var20 + 0, (double)(0.0F * var26 + var29), (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 0, var24, var20 + 0.5D, (double)(0.0F * var26 + var29),
+                                (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 1, var24, var20 + 0.5D, (double)(1.0F * var26 + var29),
+                                (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 1, var25, var20 + 0.5D, (double)(1.0F * var26 + var29),
+                                (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 0, var25, var20 + 0.5D, (double)(0.0F * var26 + var29),
+                                (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 0, (double)(0.0F * var26 + var29),
+                                (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 1, (double)(1.0F * var26 + var29),
+                                (double)(var24 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 0.5D, var25, var20 + 1, (double)(1.0F * var26 + var29),
+                                (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
+                            var8.addVertexWithUV(var19 + 0.5D, var25, var20 + 0, (double)(0.0F * var26 + var29),
+                                (double)(var25 * var26 / 4.0F + var28 * var26 + var30));
                             var8.setTranslationD(0.0D, 0.0D, 0.0D);
                             var8.draw();
                         }
@@ -809,23 +851,34 @@ public class GameRenderer : ISceneOrchestrator
                         float var37 = 1.0F;
                         if (var23 != var24)
                         {
-                            _random.SetSeed(var19 * var19 * 3121 + var19 * 45238971 + var20 * var20 * 418711 + var20 * 13761);
-                            var26 = ((_ticks + var19 * var19 * 3121 + var19 * 45238971 + var20 * var20 * 418711 + var20 * 13761 & 31) + tickDelta) / 32.0F * (3.0F + _random.NextFloat());
+                            _random.SetSeed(var19 * var19 * 3121 + var19 * 45238971 + var20 * var20 * 418711 +
+                                            var20 * 13761);
+                            var26 = ((_ticks + var19 * var19 * 3121 + var19 * 45238971 + var20 * var20 * 418711 +
+                                var20 * 13761 & 31) + tickDelta) / 32.0F * (3.0F + _random.NextFloat());
                             double var38 = (double)(var19 + 0.5F) - var3.x;
                             double var39 = (double)(var20 + 0.5F) - var3.z;
                             float var40 = MathHelper.Sqrt(var38 * var38 + var39 * var39) / var16;
                             var8.startDrawingQuads();
                             float var32 = var4.GetLuminance(var19, 128, var20) * 0.85F + 0.15F;
-                            _sceneRenderBackend.SetColor(var32, var32, var32, ((1.0F - var40 * var40) * 0.5F + 0.5F) * var2);
+                            _sceneRenderBackend.SetColor(var32, var32, var32,
+                                ((1.0F - var40 * var40) * 0.5F + 0.5F) * var2);
                             var8.setTranslationD(-var9 * 1.0D, -var11 * 1.0D, -var13 * 1.0D);
-                            var8.addVertexWithUV(var19 + 0, var23, var20 + 0.5D, (double)(0.0F * var37), (double)(var23 * var37 / 4.0F + var26 * var37));
-                            var8.addVertexWithUV(var19 + 1, var23, var20 + 0.5D, (double)(1.0F * var37), (double)(var23 * var37 / 4.0F + var26 * var37));
-                            var8.addVertexWithUV(var19 + 1, var24, var20 + 0.5D, (double)(1.0F * var37), (double)(var24 * var37 / 4.0F + var26 * var37));
-                            var8.addVertexWithUV(var19 + 0, var24, var20 + 0.5D, (double)(0.0F * var37), (double)(var24 * var37 / 4.0F + var26 * var37));
-                            var8.addVertexWithUV(var19 + 0.5D, var23, var20 + 0, (double)(0.0F * var37), (double)(var23 * var37 / 4.0F + var26 * var37));
-                            var8.addVertexWithUV(var19 + 0.5D, var23, var20 + 1, (double)(1.0F * var37), (double)(var23 * var37 / 4.0F + var26 * var37));
-                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 1, (double)(1.0F * var37), (double)(var24 * var37 / 4.0F + var26 * var37));
-                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 0, (double)(0.0F * var37), (double)(var24 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 0, var23, var20 + 0.5D, (double)(0.0F * var37),
+                                (double)(var23 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 1, var23, var20 + 0.5D, (double)(1.0F * var37),
+                                (double)(var23 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 1, var24, var20 + 0.5D, (double)(1.0F * var37),
+                                (double)(var24 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 0, var24, var20 + 0.5D, (double)(0.0F * var37),
+                                (double)(var24 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 0.5D, var23, var20 + 0, (double)(0.0F * var37),
+                                (double)(var23 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 0.5D, var23, var20 + 1, (double)(1.0F * var37),
+                                (double)(var23 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 1, (double)(1.0F * var37),
+                                (double)(var24 * var37 / 4.0F + var26 * var37));
+                            var8.addVertexWithUV(var19 + 0.5D, var24, var20 + 0, (double)(0.0F * var37),
+                                (double)(var24 * var37 / 4.0F + var26 * var37));
                             var8.setTranslationD(0.0D, 0.0D, 0.0D);
                             var8.draw();
                         }
@@ -1005,5 +1058,4 @@ public class GameRenderer : ISceneOrchestrator
         _sceneRenderBackend.Enable(SceneRenderCapability.ColorMaterial);
         _sceneRenderBackend.SetColorMaterial(SceneColorMaterialFace.Front, SceneColorMaterialParameter.Ambient);
     }
-
 }

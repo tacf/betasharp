@@ -4,7 +4,6 @@ namespace BetaSharp.Client.Rendering.Entities.Models;
 
 public class ModelSheep2 : ModelQuadruped
 {
-
     public ModelSheep2() : base(12, 0.0f)
     {
         head = new ModelPart(0, 0);

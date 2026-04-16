@@ -4,7 +4,6 @@ namespace BetaSharp.Client.Rendering.Entities.Models;
 
 public class ModelBoat : ModelBase
 {
-
     public ModelPart[] boatSides = new ModelPart[5];
 
     public ModelBoat()
@@ -34,13 +33,13 @@ public class ModelBoat : ModelBase
         boatSides[3].rotateAngleY = (float)Math.PI;
     }
 
-    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5,
+        float var6)
     {
         for (int var7 = 0; var7 < 5; ++var7)
         {
             boatSides[var7].render(gl, var6);
         }
-
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)

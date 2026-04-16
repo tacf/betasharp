@@ -27,7 +27,6 @@ public class ModelGhast : ModelBase
             tentacles[var3].rotationPointZ = var5;
             tentacles[var3].rotationPointY = 31 + var1;
         }
-
     }
 
     public override void setRotationAngles(float var1, float var2, float var3, float var4, float var5, float var6)
@@ -36,10 +35,10 @@ public class ModelGhast : ModelBase
         {
             tentacles[var7].rotateAngleX = 0.2F * MathHelper.Sin(var3 * 0.3F + var7) + 0.4F;
         }
-
     }
 
-    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5, float var6)
+    public override void render(ILegacyFixedFunctionApi gl, float var1, float var2, float var3, float var4, float var5,
+        float var6)
     {
         setRotationAngles(var1, var2, var3, var4, var5, var6);
         body.render(gl, var6);
@@ -48,6 +47,5 @@ public class ModelGhast : ModelBase
         {
             tentacles[var7].render(gl, var6);
         }
-
     }
 }

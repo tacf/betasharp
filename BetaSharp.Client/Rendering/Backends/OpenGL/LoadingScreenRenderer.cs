@@ -169,7 +169,8 @@ public class LoadingScreenRenderer(BetaSharp game) : ILoadingScreenRenderer
             _tint = tint;
         }
 
-        public void Draw(float left, float top, float right, float bottom, float z, double uLeft, double vTop, double uRight, double vBottom)
+        public void Draw(float left, float top, float right, float bottom, float z, double uLeft, double vTop,
+            double uRight, double vBottom)
         {
             tessellator.startDrawingQuads();
             tessellator.setColorRGBA(_tint);

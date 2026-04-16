@@ -7,7 +7,6 @@ namespace BetaSharp.Client.Rendering.Entities;
 
 public class ArrowEntityRenderer : EntityRenderer
 {
-
     public void renderArrow(EntityArrow var1, double var2, double var4, double var6, float var8, float var9)
     {
         if (var1.prevYaw != 0.0F || var1.prevPitch != 0.0F)

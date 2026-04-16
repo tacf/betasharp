@@ -61,6 +61,7 @@ public class UIRenderer(
     }
 
     public void SetDepthMask(bool flag) => _uiRenderBackend.SetDepthMask(flag);
+
     public void SetAlphaTest(bool flag)
     {
         _uiRenderBackend.SetAlphaTest(flag);
@@ -152,12 +153,15 @@ public class UIRenderer(
         {
             if (shadow)
             {
-                TextRenderer.DrawStringWithShadow(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY), color);
+                TextRenderer.DrawStringWithShadow(text, (int)MathF.Floor(x + _translateX),
+                    (int)MathF.Floor(y + _translateY), color);
             }
             else
             {
-                TextRenderer.DrawString(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY), color);
+                TextRenderer.DrawString(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY),
+                    color);
             }
+
             return;
         }
 
@@ -172,26 +176,32 @@ public class UIRenderer(
         {
             TextRenderer.DrawString(text, 0, 0, color);
         }
+
         _uiRenderBackend.PopMatrix();
     }
 
     public void DrawTextWrapped(string text, float x, float y, float maxWidth, Color color)
     {
-        TextRenderer.DrawStringWrapped(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY), (int)maxWidth, color);
+        TextRenderer.DrawStringWrapped(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY),
+            (int)maxWidth, color);
     }
 
-    public void DrawCenteredText(string text, float x, float y, Color color, float rotation = 0, float scale = 1.0f, bool shadow = true)
+    public void DrawCenteredText(string text, float x, float y, Color color, float rotation = 0, float scale = 1.0f,
+        bool shadow = true)
     {
         if (rotation == 0 && scale == 1.0f)
         {
             if (shadow)
             {
-                DrawCenteredStringRaw(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY), color);
+                DrawCenteredStringRaw(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY),
+                    color);
             }
             else
             {
-                TextRenderer.DrawString(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY), color, HorizontalAlignment.Center);
+                TextRenderer.DrawString(text, (int)MathF.Floor(x + _translateX), (int)MathF.Floor(y + _translateY),
+                    color, HorizontalAlignment.Center);
             }
+
             return;
         }
 
@@ -234,17 +244,20 @@ public class UIRenderer(
             1.0);
     }
 
-    public void DrawTexturedModalRect(TextureHandle texture, float x, float y, float u, float v, float width, float height)
+    public void DrawTexturedModalRect(TextureHandle texture, float x, float y, float u, float v, float width,
+        float height)
     {
         DrawTexturedModalRect(texture, x, y, u, v, width, height, width, height, 0.0f);
     }
 
-    public void DrawTexturedModalRect(TextureHandle texture, float x, float y, float u, float v, float width, float height, float uvWidth, float uvHeight)
+    public void DrawTexturedModalRect(TextureHandle texture, float x, float y, float u, float v, float width,
+        float height, float uvWidth, float uvHeight)
     {
         DrawTexturedModalRect(texture, x, y, u, v, width, height, uvWidth, uvHeight, 0.0f);
     }
 
-    public void DrawTexturedModalRect(TextureHandle texture, float x, float y, float u, float v, float width, float height, float uvWidth, float uvHeight, float z)
+    public void DrawTexturedModalRect(TextureHandle texture, float x, float y, float u, float v, float width,
+        float height, float uvWidth, float uvHeight, float z)
     {
         TextureManager.BindTexture(texture);
         float f = 0.00390625F;
@@ -262,7 +275,8 @@ public class UIRenderer(
             (v + uvHeight) * f);
     }
 
-    public void DrawRepeatingTexture(TextureHandle texture, float x, float y, float width, float height, float tileSize, float scrollOffsetY = 0f)
+    public void DrawRepeatingTexture(TextureHandle texture, float x, float y, float width, float height, float tileSize,
+        float scrollOffsetY = 0f)
     {
         TextureManager.BindTexture(texture);
         Color tint = new(64, 64, 64, 255);
@@ -297,7 +311,8 @@ public class UIRenderer(
 
     public void DrawItemIntoGui(ItemRenderer itemRenderer, int itemId, int itemMeta, int textureId, float x, float y)
     {
-        itemRenderer.drawItemIntoGui(TextRenderer, TextureManager, itemId, itemMeta, textureId, (int)(x + _translateX), (int)(y + _translateY));
+        itemRenderer.drawItemIntoGui(TextRenderer, TextureManager, itemId, itemMeta, textureId, (int)(x + _translateX),
+            (int)(y + _translateY));
     }
 
     public void DrawItem(ItemStack stack, float x, float y)
@@ -316,7 +331,8 @@ public class UIRenderer(
             _uiRenderBackend.SetDepthTest(true);
 
             _uiRenderBackend.TurnOnGuiLighting();
-            _itemRenderer.renderItemIntoGUI(TextRenderer, TextureManager, stack, (int)(x + _translateX), (int)(y + _translateY));
+            _itemRenderer.renderItemIntoGUI(TextRenderer, TextureManager, stack, (int)(x + _translateX),
+                (int)(y + _translateY));
             _uiRenderBackend.TurnOffLighting();
 
             _uiRenderBackend.SetCullFace(false);
@@ -328,7 +344,8 @@ public class UIRenderer(
         {
             _uiRenderBackend.TurnOffLighting();
             _uiRenderBackend.SetDepthTest(false);
-            _itemRenderer.renderItemIntoGUI(TextRenderer, TextureManager, stack, (int)(x + _translateX), (int)(y + _translateY));
+            _itemRenderer.renderItemIntoGUI(TextRenderer, TextureManager, stack, (int)(x + _translateX),
+                (int)(y + _translateY));
         }
     }
 
@@ -338,7 +355,8 @@ public class UIRenderer(
 
         _uiRenderBackend.TurnOffLighting();
         _uiRenderBackend.SetDepthTest(false);
-        _itemRenderer.renderItemOverlayIntoGUI(TextRenderer, TextureManager, stack, (int)(x + _translateX), (int)(y + _translateY));
+        _itemRenderer.renderItemOverlayIntoGUI(TextRenderer, TextureManager, stack, (int)(x + _translateX),
+            (int)(y + _translateY));
     }
 
     public void DrawEntity(Entity entity, float x, float y, float scale, float mouseX, float mouseY)
@@ -368,6 +386,7 @@ public class UIRenderer(
         {
             el2.bodyYaw = (float)Math.Atan(lookX / 40.0F) * 20.0F;
         }
+
         entity.yaw = (float)Math.Atan(lookX / 40.0F) * 40.0F;
         entity.pitch = -(float)Math.Atan(lookY / 40.0F) * 20.0F;
         entity.minBrightness = 1.0F;
@@ -381,6 +400,7 @@ public class UIRenderer(
         {
             el3.bodyYaw = bodyYaw;
         }
+
         entity.yaw = headYaw;
         entity.pitch = headPitch;
 

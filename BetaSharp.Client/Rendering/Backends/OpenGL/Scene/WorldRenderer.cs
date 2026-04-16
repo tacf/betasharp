@@ -43,7 +43,8 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
     private int _renderDistance = -1;
     private int _renderEntitiesStartupCounter = 2;
 
-    public WorldRenderer(BetaSharp gameInstance, ITextureManager textureManager, IChunkRendererFactory chunkRendererFactory)
+    public WorldRenderer(BetaSharp gameInstance, ITextureManager textureManager,
+        IChunkRendererFactory chunkRendererFactory)
     {
         _game = gameInstance;
         _sceneRenderBackend = gameInstance.LegacyFixedFunctionApi;
@@ -167,7 +168,6 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
             _chunkRenderer?.Dispose();
             _chunkRenderer = null;
         }
-
     }
 
     public void Tick(Entity view, float partialTicks)
@@ -249,8 +249,10 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         }
         else
         {
-            _game.BlockEntityRenderDispatcher.CacheActiveRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, var3);
-            _game.EntityRenderDispatcher.CacheRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera, _game.Options, _sceneRenderBackend, var3);
+            _game.BlockEntityRenderDispatcher.CacheActiveRenderInfo(_world, _textureManager, _game.TextRenderer,
+                _game.Camera, var3);
+            _game.EntityRenderDispatcher.CacheRenderInfo(_world, _textureManager, _game.TextRenderer, _game.Camera,
+                _game.Options, _sceneRenderBackend, var3);
             CountEntitiesTotal = 0;
             CountEntitiesRendered = 0;
             CountEntitiesHidden = 0;
@@ -295,7 +297,11 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                         continue;
                     }
                 }
-                if (var7.shouldRender(var1) && (var7.ignoreFrustumCheck || culler.IsBoundingBoxInFrustum(var7.boundingBox)) && (var7 != _game.Camera || _game.Options.CameraMode != EnumCameraMode.FirstPerson || _game.Camera.isSleeping()))
+
+                if (var7.shouldRender(var1) &&
+                    (var7.ignoreFrustumCheck || culler.IsBoundingBoxInFrustum(var7.boundingBox)) &&
+                    (var7 != _game.Camera || _game.Options.CameraMode != EnumCameraMode.FirstPerson ||
+                     _game.Camera.isSleeping()))
                 {
                     int yFloor = MathHelper.Floor(var7.y);
                     if (yFloor < 0)
@@ -318,7 +324,8 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
             for (var6 = 0; var6 < _world.Entities.BlockEntities.Count; ++var6)
             {
                 BlockEntity entity = _world.Entities.BlockEntities[var6];
-                if (!entity.isRemoved() && culler.IsBoundingBoxInFrustum(new Box(entity.X, entity.Y, entity.Z, entity.X + 1, entity.Y + 1, entity.Z + 1)))
+                if (!entity.isRemoved() && culler.IsBoundingBoxInFrustum(new Box(entity.X, entity.Y, entity.Z,
+                        entity.X + 1, entity.Y + 1, entity.Z + 1)))
                 {
                     _game.BlockEntityRenderDispatcher.RenderTileEntity(entity, var3);
                 }
@@ -426,7 +433,8 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                     var14 = var20 * (float)Math.PI * 2.0F / var19;
                     float var15 = MathHelper.Sin(var14);
                     float var16 = MathHelper.Cos(var14);
-                    var17.addVertex((double)(var15 * 120.0F), (double)(var16 * 120.0F), (double)(-var16 * 40.0F * var18[3]));
+                    var17.addVertex((double)(var15 * 120.0F), (double)(var16 * 120.0F),
+                        (double)(-var16 * 40.0F * var18[3]));
                 }
 
                 var17.draw();
@@ -528,19 +536,31 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                     if (i == 0)
                     {
                         tessellator.setNormal(0.0F, -1.0F, 0.0F);
-                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F), (double)(var31 + var22), (double)((var28 + 0.0F) * uvScale), (double)((var29 + var22) * uvScale));
-                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F), (double)(var31 + var22), (double)((var28 + var22) * uvScale), (double)((var29 + var22) * uvScale));
-                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F), (double)(var31 + 0.0F), (double)((var28 + var22) * uvScale), (double)((var29 + 0.0F) * uvScale));
-                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F), (double)(var31 + 0.0F), (double)((var28 + 0.0F) * uvScale), (double)((var29 + 0.0F) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F), (double)(var31 + var22),
+                            (double)((var28 + 0.0F) * uvScale), (double)((var29 + var22) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F), (double)(var31 + var22),
+                            (double)((var28 + var22) * uvScale), (double)((var29 + var22) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F), (double)(var31 + 0.0F),
+                            (double)((var28 + var22) * uvScale), (double)((var29 + 0.0F) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F), (double)(var31 + 0.0F),
+                            (double)((var28 + 0.0F) * uvScale), (double)((var29 + 0.0F) * uvScale));
                     }
 
                     else if (i == 1)
                     {
                         tessellator.setNormal(0.0F, 1.0F, 0.0F);
-                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight - var24), (double)(var31 + var22), (double)((var28 + 0.0F) * uvScale), (double)((var29 + var22) * uvScale));
-                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight - var24), (double)(var31 + var22), (double)((var28 + var22) * uvScale), (double)((var29 + var22) * uvScale));
-                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight - var24), (double)(var31 + 0.0F), (double)((var28 + var22) * uvScale), (double)((var29 + 0.0F) * uvScale));
-                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight - var24), (double)(var31 + 0.0F), (double)((var28 + 0.0F) * uvScale), (double)((var29 + 0.0F) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight - var24),
+                            (double)(var31 + var22), (double)((var28 + 0.0F) * uvScale),
+                            (double)((var29 + var22) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight - var24),
+                            (double)(var31 + var22), (double)((var28 + var22) * uvScale),
+                            (double)((var29 + var22) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight - var24),
+                            (double)(var31 + 0.0F), (double)((var28 + var22) * uvScale),
+                            (double)((var29 + 0.0F) * uvScale));
+                        tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight - var24),
+                            (double)(var31 + 0.0F), (double)((var28 + 0.0F) * uvScale),
+                            (double)((var29 + 0.0F) * uvScale));
                     }
 
                     else if (i == 2)
@@ -550,21 +570,38 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                             tessellator.setNormal(-1.0F, 0.0F, 0.0F);
                             for (int var32 = 0; var32 < var22; ++var32)
                             {
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(0.0F), (double)(var31 + var22), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + var22) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(cloudHeight), (double)(var31 + var22), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + var22) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(cloudHeight), (double)(var31 + 0.0F), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + 0.0F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(0.0F), (double)(var31 + 0.0F), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + 0.0F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(0.0F),
+                                    (double)(var31 + var22), (double)((var28 + var32 + 0.5F) * uvScale),
+                                    (double)((var29 + var22) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(cloudHeight),
+                                    (double)(var31 + var22), (double)((var28 + var32 + 0.5F) * uvScale),
+                                    (double)((var29 + var22) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(cloudHeight),
+                                    (double)(var31 + 0.0F), (double)((var28 + var32 + 0.5F) * uvScale),
+                                    (double)((var29 + 0.0F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 0.0F), (double)(0.0F),
+                                    (double)(var31 + 0.0F), (double)((var28 + var32 + 0.5F) * uvScale),
+                                    (double)((var29 + 0.0F) * uvScale));
                             }
                         }
+
                         if (var26 <= 1)
                         {
                             tessellator.setNormal(1.0F, 0.0F, 0.0F);
                             for (int var32 = 0; var32 < var22; ++var32)
                             {
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24), (double)(0.0F), (double)(var31 + var22), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + var22) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24), (double)(cloudHeight), (double)(var31 + var22), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + var22) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24), (double)(cloudHeight), (double)(var31 + 0.0F), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + 0.0F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24), (double)(0.0F), (double)(var31 + 0.0F), (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + 0.0F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24), (double)(0.0F),
+                                    (double)(var31 + var22), (double)((var28 + var32 + 0.5F) * uvScale),
+                                    (double)((var29 + var22) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24),
+                                    (double)(cloudHeight), (double)(var31 + var22),
+                                    (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + var22) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24),
+                                    (double)(cloudHeight), (double)(var31 + 0.0F),
+                                    (double)((var28 + var32 + 0.5F) * uvScale), (double)((var29 + 0.0F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var32 + 1.0F - var24), (double)(0.0F),
+                                    (double)(var31 + 0.0F), (double)((var28 + var32 + 0.5F) * uvScale),
+                                    (double)((var29 + 0.0F) * uvScale));
                             }
                         }
                     }
@@ -576,26 +613,44 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                             tessellator.setNormal(0.0F, 0.0F, -1.0F);
                             for (int var32 = 0; var32 < var22; ++var32)
                             {
-                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight), (double)(var31 + var32 + 0.0F), (double)((var28 + 0.0F) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight), (double)(var31 + var32 + 0.0F), (double)((var28 + var22) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F), (double)(var31 + var32 + 0.0F), (double)((var28 + var22) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F), (double)(var31 + var32 + 0.0F), (double)((var28 + 0.0F) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight),
+                                    (double)(var31 + var32 + 0.0F), (double)((var28 + 0.0F) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight),
+                                    (double)(var31 + var32 + 0.0F), (double)((var28 + var22) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F),
+                                    (double)(var31 + var32 + 0.0F), (double)((var28 + var22) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F),
+                                    (double)(var31 + var32 + 0.0F), (double)((var28 + 0.0F) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
                             }
                         }
+
                         if (var27 <= 1)
                         {
                             tessellator.setNormal(0.0F, 0.0F, 1.0F);
                             for (int var32 = 0; var32 < var22; ++var32)
                             {
-                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight), (double)(var31 + var32 + 1.0F - var24), (double)((var28 + 0.0F) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight), (double)(var31 + var32 + 1.0F - var24), (double)((var28 + var22) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F), (double)(var31 + var32 + 1.0F - var24), (double)((var28 + var22) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
-                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F), (double)(var31 + var32 + 1.0F - var24), (double)((var28 + 0.0F) * uvScale), (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(cloudHeight),
+                                    (double)(var31 + var32 + 1.0F - var24), (double)((var28 + 0.0F) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(cloudHeight),
+                                    (double)(var31 + var32 + 1.0F - var24), (double)((var28 + var22) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + var22), (double)(0.0F),
+                                    (double)(var31 + var32 + 1.0F - var24), (double)((var28 + var22) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
+                                tessellator.addVertexWithUV((double)(var30 + 0.0F), (double)(0.0F),
+                                    (double)(var31 + var32 + 1.0F - var24), (double)((var28 + 0.0F) * uvScale),
+                                    (double)((var29 + var32 + 0.5F) * uvScale));
                             }
                         }
                     }
                 }
             }
+
             tessellator.draw();
             _sceneRenderBackend.EndDisplayList();
         }
@@ -607,8 +662,11 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         float var2 = (float)(_game.Camera.lastTickY + (_game.Camera.y - _game.Camera.lastTickY) * (double)var1);
         float var4 = 12.0F;
         float var5 = 4.0F;
-        double var6 = (_game.Camera.prevX + (_game.Camera.x - _game.Camera.prevX) * (double)var1 + (double)((_cloudOffsetX + var1) * 0.03F)) / (double)var4;
-        double var8 = (_game.Camera.prevZ + (_game.Camera.z - _game.Camera.prevZ) * (double)var1) / (double)var4 + (double)0.33F;
+        double var6 =
+            (_game.Camera.prevX + (_game.Camera.x - _game.Camera.prevX) * (double)var1 +
+             (double)((_cloudOffsetX + var1) * 0.03F)) / (double)var4;
+        double var8 = (_game.Camera.prevZ + (_game.Camera.z - _game.Camera.prevZ) * (double)var1) / (double)var4 +
+                      (double)0.33F;
         float var10 = _world.Dimension.CloudHeight - var2 + 0.33F;
         int var11 = MathHelper.Floor(var6 / 2048.0D);
         int var12 = MathHelper.Floor(var8 / 2048.0D);
@@ -707,7 +765,9 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         tessellator.setTranslationD(-renderX, -renderY, -renderZ);
         tessellator.disableColor();
 
-        BlockRenderer.RenderBlockByRenderType(_world.Reader, _world.Lighting, targetBlock, new BlockPos(hit.BlockX, hit.BlockY, hit.BlockZ), tessellator, 240 + (int)(DamagePartialTime * 10.0F), true, _game.Options.AlternateBlocksEnabled);
+        BlockRenderer.RenderBlockByRenderType(_world.Reader, _world.Lighting, targetBlock,
+            new BlockPos(hit.BlockX, hit.BlockY, hit.BlockZ), tessellator, 240 + (int)(DamagePartialTime * 10.0F), true,
+            _game.Options.AlternateBlocksEnabled);
         tessellator.draw();
 
         tessellator.setTranslationD(0.0D, 0.0D, 0.0D);
@@ -739,14 +799,15 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                 double var8 = var1.lastTickX + (var1.x - var1.lastTickX) * (double)var5;
                 double var10 = var1.lastTickY + (var1.y - var1.lastTickY) * (double)var5;
                 double var12 = var1.lastTickZ + (var1.z - var1.lastTickZ) * (double)var5;
-                DrawOutlinedBoundingBox(Block.Blocks[var7].getBoundingBox(_world.Reader, _world.Entities, var2.BlockX, var2.BlockY, var2.BlockZ).Expand((double)var6, (double)var6, (double)var6).Offset(-var8, -var10, -var12));
+                DrawOutlinedBoundingBox(Block.Blocks[var7]
+                    .getBoundingBox(_world.Reader, _world.Entities, var2.BlockX, var2.BlockY, var2.BlockZ)
+                    .Expand((double)var6, (double)var6, (double)var6).Offset(-var8, -var10, -var12));
             }
 
             _sceneRenderBackend.SetDepthMask(true);
             _sceneRenderBackend.Enable(SceneRenderCapability.Texture2D);
             _sceneRenderBackend.Disable(SceneRenderCapability.Blend);
         }
-
     }
 
     private static void DrawOutlinedBoundingBox(Box box)
@@ -842,10 +903,10 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
         {
             _game.SoundManager.PlaySound(var1, (float)var2, (float)var4, (float)var6, var8, var9);
         }
-
     }
 
-    public void SpawnParticle(string var1, double var2, double var4, double var6, double var8, double var10, double var12)
+    public void SpawnParticle(string var1, double var2, double var4, double var6, double var8, double var10,
+        double var12)
     {
         if (_game != null && _game.Camera != null && _game.ParticleManager != null)
         {
@@ -874,7 +935,6 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                     case "slime": pm.AddSlime(var2, var4, var6, Item.Slimeball); break;
                     case "heart": pm.AddHeart(var2, var4, var6, var8, var10, var12); break;
                 }
-
             }
         }
     }
@@ -916,25 +976,31 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
             case 1003:
                 if (Random.Shared.NextDouble() < 0.5D)
                 {
-                    _game.SoundManager.PlaySound("random.door_open", var3 + 0.5F, var4 + 0.5F, var5 + 0.5F, 1.0F, _world.Random.NextFloat() * 0.1F + 0.9F);
+                    _game.SoundManager.PlaySound("random.door_open", var3 + 0.5F, var4 + 0.5F, var5 + 0.5F, 1.0F,
+                        _world.Random.NextFloat() * 0.1F + 0.9F);
                 }
                 else
                 {
-                    _game.SoundManager.PlaySound("random.door_close", var3 + 0.5F, var4 + 0.5F, var5 + 0.5F, 1.0F, _world.Random.NextFloat() * 0.1F + 0.9F);
+                    _game.SoundManager.PlaySound("random.door_close", var3 + 0.5F, var4 + 0.5F, var5 + 0.5F, 1.0F,
+                        _world.Random.NextFloat() * 0.1F + 0.9F);
                 }
+
                 break;
             case 1004:
-                _game.SoundManager.PlaySound("random.fizz", var3 + 0.5F, var4 + 0.5F, var5 + 0.5F, 0.5F, 2.6F + (var7.NextFloat() - var7.NextFloat()) * 0.8F);
+                _game.SoundManager.PlaySound("random.fizz", var3 + 0.5F, var4 + 0.5F, var5 + 0.5F, 0.5F,
+                    2.6F + (var7.NextFloat() - var7.NextFloat()) * 0.8F);
                 break;
             case 1005:
                 if (Item.ITEMS[var6] is ItemRecord)
                 {
-                    _game.SoundManager.PlayStreaming(((ItemRecord)Item.ITEMS[var6]).recordName, var3, var4, var5, 1.0F, 1.0F);
+                    _game.SoundManager.PlayStreaming(((ItemRecord)Item.ITEMS[var6]).recordName, var3, var4, var5, 1.0F,
+                        1.0F);
                 }
                 else
                 {
                     _game.SoundManager.PlayStreaming(null, var3, var4, var5, 1.0F, 1.0F);
                 }
+
                 break;
             case 2000:
                 int var8 = var6 % 3 - 1;
@@ -961,15 +1027,20 @@ public class WorldRenderer : IWorldEventListener, IWorldRenderer
                 if (var16 > 0)
                 {
                     Block blockId = Block.Blocks[var16];
-                    _game.SoundManager.PlaySound(blockId.SoundGroup.BreakSound, var3 + 0.5F, var4 + 0.5F, var5 + 0.5F, (blockId.SoundGroup.Volume + 1.0F) / 2.0F, blockId.SoundGroup.Pitch * 0.8F);
+                    _game.SoundManager.PlaySound(blockId.SoundGroup.BreakSound, var3 + 0.5F, var4 + 0.5F, var5 + 0.5F,
+                        (blockId.SoundGroup.Volume + 1.0F) / 2.0F, blockId.SoundGroup.Pitch * 0.8F);
                 }
 
                 _game.ParticleManager.addBlockDestroyEffects(var3, var4, var5, var6 & 255, var6 >> 8 & 255);
                 break;
         }
-
     }
 
-    public void PlayNote(int x, int y, int z, int soundType, int pitch) { }
-    public void BroadcastEntityEvent(Entity entity, byte @event) { }
+    public void PlayNote(int x, int y, int z, int soundType, int pitch)
+    {
+    }
+
+    public void BroadcastEntityEvent(Entity entity, byte @event)
+    {
+    }
 }
