@@ -641,6 +641,7 @@ public class WorldRenderer : IWorldEventListener
         int targetBlockId = _world.Reader.GetBlockId(hit.BlockX, hit.BlockY, hit.BlockZ);
         if (targetBlockId <= 0)
         {
+            // return early and 'clear' opengl context on invalid blocks
             GLManager.GL.PolygonOffset(0.0F, 0.0F);
             GLManager.GL.Color4(1.0F, 1.0F, 1.0F, 1.0F);
             GLManager.GL.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
