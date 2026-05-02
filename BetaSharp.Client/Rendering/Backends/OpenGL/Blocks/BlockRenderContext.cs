@@ -38,6 +38,11 @@ public ref struct BlockRenderContext
 
     public readonly int TerrainAtlasTileSize;
 
+    /// <summary>
+    /// When false, terrain UVs are mapped into the legacy 2D atlas and texture layer is forced to 0 (fixed-function inventory / legacy atlas binds).
+    /// </summary>
+    public bool UseArrayTextures = true;
+
     public BlockRenderContext(
         IBlockReader blockReader, Tessellator tess,
         ILightProvider lighting,
@@ -51,12 +56,14 @@ public ref struct BlockRenderContext
         int flipEast = 0, int flipWest = 0,
         bool customFlag = false, bool enableAo = true,
         int aoBlendMode = 0,
-        int terrainAtlasTileSize = 16)
+        int terrainAtlasTileSize = 16,
+        bool useArrayTextures = true)
     {
         BlockReader = blockReader;
         Tess = tess;
         Lighting = lighting;
         TerrainAtlasTileSize = terrainAtlasTileSize;
+        UseArrayTextures = useArrayTextures;
 
         OverrideTexture = overrideTexture;
         RenderAllFaces = renderAllFaces;
@@ -109,7 +116,7 @@ public ref struct BlockRenderContext
         bool flipped = false)
     {
         Box bb = OverrideBounds ?? block.BoundingBox;
-        Tess.setTextureLayer(textureId);
+        SetTerrainTextureLayer(textureId);
 
         float bbMinX = (float)bb.MinX;
         float bbMaxX = (float)bb.MaxX;
@@ -125,6 +132,7 @@ public ref struct BlockRenderContext
         CalculateUv(bMinX, bMinZ, UvRotateBottom, FlipBottom, out float u1, out float v1);
         CalculateUv(bMaxX, bMinZ, UvRotateBottom, FlipBottom, out float u2, out float v2);
         CalculateUv(bMaxX, bMaxZ, UvRotateBottom, FlipBottom, out float u3, out float v3);
+        RemapQuadLegacyAtlasUv4(textureId, ref u0, ref v0, ref u1, ref v1, ref u2, ref v2, ref u3, ref v3);
 
         float pX = (float)pos.x;
         float pY = (float)pos.y;
@@ -174,7 +182,7 @@ public ref struct BlockRenderContext
         bool flipped = false)
     {
         Box bb = OverrideBounds ?? block.BoundingBox;
-        Tess.setTextureLayer(textureId);
+        SetTerrainTextureLayer(textureId);
 
         float bbMinX = (float)bb.MinX;
         float bbMaxX = (float)bb.MaxX;
@@ -190,6 +198,7 @@ public ref struct BlockRenderContext
         CalculateUv(bMaxX, bMinZ, UvRotateTop, FlipTop, out float u1, out float v1);
         CalculateUv(bMinX, bMinZ, UvRotateTop, FlipTop, out float u2, out float v2);
         CalculateUv(bMinX, bMaxZ, UvRotateTop, FlipTop, out float u3, out float v3);
+        RemapQuadLegacyAtlasUv4(textureId, ref u0, ref v0, ref u1, ref v1, ref u2, ref v2, ref u3, ref v3);
 
         float pX = (float)pos.x;
         float pY = (float)pos.y;
@@ -239,7 +248,7 @@ public ref struct BlockRenderContext
         bool flipped = false)
     {
         Box bb = OverrideBounds ?? block.BoundingBox;
-        Tess.setTextureLayer(textureId);
+        SetTerrainTextureLayer(textureId);
 
         float bbMinY = (float)bb.MinY;
         float bbMaxY = (float)bb.MaxY;
@@ -250,6 +259,7 @@ public ref struct BlockRenderContext
         CalculateUv(bbMinZ, 1.0f - bbMinY, UvRotateNorth, FlipNorth, out float uBl, out float vBl);
         CalculateUv(bbMaxZ, 1.0f - bbMinY, UvRotateNorth, FlipNorth, out float uBr, out float vBr);
         CalculateUv(bbMaxZ, 1.0f - bbMaxY, UvRotateNorth, FlipNorth, out float uTr, out float vTr);
+        RemapQuadLegacyAtlasUv4(textureId, ref uTl, ref vTl, ref uBl, ref vBl, ref uBr, ref vBr, ref uTr, ref vTr);
 
         float pX = (float)pos.x;
         float pY = (float)pos.y;
@@ -299,7 +309,7 @@ public ref struct BlockRenderContext
         bool flipped = false)
     {
         Box bb = OverrideBounds ?? block.BoundingBox;
-        Tess.setTextureLayer(textureId);
+        SetTerrainTextureLayer(textureId);
 
         float bbMinY = (float)bb.MinY;
         float bbMaxY = (float)bb.MaxY;
@@ -315,6 +325,7 @@ public ref struct BlockRenderContext
         CalculateUv(1.0f - bMaxZ, 1.0f - bMinY, UvRotateSouth, FlipSouth, out float uBl, out float vBl);
         CalculateUv(1.0f - bMinZ, 1.0f - bMinY, UvRotateSouth, FlipSouth, out float uBr, out float vBr);
         CalculateUv(1.0f - bMinZ, 1.0f - bMaxY, UvRotateSouth, FlipSouth, out float uTr, out float vTr);
+        RemapQuadLegacyAtlasUv4(textureId, ref uTl, ref vTl, ref uBl, ref vBl, ref uBr, ref vBr, ref uTr, ref vTr);
 
         float pX = (float)pos.x;
         float pY = (float)pos.y;
@@ -364,7 +375,7 @@ public ref struct BlockRenderContext
         bool flipped = false)
     {
         Box bb = OverrideBounds ?? block.BoundingBox;
-        Tess.setTextureLayer(textureId);
+        SetTerrainTextureLayer(textureId);
 
         float bbMinX = (float)bb.MinX;
         float bbMaxX = (float)bb.MaxX;
@@ -380,6 +391,7 @@ public ref struct BlockRenderContext
         CalculateUv(1.0f - bMaxX, 1.0f - bMinY, UvRotateEast, FlipEast, out float uBl, out float vBl);
         CalculateUv(1.0f - bMinX, 1.0f - bMinY, UvRotateEast, FlipEast, out float uBr, out float vBr);
         CalculateUv(1.0f - bMinX, 1.0f - bMaxY, UvRotateEast, FlipEast, out float uTr, out float vTr);
+        RemapQuadLegacyAtlasUv4(textureId, ref uTl, ref vTl, ref uBl, ref vBl, ref uBr, ref vBr, ref uTr, ref vTr);
 
         float pX = (float)pos.x;
         float pY = (float)pos.y;
@@ -429,7 +441,7 @@ public ref struct BlockRenderContext
         bool flipped = false)
     {
         Box bb = OverrideBounds ?? block.BoundingBox;
-        Tess.setTextureLayer(textureId);
+        SetTerrainTextureLayer(textureId);
 
         float bbMinX = (float)bb.MinX;
         float bbMaxX = (float)bb.MaxX;
@@ -445,6 +457,7 @@ public ref struct BlockRenderContext
         CalculateUv(bMinX, 1.0f - bMinY, UvRotateWest, FlipWest, out float uBl, out float vBl);
         CalculateUv(bMaxX, 1.0f - bMinY, UvRotateWest, FlipWest, out float uBr, out float vBr);
         CalculateUv(bMaxX, 1.0f - bMaxY, UvRotateWest, FlipWest, out float uTr, out float vTr);
+        RemapQuadLegacyAtlasUv4(textureId, ref uTl, ref vTl, ref uBl, ref vBl, ref uBr, ref vBr, ref uTr, ref vTr);
 
         float pX = (float)pos.x;
         float pY = (float)pos.y;
@@ -812,7 +825,7 @@ public ref struct BlockRenderContext
 
         int textureId = OverrideTexture >= 0 ? OverrideTexture : block.GetTexture(0);
 
-        Tess.setTextureLayer(textureId);
+        SetTerrainTextureLayer(textureId);
 
         int tileSize = TerrainAtlasTileSize;
         int texU = (textureId & 15) * tileSize;
@@ -825,9 +838,13 @@ public ref struct BlockRenderContext
         float maxV = (texV + tileSize - 0.01f) * invW;
 
         float atlasW = tileSize * 16f;
+        bool useArrayTextures = UseArrayTextures;
 
-        float ToLocalU(float atlasU) => (atlasU * atlasW - texU) / tileSize;
-        float ToLocalV(float atlasV) => (atlasV * atlasW - texV) / tileSize;
+        float ToLocalU(float atlasU) =>
+            useArrayTextures ? (atlasU * atlasW - texU) / tileSize : atlasU;
+
+        float ToLocalV(float atlasV) =>
+            useArrayTextures ? (atlasV * atlasW - texV) / tileSize : atlasV;
 
         float topMinU = minU + topMinUOffset;
         float topMinV = minV + topMinVOffset;
@@ -898,6 +915,36 @@ public ref struct BlockRenderContext
         Tess.addVertexWithUV(tRightX, yBot, cZminT, ToLocalU(minU), ToLocalV(maxV));
         Tess.addVertexWithUV(tLeftX, yBot, cZminT, ToLocalU(maxU), ToLocalV(maxV));
         Tess.addVertexWithUV(leftX, yTop, cZmin, ToLocalU(maxU), ToLocalV(minV));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private readonly void SetTerrainTextureLayer(int textureId) =>
+        Tess.setTextureLayer(UseArrayTextures ? textureId : 0);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private readonly void ApplyLegacyTerrainTileUv(int textureId, ref float u, ref float v)
+    {
+        int texU = (textureId & 15) * TerrainAtlasTileSize;
+        int texV = (textureId >> 4) * TerrainAtlasTileSize;
+        float atlasSize = TerrainAtlasTileSize * 16f;
+        float span = TerrainAtlasTileSize - 0.01f;
+        u = (texU + u * span) / atlasSize;
+        v = (texV + v * span) / atlasSize;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private readonly void RemapQuadLegacyAtlasUv4(int textureId, ref float u0, ref float v0, ref float u1,
+        ref float v1, ref float u2, ref float v2, ref float u3, ref float v3)
+    {
+        if (UseArrayTextures)
+        {
+            return;
+        }
+
+        ApplyLegacyTerrainTileUv(textureId, ref u0, ref v0);
+        ApplyLegacyTerrainTileUv(textureId, ref u1, ref v1);
+        ApplyLegacyTerrainTileUv(textureId, ref u2, ref v2);
+        ApplyLegacyTerrainTileUv(textureId, ref u3, ref v3);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

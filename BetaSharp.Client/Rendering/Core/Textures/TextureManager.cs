@@ -485,22 +485,21 @@ public class TextureManager : ITextureManager
 
                 if (terrainArray && texture.Atlas == DynamicTexture.FxImage.Terrain)
                 {
-                    int tileX = (texture.Sprite % 16) * targetTileSize;
-                    int tileY = (texture.Sprite / 16) * targetTileSize;
-                    for (int x = 0; x < finalReplicate; x++)
+                    int baseCol = texture.Sprite % 16;
+                    int baseRow = texture.Sprite / 16;
+
+                    for (int rx = 0; rx < finalReplicate; rx++)
                     {
-                        for (int y = 0; y < finalReplicate; y++)
+                        for (int ry = 0; ry < finalReplicate; ry++)
                         {
-                            int offX = tileX + x * uploadSize;
-                            int offY = tileY + y * uploadSize;
-                            int layerCol = offX / targetTileSize;
-                            int layerRow = offY / targetTileSize;
+                            int layerCol = baseCol + rx;
+                            int layerRow = baseRow + ry;
                             if (layerCol is < 0 or > 15 || layerRow is < 0 or > 15)
                             {
                                 continue;
                             }
 
-                            int layer = layerCol + layerRow * 16;
+                            int layer = layerRow * 16 + layerCol;
                             _textureUploadService.UploadSubImage3D(
                                 atlasTexture,
                                 0,

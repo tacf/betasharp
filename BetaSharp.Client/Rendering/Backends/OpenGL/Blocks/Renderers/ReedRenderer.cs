@@ -44,13 +44,31 @@ public class ReedRenderer : IBlockRenderer
             textureId = ctx.OverrideTexture;
         }
 
-        // Convert texture ID to UV coordinates (0.0 to 1.0 range)
-        int texU = (textureId & 15) << 4;
-        int texV = textureId & 240;
-        float minU = texU / 256.0F;
-        float maxU = (texU + 15.99F) / 256.0F;
-        float minV = texV / 256.0F;
-        float maxV = (texV + 15.99F) / 256.0F;
+        int ts = ctx.TerrainAtlasTileSize;
+        float minU;
+        float maxU;
+        float minV;
+        float maxV;
+        if (ctx.UseArrayTextures)
+        {
+            ctx.Tess.setTextureLayer(textureId);
+            minU = 0.0F;
+            maxU = 1.0F;
+            minV = 0.0F;
+            maxV = 1.0F;
+        }
+        else
+        {
+            ctx.Tess.setTextureLayer(0);
+            float atlasSize = ts * 16f;
+            float span = ts - 0.01f;
+            int texU = (textureId & 15) * ts;
+            int texV = (textureId >> 4) * ts;
+            minU = texU / atlasSize;
+            maxU = (texU + span) / atlasSize;
+            minV = texV / atlasSize;
+            maxV = (texV + span) / atlasSize;
+        }
 
         // Magic number 0.45 means the planes stretch from 0.05 to 0.95 within the block.
         // This slight inset prevents Z-fighting (flickering) if the plant touches an adjacent solid block.

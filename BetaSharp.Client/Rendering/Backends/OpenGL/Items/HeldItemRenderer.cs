@@ -46,7 +46,7 @@ public class HeldItemRenderer : IHeldItemRenderer
         {
             string texPath = item.ItemId < 256 ? TextureManager.TerrainLegacy2dTexturePath : "/gui/items.png";
             _game.TextureManager.BindTexture(_game.TextureManager.GetTextureId(texPath));
-            int tileSize = _game.TextureManager.GetAtlasTileSize(item.ItemId < 256 ? "/terrain.png" : texPath);
+            int tileSize = _game.TextureManager.GetAtlasTileSize(item.ItemId < 256 ? TextureManager.TerrainLegacy2dTexturePath : texPath);
 
             Tessellator tessellator = Tessellator.instance;
             int iconIndex = entity.GetItemStackTextureId(item);

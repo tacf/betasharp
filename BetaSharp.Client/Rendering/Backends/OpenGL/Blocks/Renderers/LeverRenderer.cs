@@ -50,7 +50,8 @@ public class LeverRenderer : IBlockRenderer
             customFlag: ctx.CustomFlag,
             enableAo: true,
             aoBlendMode: 0,
-            terrainAtlasTileSize: ctx.TerrainAtlasTileSize
+            terrainAtlasTileSize: ctx.TerrainAtlasTileSize,
+            useArrayTextures: ctx.UseArrayTextures
         );
 
         // Draw the base using the helper
@@ -73,7 +74,8 @@ public class LeverRenderer : IBlockRenderer
             customFlag: ctx.CustomFlag,
             enableAo: false,
             aoBlendMode: 1,
-            terrainAtlasTileSize: ctx.TerrainAtlasTileSize
+            terrainAtlasTileSize: ctx.TerrainAtlasTileSize,
+            useArrayTextures: ctx.UseArrayTextures
         );
 
         // Determine texture for the handle itself
@@ -151,10 +153,14 @@ public class LeverRenderer : IBlockRenderer
 
         handleCtx.Tess.setColorOpaque_F(r * luminance, g * luminance, b * luminance);
 
-        handleCtx.Tess.setTextureLayer(handleTextureId);
+        bool useArrayTextures = handleCtx.UseArrayTextures;
+        handleCtx.Tess.setTextureLayer(useArrayTextures ? handleTextureId : 0);
         float atlasW = t * 16.0F;
-        float LocU(float atlasU) => (atlasU * atlasW - texU) / t;
-        float LocV(float atlasV) => (atlasV * atlasW - texV) / t;
+        float LocU(float atlasU) =>
+            useArrayTextures ? (atlasU * atlasW - texU) / t : atlasU;
+
+        float LocV(float atlasV) =>
+            useArrayTextures ? (atlasV * atlasW - texV) / t : atlasV;
 
         for (int face = 0; face < 6; ++face)
         {

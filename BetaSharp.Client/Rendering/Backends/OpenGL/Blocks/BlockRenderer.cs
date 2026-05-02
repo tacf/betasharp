@@ -31,7 +31,7 @@ public class BlockRenderer
 
     public static bool RenderBlockByRenderType(IBlockReader world, ILightProvider lighting, Block block, BlockPos pos,
         Tessellator tess, int overrideTexture = -1, bool renderAllFaces = false, bool doVariance = false,
-        int terrainAtlasTileSize = 16)
+        int terrainAtlasTileSize = 16, bool useArrayTextures = true)
     {
         BlockRendererType type = block.getRenderType();
 
@@ -76,7 +76,8 @@ public class BlockRenderer
             flipWest: flipSide,
             aoBlendMode: 1,
             customFlag: type == BlockRendererType.PistonExtension,
-            terrainAtlasTileSize: terrainAtlasTileSize
+            terrainAtlasTileSize: terrainAtlasTileSize,
+            useArrayTextures: useArrayTextures
         );
 
         if (type == BlockRendererType.Standard)
@@ -116,7 +117,8 @@ public class BlockRenderer
             lighting: null,
             renderAllFaces: true,
             enableAo: false,
-            overrideTexture: -1
+            overrideTexture: -1,
+            useArrayTextures: false
         );
 
         Vec3D origin = new Vec3D(0, 0, 0);
@@ -196,7 +198,8 @@ public class BlockRenderer
             BlockPos itemPos = new(0, 0, 0);
             tess.startDrawingQuads();
             tess.setNormal(0.0F, 1.0F, 0.0F);
-            RenderBlockByRenderType(itemWorld, itemWorld, block, itemPos, tess, uiCtx.OverrideTexture, true);
+            RenderBlockByRenderType(itemWorld, itemWorld, block, itemPos, tess, uiCtx.OverrideTexture, true,
+                useArrayTextures: false);
             tess.draw();
             GLManager.GL.Translate(0.5F, 0.5F, 0.5F);
         }

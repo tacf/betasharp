@@ -53,7 +53,7 @@ public class ItemRenderer : EntityRenderer
         if (itemStack.ItemId < 256 && BlockRenderer.IsSideLit(Block.Blocks[itemStack.ItemId].getRenderType()))
         {
             GLManager.GL.Rotate(spinDegrees, 0.0F, 1.0F, 0.0F);
-            loadTexture("/terrain.png");
+            loadTexture(TextureManager.TerrainLegacy2dTexturePath);
             float blockScale = 0.25F;
             if (!Block.Blocks[itemStack.ItemId].isFullCube() && itemStack.ItemId != Block.Slab.id
                                                              && Block.Blocks[itemStack.ItemId].getRenderType() !=
@@ -89,7 +89,7 @@ public class ItemRenderer : EntityRenderer
             int textureIndex = itemStack.getTextureId();
             if (itemStack.ItemId < 256)
             {
-                loadTexture("/terrain.png");
+                loadTexture(TextureManager.TerrainLegacy2dTexturePath);
             }
             else
             {

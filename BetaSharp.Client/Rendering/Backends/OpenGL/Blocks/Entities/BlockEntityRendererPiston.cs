@@ -46,7 +46,8 @@ public class BlockEntityRendererPiston : BlockEntitySpecialRenderer
                 lighting: piston.World.Lighting,
                 tess: tess,
                 renderAllFaces: true,
-                aoBlendMode: 1
+                aoBlendMode: 1,
+                useArrayTextures: false
             );
 
             BlockPos pos = new(piston.X, piston.Y, piston.Z);
