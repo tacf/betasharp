@@ -16,6 +16,8 @@ public partial class TextField : UIElement
 
     public string Placeholder { get; set; } = "";
 
+    public override bool DoTextMeasuring => true;
+    
     public int MaxLength
     {
         get => _buffer.MaxLength;
@@ -38,7 +40,7 @@ public partial class TextField : UIElement
     public Action? OnSubmit;
 
     private bool _isDragging = false;
-    private TextRenderer? _textRenderer;
+    private ITextRenderer? _textRenderer;
     private int _cursorCounter = 0;
 
     public TextField()

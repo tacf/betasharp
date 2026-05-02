@@ -1,3 +1,4 @@
+using BetaSharp.Client.Rendering.Backends;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -21,7 +22,7 @@ public class DynamicTexture(int iconIdx)
         Items
     }
 
-    public virtual void Setup(BetaSharp game)
+    public virtual void Setup(IRendererServices services)
     {
     }
 
@@ -29,13 +30,13 @@ public class DynamicTexture(int iconIdx)
     {
     }
 
-    protected virtual void TryLoadCustomTexture(BetaSharp game, string resourceName)
+    protected virtual void TryLoadCustomTexture(IRendererServices services, string resourceName)
     {
         CustomFrames = null;
         CustomFrameIndex = 0;
         CustomFrameCount = 0;
 
-        using Stream? stream = game.TexturePackList.SelectedTexturePack.GetResourceAsStream(resourceName);
+        using Stream? stream = services.TexturePacks.SelectedTexturePack.GetResourceAsStream(resourceName);
         if (stream == null)
         {
             if (Pixels.Length != 1024) Pixels = new byte[1024];
@@ -45,7 +46,7 @@ public class DynamicTexture(int iconIdx)
         try
         {
             string atlasPath = Atlas == FxImage.Terrain ? "/terrain.png" : "/gui/items.png";
-            int targetWidth = game.TextureManager.GetTextureId(atlasPath).Texture?.Width ?? 256;
+            int targetWidth = services.TextureManager.GetTextureId(atlasPath).Texture?.Width ?? 256;
             int targetTileSize = targetWidth / 16;
 
             if (targetTileSize < 1) targetTileSize = 1;
@@ -60,7 +61,11 @@ public class DynamicTexture(int iconIdx)
 
             if (width != targetTileSize)
             {
-                image.Mutate(x => x.Resize(new ResizeOptions { Size = new Size(targetTileSize, targetTileSize * CustomFrameCount), Sampler = KnownResamplers.NearestNeighbor }));
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Size = new Size(targetTileSize, targetTileSize * CustomFrameCount),
+                    Sampler = KnownResamplers.NearestNeighbor
+                }));
                 width = image.Width;
                 height = image.Height;
             }
@@ -80,7 +85,8 @@ public class DynamicTexture(int iconIdx)
                 CustomFrames[i] = new byte[bytesPerFrame];
                 int currentFrameIndex = i;
 
-                using Image<Rgba32> frame = image.Clone(ctx => ctx.Crop(new Rectangle(0, currentFrameIndex * width, width, width)));
+                using Image<Rgba32> frame = image.Clone(ctx =>
+                    ctx.Crop(new Rectangle(0, currentFrameIndex * width, width, width)));
                 frame.CopyPixelDataTo(CustomFrames[i]);
             }
         }

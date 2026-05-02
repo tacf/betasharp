@@ -1,5 +1,6 @@
 using BetaSharp.Client.Entities;
 using BetaSharp.Client.Guis;
+using BetaSharp.Client.Rendering.Core.Textures;
 using BetaSharp.Client.UI.Rendering;
 
 namespace BetaSharp.Client.UI.Controls.HUD;
@@ -19,8 +20,8 @@ public class PortalOverlay(Func<ClientPlayerEntity?> getPlayer) : UIElement
         ClientPlayerEntity? player = getPlayer();
         if (player == null) return;
 
-        float last = player.lastScreenDistortion;
-        float curr = player.changeDimensionCooldown;
+        float last = player.LastScreenDistortion;
+        float curr = player.ChangeDimensionCooldown;
         float portal = last + (curr - last) * _partialTicks;
 
         if (portal > 0.0F)
@@ -36,7 +37,9 @@ public class PortalOverlay(Func<ClientPlayerEntity?> getPlayer) : UIElement
             renderer.SetDepthMask(false);
             renderer.PushColor(new Color(255, 255, 255, (byte)(255 * portal)));
 
-            renderer.DrawTexturedModalRect(renderer.TextureManager.GetTextureId("/terrain.png"), 0, 0, 14 * 16, 0 * 16, ComputedWidth, ComputedHeight, 16, 16, -90.0f);
+            renderer.DrawTexturedModalRect(
+                renderer.TextureManager.GetTextureId(TextureManager.TerrainLegacy2dTexturePath), 0, 0, 14 * 16, 0 * 16,
+                ComputedWidth, ComputedHeight, 16, 16, -90.0f);
             renderer.PopColor();
             renderer.SetDepthMask(true);
             renderer.SetAlphaTest(true);

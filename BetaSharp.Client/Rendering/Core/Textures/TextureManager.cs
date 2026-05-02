@@ -1,5 +1,6 @@
 using System.Buffers;
 using BetaSharp.Client.Options;
+using BetaSharp.Client.Rendering.Backends;
 using BetaSharp.Client.Resource.Pack;
 using BetaSharp.Registries.Data;
 using Microsoft.Extensions.Logging;
@@ -8,12 +9,19 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using static BetaSharp.Client.Rendering.Core.Textures.TextureAtlasMipmapGenerator;
 
 namespace BetaSharp.Client.Rendering.Core.Textures;
 
-public class TextureManager : IDisposable
+public class TextureManager : ITextureManager
 {
+    /// <summary>
+    /// Full 2D terrain atlas for fixed-function and inventory paths; chunk rendering uses <see cref="TerrainTexturePath"/> (2D array).
+    /// </summary>
+    public const string TerrainLegacy2dTexturePath = "/terrain.png##legacy2d";
+
+    private const string TerrainTexturePath = "/terrain.png";
+    private const string ItemsTexturePath = "/gui/items.png";
+
     private readonly ILogger _logger = Log.Instance.For<TextureManager>();
     private readonly Dictionary<string, TextureHandle> _textures = [];
     private readonly Dictionary<string, int[]> _colors = [];
@@ -22,18 +30,29 @@ public class TextureManager : IDisposable
     private readonly Dictionary<string, int> _atlasTileSizes = [];
     private TextureHandle? _terrainHandle;
     private TextureHandle? _itemsHandle;
+    private TextureArrayRegistry? _terrainArrayRegistry;
     private readonly GameOptions _gameOptions;
     private bool _clamp;
     private bool _blur;
     private readonly TexturePacks _texturePacks;
     private readonly BetaSharp _game;
+    private readonly ITextureResourceFactory _textureResourceFactory;
+    private readonly ITextureUploadService _textureUploadService;
     private readonly Image<Rgba32> _missingTextureImage = new(256, 256);
+    private IRendererServices? _rendererServices;
 
-    public TextureManager(BetaSharp game, TexturePacks texturePacks, GameOptions options)
+    public TextureManager(
+        BetaSharp game,
+        TexturePacks texturePacks,
+        GameOptions options,
+        ITextureResourceFactory textureResourceFactory,
+        ITextureUploadService textureUploadService)
     {
         _game = game;
         _texturePacks = texturePacks;
         _gameOptions = options;
+        _textureResourceFactory = textureResourceFactory;
+        _textureUploadService = textureUploadService;
         _missingTextureImage.Mutate(ctx =>
         {
             ctx.BackgroundColor(Color.Magenta);
@@ -41,6 +60,32 @@ public class TextureManager : IDisposable
             ctx.Fill(Color.Black, new RectangleF(128, 128, 128, 128));
         });
     }
+
+    internal void SetRendererServices(IRendererServices rendererServices) => _rendererServices = rendererServices;
+
+    /// <summary>Layer aliases for the terrain <c>TEXTURE_2D_ARRAY</c>; non-null after the first terrain array upload.</summary>
+    public TextureArrayRegistry? TerrainTextureArrayRegistry => _terrainArrayRegistry;
+
+    private void EnsureTerrainLegacy2dCopy(Image<Rgba32> terrainImage)
+    {
+        if (_textures.TryGetValue(TerrainLegacy2dTexturePath, out TextureHandle? existing))
+        {
+            if (existing.Texture != null)
+            {
+                Load(terrainImage, existing.Texture, false);
+            }
+
+            return;
+        }
+
+        ITextureResource tex2d = _textureResourceFactory.CreateTexture(TerrainLegacy2dTexturePath);
+        var handle = new TextureHandle(tex2d);
+        _textures[TerrainLegacy2dTexturePath] = handle;
+        _atlasTileSizes[TerrainLegacy2dTexturePath] = terrainImage.Width / 16;
+        Load(terrainImage, tex2d, false);
+    }
+
+    public int ActiveTextureCount => _textureResourceFactory.ActiveTextureCount;
 
     public int[] GetColors(string path)
     {
@@ -59,7 +104,6 @@ public class TextureManager : IDisposable
             _colors[path] = fallback;
             return fallback;
         }
-
     }
 
     public int GetAtlasTileSize(string path)
@@ -70,7 +114,7 @@ public class TextureManager : IDisposable
 
     public TextureHandle Load(Image<Rgba32> image)
     {
-        var texture = new GLTexture("Image_Direct");
+        ITextureResource texture = _textureResourceFactory.CreateTexture("Image_Direct");
         Load(image, texture, false);
         var handle = new TextureHandle(texture);
         _images[texture.Id] = (image, handle);
@@ -81,17 +125,35 @@ public class TextureManager : IDisposable
     {
         if (_textures.TryGetValue(path, out TextureHandle? handle)) return handle;
 
-        var texture = new GLTexture(path);
+        bool legacyTerrain2d = string.Equals(path, TerrainLegacy2dTexturePath, StringComparison.Ordinal);
+        bool terrainArray = path.Contains("terrain.png", StringComparison.Ordinal) && !legacyTerrain2d;
+
+        ITextureResource texture = terrainArray
+            ? _textureResourceFactory.CreateTexture(path, TextureTarget.Texture2DArray)
+            : _textureResourceFactory.CreateTexture(path);
         handle = new TextureHandle(texture);
         _textures[path] = handle;
 
         try
         {
-            using Image<Rgba32> img = LoadImageFromResource(path);
+            using Image<Rgba32> img = LoadImageFromResource(legacyTerrain2d ? TerrainTexturePath : path);
 
             _atlasTileSizes[path] = img.Width / 16;
 
-            Load(img, texture, path.Contains("terrain.png"));
+            if (legacyTerrain2d)
+            {
+                Load(img, texture, false);
+            }
+            else if (terrainArray)
+            {
+                Load(img, texture, true);
+                EnsureTerrainLegacy2dCopy(img);
+            }
+            else
+            {
+                Load(img, texture, false);
+            }
+
             return handle;
         }
         catch (Exception ex)
@@ -100,51 +162,58 @@ public class TextureManager : IDisposable
             Load(_missingTextureImage, texture, false);
             return handle;
         }
-
     }
 
-    public unsafe void Load(Image<Rgba32> image, GLTexture texture, bool isTerrain)
+    public void Load(Image<Rgba32> image, ITextureResource texture, bool isTerrain)
     {
         texture.Bind();
 
         if (isTerrain)
         {
-            int tileSize = image.Width / 16;
-            Image<Rgba32>[] mips = GenerateMipmaps(image, tileSize);
-            int mipCount = _gameOptions.UseMipmaps ? mips.Length : 1;
+            byte[] contiguous = BuildLegacyTerrainArrayBuffer(image, out int tileSize);
+            texture.AllocateTexture2DArrayStorage(tileSize, tileSize, TextureArrayRegistry.MaxTerrainLayers,
+                TextureStorageFormat.Rgba8, 1);
+            _textureUploadService.UploadSubImage3D(
+                texture,
+                0,
+                0,
+                0,
+                tileSize,
+                tileSize,
+                256,
+                contiguous,
+                0,
+                TextureDataFormat.Rgba);
+            _terrainArrayRegistry ??= new TextureArrayRegistry();
 
-            for (int level = 0; level < mipCount; level++)
-            {
-                Image<Rgba32> mip = mips[level];
-                byte[] pixels = new byte[mip.Width * mip.Height * 4];
-                mip.CopyPixelDataTo(pixels);
-                fixed (byte* ptr = pixels)
-                {
-                    texture.Upload(mip.Width, mip.Height, ptr, level, PixelFormat.Rgba, InternalFormat.Rgba8);
-                }
-                if (level > 0) mip.Dispose();
-            }
-
-            texture.SetFilter(_gameOptions.UseMipmaps ? TextureMinFilter.NearestMipmapNearest : TextureMinFilter.Nearest, TextureMagFilter.Nearest);
-            texture.SetMaxLevel(mipCount - 1);
+            texture.SetFilter(TextureMinificationFilter.Nearest, TextureMagnificationFilter.Nearest);
+            texture.SetMaxLevel(0);
+            texture.SetWrap(TextureAddressMode.ClampToEdge, TextureAddressMode.ClampToEdge);
 
             float aniso = _gameOptions.AnisotropicLevel == 0 ? 1.0f : (float)Math.Pow(2, _gameOptions.AnisotropicLevel);
             aniso = Math.Clamp(aniso, 1.0f, GameOptions.MaxAnisotropy);
-
             texture.SetAnisotropicFilter(aniso);
 
             return;
         }
 
-        texture.SetFilter(_blur ? TextureMinFilter.Linear : TextureMinFilter.Nearest, _blur ? TextureMagFilter.Linear : TextureMagFilter.Nearest);
-        texture.SetWrap(_clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat, _clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat);
+        texture.SetFilter(
+            _blur ? TextureMinificationFilter.Linear : TextureMinificationFilter.Nearest,
+            _blur ? TextureMagnificationFilter.Linear : TextureMagnificationFilter.Nearest);
+        texture.SetWrap(
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat,
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat);
 
         byte[] rawPixels = new byte[image.Width * image.Height * 4];
         image.CopyPixelDataTo(rawPixels);
-        fixed (byte* ptr = rawPixels)
-        {
-            texture.Upload(image.Width, image.Height, ptr, 0, PixelFormat.Rgba, InternalFormat.Rgba);
-        }
+        _textureUploadService.Upload(
+            texture,
+            image.Width,
+            image.Height,
+            rawPixels,
+            0,
+            TextureDataFormat.Rgba,
+            TextureStorageFormat.Rgba8);
 
         _clamp = false;
         _blur = false;
@@ -163,7 +232,8 @@ public class TextureManager : IDisposable
         {
             for (int i = 0; i < scale; i++)
             {
-                using Image<Rgba32> frame = image.Clone(x => x.Crop(new SixLabors.ImageSharp.Rectangle(i * 16, 0, 16, image.Height)));
+                using Image<Rgba32> frame = image.Clone(x =>
+                    x.Crop(new SixLabors.ImageSharp.Rectangle(i * 16, 0, 16, image.Height)));
                 ctx.DrawImage(frame, new SixLabors.ImageSharp.Point(0, i * image.Height), 1f);
             }
         });
@@ -202,8 +272,16 @@ public class TextureManager : IDisposable
         string cleanPath = path;
         while (true)
         {
-            if (cleanPath.StartsWith("%clamp%")) { _clamp = true; cleanPath = cleanPath[7..]; }
-            else if (cleanPath.StartsWith("%blur%")) { _blur = true; cleanPath = cleanPath[6..]; }
+            if (cleanPath.StartsWith("%clamp%"))
+            {
+                _clamp = true;
+                cleanPath = cleanPath[7..];
+            }
+            else if (cleanPath.StartsWith("%blur%"))
+            {
+                _blur = true;
+                cleanPath = cleanPath[6..];
+            }
             else break;
         }
 
@@ -214,14 +292,18 @@ public class TextureManager : IDisposable
     }
 
 
-    public unsafe void Bind(int[] packedARGB, int width, int height, GLTexture texture)
+    public void Bind(int[] packedARGB, int width, int height, ITextureResource texture)
     {
         //TODO: this is potentially wrong but shouldn't crash
 
         texture.Bind();
 
-        texture.SetFilter(_blur ? TextureMinFilter.Linear : TextureMinFilter.Nearest, _blur ? TextureMagFilter.Linear : TextureMagFilter.Nearest);
-        texture.SetWrap(_clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat, _clamp ? TextureWrapMode.ClampToEdge : TextureWrapMode.Repeat);
+        texture.SetFilter(
+            _blur ? TextureMinificationFilter.Linear : TextureMinificationFilter.Nearest,
+            _blur ? TextureMagnificationFilter.Linear : TextureMagnificationFilter.Nearest);
+        texture.SetWrap(
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat,
+            _clamp ? TextureAddressMode.ClampToEdge : TextureAddressMode.Repeat);
 
         byte[] unpackedRGBA = new byte[width * height * 4];
 
@@ -238,16 +320,27 @@ public class TextureManager : IDisposable
             unpackedRGBA[i * 4 + 3] = (byte)a;
         }
 
-        fixed (byte* ptr = unpackedRGBA)
-        {
-            texture.UploadSubImage(0, 0, width, height, ptr, 0, PixelFormat.Rgba);
-        }
+        _textureUploadService.UploadSubImage(
+            texture,
+            0,
+            0,
+            width,
+            height,
+            unpackedRGBA,
+            0,
+            TextureDataFormat.Rgba);
     }
 
-    public void Delete(GLTexture texture)
+    public void Delete(ITextureResource texture)
     {
-        KeyValuePair<string, TextureHandle> textureEntry = _textures.FirstOrDefault(x => x.Value.Texture == texture);
-        if (textureEntry.Key != null) _textures.Remove(textureEntry.Key);
+        foreach (KeyValuePair<string, TextureHandle> entry in _textures)
+        {
+            if (entry.Value.Texture == texture)
+            {
+                _textures.Remove(entry.Key);
+                break;
+            }
+        }
 
         _images.Remove(texture.Id);
         texture.Dispose();
@@ -258,11 +351,33 @@ public class TextureManager : IDisposable
         if (handle.Texture != null) Delete(handle.Texture);
     }
 
+    public void UploadSubImage(
+        TextureHandle handle,
+        int x,
+        int y,
+        int width,
+        int height,
+        ReadOnlySpan<byte> pixelData,
+        int level = 0,
+        TextureDataFormat format = TextureDataFormat.Rgba)
+    {
+        if (handle.Texture == null)
+        {
+            return;
+        }
+
+        _textureUploadService.UploadSubImage(handle.Texture, x, y, width, height, pixelData, level, format);
+    }
+
 
     public void AddDynamicTexture(DynamicTexture t)
     {
         _dynamicTextures.Add(t);
-        t.Setup(_game);
+        if (_rendererServices != null)
+        {
+            t.Setup(_rendererServices);
+        }
+
         t.tick();
 
         _terrainHandle = null;
@@ -272,18 +387,35 @@ public class TextureManager : IDisposable
     public void Reload()
     {
         _atlasTileSizes.Clear();
+        _terrainArrayRegistry = null;
         foreach (KeyValuePair<string, TextureHandle> entry in _textures)
         {
             entry.Value.Texture?.Dispose();
 
-            var newTexture = new GLTexture(entry.Key);
+            bool legacy2d = string.Equals(entry.Key, TerrainLegacy2dTexturePath, StringComparison.Ordinal);
+            bool reloadTerrain = entry.Key.Contains("terrain.png", StringComparison.Ordinal) && !legacy2d;
+            ITextureResource newTexture = reloadTerrain
+                ? _textureResourceFactory.CreateTexture(entry.Key, TextureTarget.Texture2DArray)
+                : _textureResourceFactory.CreateTexture(entry.Key);
             entry.Value.Texture = newTexture;
 
             try
             {
-                using Image<Rgba32> img = LoadImageFromResource(entry.Key);
+                using Image<Rgba32> img = LoadImageFromResource(legacy2d ? TerrainTexturePath : entry.Key);
                 _atlasTileSizes[entry.Key] = img.Width / 16;
-                Load(img, newTexture, entry.Key.Contains("terrain.png"));
+                if (legacy2d)
+                {
+                    Load(img, newTexture, false);
+                }
+                else if (reloadTerrain)
+                {
+                    Load(img, newTexture, true);
+                    EnsureTerrainLegacy2dCopy(img);
+                }
+                else
+                {
+                    Load(img, newTexture, false);
+                }
             }
             catch (Exception ex)
             {
@@ -299,7 +431,7 @@ public class TextureManager : IDisposable
         {
             entry.Value.Handle.Texture?.Dispose();
 
-            var newTexture = new GLTexture(entry.Value.Handle.Texture?.Source ?? "Image_Direct_Reload");
+            ITextureResource newTexture = _textureResourceFactory.CreateTexture(entry.Value.Handle.Source);
             entry.Value.Handle.Texture = newTexture;
             Load(entry.Value.Image, newTexture, false);
             _images[newTexture.Id] = entry.Value;
@@ -307,21 +439,22 @@ public class TextureManager : IDisposable
 
         foreach (string key in new List<string>(_colors.Keys)) GetColors(key);
 
-        foreach (DynamicTexture dynamicTexture in _dynamicTextures)
+        if (_rendererServices != null)
         {
-            dynamicTexture.Setup(_game);
+            foreach (DynamicTexture dynamicTexture in _dynamicTextures)
+            {
+                dynamicTexture.Setup(_rendererServices);
+            }
         }
 
         _terrainHandle = null;
         _itemsHandle = null;
     }
 
-    public unsafe void Tick()
+    public void Tick()
     {
-        _terrainHandle ??= _textures.FirstOrDefault(x => x.Key.EndsWith("/terrain.png")).Value
-                           ?? GetTextureId("/terrain.png");
-        _itemsHandle ??= _textures.FirstOrDefault(x => x.Key.EndsWith("/gui/items.png")).Value
-                         ?? GetTextureId("/gui/items.png");
+        _terrainHandle ??= GetTextureHandleOrLoad(TerrainTexturePath);
+        _itemsHandle ??= GetTextureHandleOrLoad(ItemsTexturePath);
 
         foreach (DynamicTexture texture in _dynamicTextures)
         {
@@ -331,13 +464,11 @@ public class TextureManager : IDisposable
                 ? _terrainHandle
                 : _itemsHandle;
 
-            GLTexture? atlasTexture = atlasHandle?.Texture;
+            ITextureResource? atlasTexture = atlasHandle?.Texture;
             if (atlasTexture == null) continue;
 
-            int targetTileSize = atlasTexture.Width / 16;
-
-            int tileX = (texture.Sprite % 16) * targetTileSize;
-            int tileY = (texture.Sprite / 16) * targetTileSize;
+            bool terrainArray = atlasTexture.Depth > 1;
+            int targetTileSize = terrainArray ? atlasTexture.Width : atlasTexture.Width / 16;
 
             int fxSize = (int)Math.Sqrt(texture.Pixels.Length / 4);
             int scale = targetTileSize / fxSize;
@@ -358,28 +489,75 @@ public class TextureManager : IDisposable
                 }
 
                 int finalReplicate = texture.Replicate;
+                ReadOnlySpan<byte> uploadPixelSpan = uploadPixels.AsSpan(0, uploadSize * uploadSize * 4);
 
-                fixed (byte* ptr = uploadPixels)
+                if (terrainArray && texture.Atlas == DynamicTexture.FxImage.Terrain)
                 {
-                    for (int x = 0; x < finalReplicate; x++)
+                    int baseCol = texture.Sprite % 16;
+                    int baseRow = texture.Sprite / 16;
+
+                    for (int rx = 0; rx < finalReplicate; rx++)
                     {
-                        for (int y = 0; y < finalReplicate; y++)
+                        for (int ry = 0; ry < finalReplicate; ry++)
                         {
-                            atlasTexture.UploadSubImage(
-                               tileX + (x * uploadSize),
-                               tileY + (y * uploadSize),
-                               uploadSize, uploadSize, ptr, 0, PixelFormat.Rgba);
+                            int layerCol = baseCol + rx;
+                            int layerRow = baseRow + ry;
+                            if (layerCol is < 0 or > 15 || layerRow is < 0 or > 15)
+                            {
+                                continue;
+                            }
+
+                            int layer = layerRow * 16 + layerCol;
+                            _textureUploadService.UploadSubImage3D(
+                                atlasTexture,
+                                0,
+                                0,
+                                layer,
+                                uploadSize,
+                                uploadSize,
+                                1,
+                                uploadPixelSpan,
+                                0,
+                                TextureDataFormat.Rgba);
                         }
                     }
                 }
-
-                if (texture.Atlas == DynamicTexture.FxImage.Terrain && _gameOptions.UseMipmaps)
+                else
                 {
+                    int tileX = (texture.Sprite % 16) * targetTileSize;
+                    int tileY = (texture.Sprite / 16) * targetTileSize;
+
                     for (int x = 0; x < finalReplicate; x++)
                     {
                         for (int y = 0; y < finalReplicate; y++)
                         {
-                            UpdateTileMipmaps(tileX + (x * uploadSize), tileY + (y * uploadSize), uploadSize, targetTileSize, uploadPixels, atlasTexture);
+                            _textureUploadService.UploadSubImage(
+                                atlasTexture,
+                                tileX + (x * uploadSize),
+                                tileY + (y * uploadSize),
+                                uploadSize,
+                                uploadSize,
+                                uploadPixelSpan,
+                                0,
+                                TextureDataFormat.Rgba);
+                        }
+                    }
+
+                    if (texture.Atlas == DynamicTexture.FxImage.Terrain &&
+                        _gameOptions.UseMipmaps)
+                    {
+                        for (int x = 0; x < finalReplicate; x++)
+                        {
+                            for (int y = 0; y < finalReplicate; y++)
+                            {
+                                UpdateTileMipmaps(
+                                    tileX + (x * uploadSize),
+                                    tileY + (y * uploadSize),
+                                    uploadSize,
+                                    targetTileSize,
+                                    uploadPixels,
+                                    atlasTexture);
+                            }
                         }
                     }
                 }
@@ -392,6 +570,19 @@ public class TextureManager : IDisposable
                 }
             }
         }
+    }
+
+    private TextureHandle GetTextureHandleOrLoad(string path)
+    {
+        foreach (KeyValuePair<string, TextureHandle> entry in _textures)
+        {
+            if (entry.Key.EndsWith(path, StringComparison.Ordinal))
+            {
+                return entry.Value;
+            }
+        }
+
+        return GetTextureId(path);
     }
 
     private static void UpscaleNearestNeighbor(byte[] src, byte[] dst, int srcSize, int dstSize, int scale)
@@ -416,7 +607,13 @@ public class TextureManager : IDisposable
         }
     }
 
-    private unsafe void UpdateTileMipmaps(int baseX, int baseY, int dataSize, int targetTileSize, byte[] tileData, GLTexture texture)
+    private void UpdateTileMipmaps(
+        int baseX,
+        int baseY,
+        int dataSize,
+        int targetTileSize,
+        byte[] tileData,
+        ITextureResource texture)
     {
         int maxMipLevels = (int)Math.Log2(targetTileSize) + 1;
         byte[] currentData = tileData;
@@ -444,10 +641,14 @@ public class TextureManager : IDisposable
 
                             int dst = (y * newSize + x) * 4;
 
-                            downsampled[dst] = (byte)((currentData[src0] + currentData[src1] + currentData[src2] + currentData[src3]) >> 2);
-                            downsampled[dst + 1] = (byte)((currentData[src0 + 1] + currentData[src1 + 1] + currentData[src2 + 1] + currentData[src3 + 1]) >> 2);
-                            downsampled[dst + 2] = (byte)((currentData[src0 + 2] + currentData[src1 + 2] + currentData[src2 + 2] + currentData[src3 + 2]) >> 2);
-                            downsampled[dst + 3] = (byte)((currentData[src0 + 3] + currentData[src1 + 3] + currentData[src2 + 3] + currentData[src3 + 3]) >> 2);
+                            downsampled[dst] = (byte)((currentData[src0] + currentData[src1] + currentData[src2] +
+                                                       currentData[src3]) >> 2);
+                            downsampled[dst + 1] = (byte)((currentData[src0 + 1] + currentData[src1 + 1] +
+                                                           currentData[src2 + 1] + currentData[src3 + 1]) >> 2);
+                            downsampled[dst + 2] = (byte)((currentData[src0 + 2] + currentData[src1 + 2] +
+                                                           currentData[src2 + 2] + currentData[src3 + 2]) >> 2);
+                            downsampled[dst + 3] = (byte)((currentData[src0 + 3] + currentData[src1 + 3] +
+                                                           currentData[src2 + 3] + currentData[src3 + 3]) >> 2);
                         }
                     }
                 }
@@ -458,11 +659,15 @@ public class TextureManager : IDisposable
 
                 int mipX = baseX >> mipLevel;
                 int mipY = baseY >> mipLevel;
-
-                fixed (byte* ptr = downsampled)
-                {
-                    texture.UploadSubImage(mipX, mipY, newSize, newSize, ptr, mipLevel, PixelFormat.Rgba);
-                }
+                _textureUploadService.UploadSubImage(
+                    texture,
+                    mipX,
+                    mipY,
+                    newSize,
+                    newSize,
+                    downsampled.AsSpan(0, newSize * newSize * 4),
+                    mipLevel,
+                    TextureDataFormat.Rgba);
 
                 if (mipLevel > 1)
                 {
@@ -493,6 +698,7 @@ public class TextureManager : IDisposable
         {
             handle.Texture?.Dispose();
         }
+
         _textures.Clear();
 
         foreach ((Image<Rgba32> Image, TextureHandle Handle) entry in _images.Values)
@@ -500,10 +706,76 @@ public class TextureManager : IDisposable
             entry.Handle.Texture?.Dispose();
             entry.Image.Dispose();
         }
+
         _images.Clear();
 
         _missingTextureImage.Dispose();
         _colors.Clear();
         _dynamicTextures.Clear();
+        _terrainArrayRegistry = null;
+    }
+
+    /// <summary>Copies the 16×16 legacy terrain atlas into 256 contiguous RGBA8 tiles (layer-major) for array upload.</summary>
+    private static byte[] BuildLegacyTerrainArrayBuffer(Image<Rgba32> atlas, out int tileSize)
+    {
+        if (atlas.Width != atlas.Height)
+        {
+            throw new ArgumentException("Terrain atlas must be square.", nameof(atlas));
+        }
+
+        if (atlas.Width % 16 != 0)
+        {
+            throw new ArgumentException("Terrain atlas width must be divisible by 16.", nameof(atlas));
+        }
+
+        int ts = atlas.Width / 16;
+        tileSize = ts;
+        const int layerCount = 256;
+        int bytesPerTile = ts * ts * 4;
+        var layers = new byte[layerCount][];
+
+        for (int i = 0; i < layerCount; i++)
+        {
+            layers[i] = new byte[bytesPerTile];
+        }
+
+        atlas.ProcessPixelRows(accessor =>
+        {
+            for (int row = 0; row < 16; row++)
+            {
+                for (int col = 0; col < 16; col++)
+                {
+                    int layer = col + row * 16;
+                    byte[] dst = layers[layer];
+                    int baseX = col * ts;
+                    int baseY = row * ts;
+
+                    for (int ty = 0; ty < ts; ty++)
+                    {
+                        Span<Rgba32> srcRow = accessor.GetRowSpan(baseY + ty);
+                        int dstOfs = ty * ts * 4;
+
+                        for (int tx = 0; tx < ts; tx++)
+                        {
+                            Rgba32 p = srcRow[baseX + tx];
+                            int o = dstOfs + tx * 4;
+                            dst[o] = p.R;
+                            dst[o + 1] = p.G;
+                            dst[o + 2] = p.B;
+                            dst[o + 3] = p.A;
+                        }
+                    }
+                }
+            }
+        });
+
+        byte[] result = new byte[checked(layerCount * bytesPerTile)];
+
+        for (int layer = 0; layer < layerCount; layer++)
+        {
+            System.Buffer.BlockCopy(layers[layer], 0, result, layer * bytesPerTile, bytesPerTile);
+        }
+
+        return result;
     }
 }
